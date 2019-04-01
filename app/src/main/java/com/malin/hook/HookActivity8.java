@@ -1,6 +1,7 @@
 package com.malin.hook;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -9,6 +10,7 @@ import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -128,7 +130,7 @@ public class HookActivity8 {
     /**
      * 启动未注册的Activity
      */
-    public static void hookLauncherActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static void hookLauncherActivity(Context context, Class<?> aClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         //1.ActivityThread的Class对象
         //package android.app
         // public final class ActivityThread
@@ -165,12 +167,21 @@ public class HookActivity8 {
 
 
         //8.给mH增加mCallback
-        mCallbackField.set(mHObject, new HandlerCallback());
+        mCallbackField.set(mHObject, new HandlerCallback(context, aClass, isAppCompat));
 
 
     }
 
     private static class HandlerCallback implements Handler.Callback {
+        private Context context;
+        private Class<?> aClass;
+        private boolean isAppCompat;
+
+        public HandlerCallback(Context context, Class<?> aClass, boolean isAppCompat) {
+            this.context = context;
+            this.aClass = aClass;
+            this.isAppCompat = isAppCompat;
+        }
 
         @Override
         public boolean handleMessage(Message msg) {
@@ -200,16 +211,93 @@ public class HookActivity8 {
                     //5.将安全的Intent,替换为原始的Intent
                     //给ActivityClientRecord对象的intent属性,赋值为原始的Intent(originIntent)
                     safeIntentField.set(recordObj, originIntent);
-
+                    try {
+                        if (isAppCompat) {
+                            hookPM(context, aClass);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
                 } catch (NoSuchFieldException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
 
+
             }
 
             return false;
         }
+    }
+
+    private static void hookPM(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException,
+            IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        String pmName = getPMName(context);
+        String hostClzName = aClass.getName();
+
+        //1.获取ActivityThread的值
+        Class<?> forName = Class.forName("android.app.ActivityThread");
+        Field field = forName.getDeclaredField("sCurrentActivityThread");
+        field.setAccessible(true);
+        Object activityThread = field.get(null);
+
+
+        //2.Hook getPackageManager方法
+        //public static IPackageManager getPackageManager() {}
+        Method getPackageManager = activityThread.getClass().getDeclaredMethod("getPackageManager");
+
+        //3.获取getPackageManager方法的返回值IPackageManager
+        Object iPackageManager = getPackageManager.invoke(activityThread);
+
+
+        Class<?> iPackageManagerIntercept = Class.forName("android.content.pm.IPackageManager");
+
+        Object iPackageManagerProxy = Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class<?>[]{iPackageManagerIntercept},
+                new PackageManagerHandler(iPackageManager, pmName, hostClzName));
+
+        //4.获取 sPackageManager 属性的Field
+        //static volatile IPackageManager sPackageManager;
+        Field iPackageManagerField = activityThread.getClass().getDeclaredField("sPackageManager");
+        iPackageManagerField.setAccessible(true);
+
+        //5.给ActivityThread的属性sPackageManager设置新的值
+        iPackageManagerField.set(activityThread, iPackageManagerProxy);
+    }
+
+    private static class PackageManagerHandler implements InvocationHandler {
+        private final String mPmName;
+        private final String mHostClzName;
+        private Object mActivityManagerObject;
+
+        PackageManagerHandler(Object mActivityManagerObject, String pmName, String hostClzName) {
+            this.mActivityManagerObject = mActivityManagerObject;
+            mPmName = pmName;
+            mHostClzName = hostClzName;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getName().equals("getActivityInfo")) {
+                ComponentName componentName = new ComponentName(mPmName, mHostClzName);
+                args[0] = componentName;
+            }
+            return method.invoke(mActivityManagerObject, args);
+        }
+    }
+
+    /**
+     * 获取包名
+     */
+    private static String getPMName(Context context) {
+        // 获取当前进程已经注册的 activity
+        Context applicationContext = context.getApplicationContext();
+        return applicationContext.getPackageName();
     }
 }

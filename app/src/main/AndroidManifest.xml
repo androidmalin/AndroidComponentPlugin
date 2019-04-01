@@ -17,8 +17,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".StubActivity" />
-        <activity android:name=".StubAppCompatActivity" />
+        <activity
+            android:name=".StubActivity"
+            android:theme="@style/AppThemeNotAppCompat" />
+        <activity
+            android:name=".StubAppCompatActivity"
+            android:theme="@style/AppCompatTheme" />
     </application>
 
 </manifest>

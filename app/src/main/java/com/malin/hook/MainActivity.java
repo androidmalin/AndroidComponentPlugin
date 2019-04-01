@@ -17,7 +17,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void initHook() {
         try {
-            HookAMS.hookStartActivity(this, StubActivity.class);
+            HookAMS.hookStartActivity(this, StubAppCompatActivity.class, true);
+            //HookAMS.hookStartActivity(this, StubActivity.class, false);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -35,7 +36,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btn_start) {
-            startActivity(new Intent(this, TwoActivity.class));
+            startActivity(new Intent(this, TwoAppCompatActivity.class));
         }
     }
 }
