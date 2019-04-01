@@ -1,7 +1,6 @@
 package com.malin.hook;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -24,60 +23,58 @@ public class HookActivity8 {
     public static void hookStartActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
         Field singletonIActivityManagerField;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            //1.获取ActivityManager的Class对象
-            //package android.app
-            //public class ActivityManager
-            Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
+        //1.获取ActivityManager的Class对象
+        //package android.app
+        //public class ActivityManager
+        Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
 
-            //2.获取ActivityManager的私有属性IActivityManagerSingleton
-            //private static final Singleton<IActivityManager> IActivityManagerSingleton
-            singletonIActivityManagerField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
-            singletonIActivityManagerField.setAccessible(true);
+        //2.获取ActivityManager的私有属性IActivityManagerSingleton
+        //private static final Singleton<IActivityManager> IActivityManagerSingleton
+        singletonIActivityManagerField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+        singletonIActivityManagerField.setAccessible(true);
 
-            //3.Singleton<IActivityManager> IActivityManagerSingleton
-            Object IActivityManagerSingletonObj = singletonIActivityManagerField.get(null);
-
-
-            //4.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance;
-
-            //5.拿到该属性
-
-            //获取Singleton类对象
-            //package android.util
-            //public abstract class Singleton<T> ,既class Singleton<IActivityManager>
-            Class<?> singletonClass = Class.forName("android.util.Singleton");
-
-            //获取mInstance属性
-            //private T mInstance; 既IActivityManager mInstance
-            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
-
-            //设置不检查
-            mInstanceField.setAccessible(true);
-
-            //从Singleton<IActivityManager> IActivityManagerSingleton对象中获取mInstance属性对应的值,既IActivityManager
-            Object mInstanceIActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
+        //3.Singleton<IActivityManager> IActivityManagerSingleton
+        Object IActivityManagerSingletonObj = singletonIActivityManagerField.get(null);
 
 
-            //6.获取IActivityManager接口的类对象
-            //package android.app
-            //public interface IActivityManager
+        //4.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance;
 
-            Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
+        //5.拿到该属性
 
-            Object iActivityManagerProxy = Proxy.newProxyInstance(
-                    HookAMS.class.getClassLoader(),
-                    new Class[]{iActivityManagerClass},
-                    new IActivityInvocationHandler(mInstanceIActivityManager)
-            );
+        //获取Singleton类对象
+        //package android.util
+        //public abstract class Singleton<T> ,既class Singleton<IActivityManager>
+        Class<?> singletonClass = Class.forName("android.util.Singleton");
 
-            //7.从新赋值
-            //给mInstance属性,赋新值
-            // Singleton<IActivityManager> IActivityManagerSingleton对象的属性private T mInstance赋新值
-            mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
+        //获取mInstance属性
+        //private T mInstance; 既IActivityManager mInstance
+        Field mInstanceField = singletonClass.getDeclaredField("mInstance");
 
-        }
+        //设置不检查
+        mInstanceField.setAccessible(true);
+
+        //从Singleton<IActivityManager> IActivityManagerSingleton对象中获取mInstance属性对应的值,既IActivityManager
+        Object mInstanceIActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
+
+
+        //6.获取IActivityManager接口的类对象
+        //package android.app
+        //public interface IActivityManager
+
+        Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
+
+        Object iActivityManagerProxy = Proxy.newProxyInstance(
+                HookAMS.class.getClassLoader(),
+                new Class[]{iActivityManagerClass},
+                new IActivityInvocationHandler(mInstanceIActivityManager)
+        );
+
+        //7.从新赋值
+        //给mInstance属性,赋新值
+        // Singleton<IActivityManager> IActivityManagerSingleton对象的属性private T mInstance赋新值
+        mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
+
 
     }
 
