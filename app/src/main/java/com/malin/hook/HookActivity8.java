@@ -19,6 +19,7 @@ import java.util.Arrays;
  * https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html
  * >=android 8.0以上的Hook
  */
+@SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint("PrivateApi")
 public class HookActivity8 {
     private static final String TAG = "HookActivityUtils8";
@@ -40,6 +41,7 @@ public class HookActivity8 {
         singletonIActivityManagerField.setAccessible(true);
 
         //3.Singleton<IActivityManager> IActivityManagerSingleton
+        //所有静态对象的反射可以通过传null获取。如果是实列必须传实例
         Object IActivityManagerSingletonObj = singletonIActivityManagerField.get(null);
 
 
