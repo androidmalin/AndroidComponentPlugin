@@ -13,6 +13,7 @@ public class HookAMS {
     public static void hookStartActivity(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         if (Build.VERSION.SDK_INT >= 26) {
             HookActivity8.hookStartActivity(context, aClass);
+            HookActivity8.hookLauncherActivity();
         } else {
             HookActivity7.hookStartActivity();
         }
