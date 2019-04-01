@@ -1,6 +1,8 @@
 package com.malin.hook;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -18,9 +20,10 @@ import java.util.Arrays;
 @SuppressLint("PrivateApi")
 public class HookActivity8 {
     private static final String TAG = "HookActivityUtils8";
+    private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
 
 
-    public static void hookStartActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static void hookStartActivity(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
         Field singletonIActivityManagerField;
 
@@ -67,7 +70,7 @@ public class HookActivity8 {
         Object iActivityManagerProxy = Proxy.newProxyInstance(
                 HookAMS.class.getClassLoader(),
                 new Class[]{iActivityManagerClass},
-                new IActivityInvocationHandler(mInstanceIActivityManager)
+                new IActivityInvocationHandler(mInstanceIActivityManager, context, aClass)
         );
 
         //7.从新赋值
@@ -82,9 +85,14 @@ public class HookActivity8 {
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private Object mObject;
+        private Class<?> aClass;
+        private Context mContext;
 
-        public IActivityInvocationHandler(Object object) {
+
+        public IActivityInvocationHandler(Object object, Context context, Class<?> aClass) {
             this.mObject = object;
+            this.aClass = aClass;
+            this.mContext = context;
         }
 
         @Override
@@ -92,6 +100,16 @@ public class HookActivity8 {
             Log.d(TAG, "invoke :" + method.getName() + " args:" + Arrays.toString(args));
             if (method.getName().equals("startActivity")) {
                 Log.d(TAG, "startActivity hook");
+                // public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
+                //            String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags,
+                //            ProfilerInfo profilerInfo, Bundle options) throws RemoteException;
+
+                //1.将启动的没有配置的Activity Intent,改为安全的Intent,就是配置了Activity的Intent
+                Intent originIntent = (Intent) args[2];
+
+                Intent safeIntent = new Intent(mContext, aClass);
+                safeIntent.putExtra(EXTRA_ORIGIN_INTENT, originIntent);
+                args[2] = safeIntent;
             }
             return method.invoke(mObject, args);
         }

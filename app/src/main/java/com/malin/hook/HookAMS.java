@@ -1,6 +1,7 @@
 package com.malin.hook;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Build;
 
 /**
@@ -9,9 +10,9 @@ import android.os.Build;
 @SuppressLint("PrivateApi")
 public class HookAMS {
 
-    public static void hookStartActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            HookActivity8.hookStartActivity();
+    public static void hookStartActivity(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        if (Build.VERSION.SDK_INT >= 26) {
+            HookActivity8.hookStartActivity(context, aClass);
         } else {
             HookActivity7.hookStartActivity();
         }
