@@ -263,7 +263,7 @@ public class HookActivity8 {
                 new PackageManagerHandler(iPackageManager, pmName, hostClzName));
 
         //4.获取 sPackageManager 属性的Field
-        //static volatile IPackageManager sPackageManager;
+        //static IPackageManager sPackageManager;
         Field iPackageManagerField = activityThread.getClass().getDeclaredField("sPackageManager");
         iPackageManagerField.setAccessible(true);
 
@@ -278,15 +278,24 @@ public class HookActivity8 {
 
         PackageManagerHandler(Object mActivityManagerObject, String pmName, String hostClzName) {
             this.mActivityManagerObject = mActivityManagerObject;
-            mPmName = pmName;
-            mHostClzName = hostClzName;
+            this.mPmName = pmName;
+            this.mHostClzName = hostClzName;
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            //IPackageManager
+            //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId) throws android.os.RemoteException;
             if (method.getName().equals("getActivityInfo")) {
+                int index = 0;
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] instanceof ComponentName) {
+                        index = i;
+                        break;
+                    }
+                }
                 ComponentName componentName = new ComponentName(mPmName, mHostClzName);
-                args[0] = componentName;
+                args[index] = componentName;
             }
             return method.invoke(mActivityManagerObject, args);
         }
@@ -296,7 +305,6 @@ public class HookActivity8 {
      * 获取包名
      */
     private static String getPMName(Context context) {
-        // 获取当前进程已经注册的 activity
         Context applicationContext = context.getApplicationContext();
         return applicationContext.getPackageName();
     }
