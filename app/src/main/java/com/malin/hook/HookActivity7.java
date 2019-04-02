@@ -26,50 +26,52 @@ public class HookActivity7 {
         //1.获取ActivityManagerNative的Class对象
         //package android.app
         //public abstract class ActivityManagerNative
-        Class<?> clActivityManagerNative = Class.forName("android.app.ActivityManagerNative");
+        Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
 
         //2.获取 ActivityManagerNative的 私有属性gDefault
         // private static final Singleton<IActivityManager> gDefault
-        Field gDefaultField = clActivityManagerNative.getDeclaredField("gDefault");
+        Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
 
         //3.对私有属性gDefault,解除私有限定
         gDefaultField.setAccessible(true);
 
-        //4.获得gDefaultField中对应的属性值(被static修饰了)
+        //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
         //private static final Singleton<IActivityManager> gDefault
         Object gDefault = gDefaultField.get(null);
 
 
         //Log for test
-        Log.d(TAG, "clActivityManagerNative getPackage().getName :" + clActivityManagerNative.getPackage().getName());
-        Log.d(TAG, "clActivityManagerNative getCanonicalName :" + clActivityManagerNative.getCanonicalName());
+        Log.d(TAG, "clActivityManagerNative getPackage().getName :" + activityManagerNativeClass.getPackage().getName());
+        Log.d(TAG, "clActivityManagerNative getCanonicalName :" + activityManagerNativeClass.getCanonicalName());
         Log.d(TAG, "gDefaultField type:" + gDefaultField.getType().getCanonicalName());
         Log.d(TAG, "gDefaultField name:" + gDefaultField.getName());
         Log.d(TAG, "gDefaultField isStatic:" + Modifier.isStatic(gDefaultField.getModifiers()));
 
 
+        //获取Singleton<IActivityManager>对象gDefault的属性mInstance的值
+
         //1.获取Singleton的Class对象
         //package android.util
         //public abstract class Singleton<IActivityManager>
-        Class<?> clSingleton = Class.forName("android.util.Singleton");
+        Class<?> singletonClass = Class.forName("android.util.Singleton");
 
         //2.获取 Singleton的 私有属性mInstance
         //private IActivityManager mInstance;
-        Field mInstanceField = clSingleton.getDeclaredField("mInstance");
+        Field mInstanceField = singletonClass.getDeclaredField("mInstance");
 
         //3.对私有属性mInstance,解除私有限定
         mInstanceField.setAccessible(true);
 
         //4.从属性mInstance, 获取IActivityManager
         //private IActivityManager mInstance;
-        //从gDefault(Singleton<IActivityManager> gDefault)实例中获取mInstance(IActivityManager)
+        //从gDefault(Singleton<IActivityManager> gDefault)实例中获取属性mInstance对应的值(IActivityManager)
         Object rawIActivityManager = mInstanceField.get(gDefault);
 
         //5.获取IActivityManager接口的类对象
         Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
 
         //6.动态代理
-        Object objectProxy = Proxy.newProxyInstance(
+        Object iActivityManagerProxy = Proxy.newProxyInstance(
                 HookActivity7.class.getClassLoader(),
                 new Class<?>[]{iActivityManagerClass},
                 new ActivityManagerInvocationHandler(rawIActivityManager)
@@ -77,9 +79,9 @@ public class HookActivity7 {
 
         //7.给gDefault对象的mInstance属性设置值为iActivityManagerProxy
         //给private static final Singleton<IActivityManager> gDefault对象的private T mInstance属性设置值 iActivityManagerProxy
-        //Field.set(Object obj, Object value)	设置obj中对应属性值
+        //field.set(Object obj, Object value)	设置obj中对应属性field的值
         //Field代表类的成员变量（成员变量也称为类的属性）
-        mInstanceField.set(gDefault, objectProxy);
+        mInstanceField.set(gDefault, iActivityManagerProxy);
 
     }
 

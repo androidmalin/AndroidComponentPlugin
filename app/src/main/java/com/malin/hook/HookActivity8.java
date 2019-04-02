@@ -30,8 +30,6 @@ public class HookActivity8 {
 
     public static void hookStartActivity(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
-        Field singletonIActivityManagerField;
-
         //1.获取ActivityManager的Class对象
         //package android.app
         //public class ActivityManager
@@ -39,7 +37,7 @@ public class HookActivity8 {
 
         //2.获取ActivityManager的私有属性IActivityManagerSingleton
         //private static final Singleton<IActivityManager> IActivityManagerSingleton
-        singletonIActivityManagerField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+        Field singletonIActivityManagerField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
         singletonIActivityManagerField.setAccessible(true);
 
         //3.Singleton<IActivityManager> IActivityManagerSingleton
