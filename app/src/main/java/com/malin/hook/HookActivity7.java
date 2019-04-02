@@ -14,6 +14,7 @@ import java.util.Arrays;
  * malin
  * 反射
  * https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html
+ * https://blog.csdn.net/jiangwei0910410003/article/details/52550147
  * <android 8.0以下的Hook
  */
 @SuppressLint("PrivateApi")
@@ -72,7 +73,7 @@ public class HookActivity7 {
 
         //6.动态代理
         Object iActivityManagerProxy = Proxy.newProxyInstance(
-                HookActivity7.class.getClassLoader(),
+                Thread.currentThread().getContextClassLoader(),
                 new Class<?>[]{iActivityManagerClass},
                 new ActivityManagerInvocationHandler(rawIActivityManager)
         );

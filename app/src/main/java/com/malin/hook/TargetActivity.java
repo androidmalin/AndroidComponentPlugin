@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 @SuppressLint("SetTextI18n")
-public class TwoActivity extends Activity {
+public class TargetActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView textView = new TextView(this);
-        textView.setText("TwoActivity");
+        textView.setText("TargetActivity");
         setContentView(textView);
     }
 }

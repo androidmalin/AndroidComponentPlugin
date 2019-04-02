@@ -19,6 +19,7 @@ import java.util.Arrays;
  * malin
  * 反射
  * https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html
+ * https://blog.csdn.net/jiangwei0910410003/article/details/52550147
  * >=android 8.0以上的Hook
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
@@ -104,16 +105,21 @@ public class HookActivity8 {
             Log.d(TAG, "invoke :" + method.getName() + " args:" + Arrays.toString(args));
             if (method.getName().equals("startActivity")) {
                 Log.d(TAG, "startActivity hook");
-                // public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
-                //            String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags,
-                //            ProfilerInfo profilerInfo, Bundle options) throws RemoteException;
-
+                int intentIndex = 2;
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] instanceof Intent) {
+                        intentIndex = i;
+                        break;
+                    }
+                }
                 //1.将启动的没有配置的Activity Intent,改为安全的Intent,就是配置了Activity的Intent
-                Intent originIntent = (Intent) args[2];
+                Intent originIntent = (Intent) args[intentIndex];
 
                 Intent safeIntent = new Intent(mContext, aClass);
                 safeIntent.putExtra(EXTRA_ORIGIN_INTENT, originIntent);
-                args[2] = safeIntent;
+
+                //2.替换到原来的Intent,欺骗AMS
+                args[intentIndex] = safeIntent;
 
                 //final H mH = new H();
                 //hook Handler消息的处理,给Handler增加mCallback
@@ -129,24 +135,23 @@ public class HookActivity8 {
      * 启动未注册的Activity
      */
     public static void hookLauncherActivity(Context context, Class<?> aClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        //1.ActivityThread的Class对象
+        //1.获取ActivityThread的Class对象
         //package android.app
         // public final class ActivityThread
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取ActivityThread 的属性mH
-        //final H mH = new H();
-        Field mHField = activityThreadClass.getDeclaredField("mH");
-        mHField.setAccessible(true);
-
-        //3.获取ActivityThread对象属性sCurrentActivityThread
+        //2.获取ActivityThread对象属性sCurrentActivityThread
         //private static ActivityThread sCurrentActivityThread;
         Field currentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
         currentActivityThreadField.setAccessible(true);
 
-        //4.获取ActivityThread的对象(sCurrentActivityThread的值)
+        //3.获取ActivityThread的对象(sCurrentActivityThread的值)实例
         Object activityThreadObj = currentActivityThreadField.get(null);
 
+        //4.获取ActivityThread 的属性mH
+        //final H mH = new H();
+        Field mHField = activityThreadClass.getDeclaredField("mH");
+        mHField.setAccessible(true);
 
         //5.获取mH的值
         Object mHObject = mHField.get(activityThreadObj);
@@ -183,53 +188,64 @@ public class HookActivity8 {
 
         @Override
         public boolean handleMessage(Message msg) {
-            int what = msg.what;
-
-            //ActivityThread.H.LAUNCH_ACTIVITY==100
-            if (what == 100) {
-                //final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
-
-                //1.从msg中获取ActivityClientRecord对象
-                Object recordObj = msg.obj;
+            handleLaunchActivity(msg, context, aClass, isAppCompat);
+            return false;
+        }
+    }
 
 
+    private static void handleLaunchActivity(Message msg, Context context, Class<?> aClass, boolean isAppCompat) {
+        int LAUNCH_ACTIVITY = 100;
+        try {
+            //1.获取ActivityThread的内部类H的Class对象
+            //package android.app
+            //public final class ActivityThread
+            //private class H extends Handler {}
+            Class<?> hClass = Class.forName("android.app.ActivityThread$H");
+
+            //2.public static final int LAUNCH_ACTIVITY         = 100;
+            Field launch_field = hClass.getField("LAUNCH_ACTIVITY");
+
+            //3.获取LAUNCH_ACTIVITY的值
+            LAUNCH_ACTIVITY = (int) launch_field.get(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (msg.what == LAUNCH_ACTIVITY) {
+            //final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
+            //1.从msg中获取ActivityClientRecord对象
+            Object recordObj = msg.obj;
+
+            try {
+                //2.获取ActivityClientRecord的intent属性
+                // Intent intent;
+                Field safeIntentField = recordObj.getClass().getDeclaredField("intent");
+                safeIntentField.setAccessible(true);
+
+                //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
+                Intent safeIntent = (Intent) safeIntentField.get(recordObj);
+
+                //4.获取原始的Intent
+                Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+
+                if (originIntent == null) return;
+
+                //5.将安全的Intent,替换为原始的Intent
+                //给ActivityClientRecord对象的intent属性,赋值为原始的Intent(originIntent)
+                safeIntentField.set(recordObj, originIntent);
+
+                //6.处理未注册的Activity为AppCompatActivity时
                 try {
-                    //2.获取ActivityClientRecord的intent属性
-                    Field safeIntentField = recordObj.getClass().getDeclaredField("intent");
-                    safeIntentField.setAccessible(true);
-
-                    //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
-                    Intent safeIntent = (Intent) safeIntentField.get(recordObj);
-
-                    //4.获取原始的Intent
-                    Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
-
-                    if (originIntent == null) return false;
-
-                    //5.将安全的Intent,替换为原始的Intent
-                    //给ActivityClientRecord对象的intent属性,赋值为原始的Intent(originIntent)
-                    safeIntentField.set(recordObj, originIntent);
-                    try {
-                        if (isAppCompat) {
-                            hookPM(context, aClass);
-                        }
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (NoSuchMethodException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
+                    if (isAppCompat) {
+                        hookPM(context, aClass);
                     }
-                } catch (NoSuchFieldException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            return false;
         }
     }
 
