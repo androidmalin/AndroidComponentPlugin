@@ -9,7 +9,7 @@ import android.view.View;
 public class MainActivity extends Activity implements View.OnClickListener {
 
     //启动AppCompatActivity类型的Activity
-    private boolean APPCOMPAT_ACTIVITY = false;
+    private boolean APPCOMPAT_ACTIVITY = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
