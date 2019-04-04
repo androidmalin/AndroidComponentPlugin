@@ -251,30 +251,30 @@ public class HookActivity8 {
 
     private static void hookPM(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException,
             IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        String pmName = getPMName(context);
+        String pmName = getAppPackageName(context);
         String hostClzName = aClass.getName();
 
         //1.获取ActivityThread的值
-        Class<?> forName = Class.forName("android.app.ActivityThread");
-        Field field = forName.getDeclaredField("sCurrentActivityThread");
-        field.setAccessible(true);
-        Object activityThread = field.get(null);
+        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+        Field sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
+        sCurrentActivityThreadField.setAccessible(true);
+        Object activityThread = sCurrentActivityThreadField.get(null);
 
 
         //2.Hook getPackageManager方法
         //public static IPackageManager getPackageManager() {}
-        Method getPackageManager = activityThread.getClass().getDeclaredMethod("getPackageManager");
+        Method getPackageManagerMethod = activityThread.getClass().getDeclaredMethod("getPackageManager");
 
-        //3.获取getPackageManager方法的返回值IPackageManager
-        Object iPackageManager = getPackageManager.invoke(activityThread);
+        //3.获取getPackageManager方法的返回值IPackageManager,使用activityThread对象的实例,调用getPackageManager()方法返回IPackageManager对象的实例
+        Object iPackageManager = getPackageManagerMethod.invoke(activityThread);
 
 
-        Class<?> iPackageManagerIntercept = Class.forName("android.content.pm.IPackageManager");
+        Class<?> iPackageManagerClass = Class.forName("android.content.pm.IPackageManager");
 
         Object iPackageManagerProxy = Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
-                new Class<?>[]{iPackageManagerIntercept},
-                new PackageManagerHandler(iPackageManager, pmName, hostClzName));
+                new Class<?>[]{iPackageManagerClass},
+                new IPackageManagerHandler(iPackageManager, pmName, hostClzName));
 
         //4.获取 sPackageManager 属性的Field
         //static IPackageManager sPackageManager;
@@ -282,17 +282,18 @@ public class HookActivity8 {
         iPackageManagerField.setAccessible(true);
 
         //5.给ActivityThread的属性sPackageManager设置新的值
+        //activityThread实例对象设置sPackageManager属性的值
         iPackageManagerField.set(activityThread, iPackageManagerProxy);
     }
 
-    private static class PackageManagerHandler implements InvocationHandler {
-        private final String mPmName;
+    private static class IPackageManagerHandler implements InvocationHandler {
+        private final String mAppPackageName;
         private final String mHostClzName;
-        private Object mActivityManagerObject;
+        private Object mIPackageManager;
 
-        PackageManagerHandler(Object mActivityManagerObject, String pmName, String hostClzName) {
-            this.mActivityManagerObject = mActivityManagerObject;
-            this.mPmName = pmName;
+        IPackageManagerHandler(Object iPackageManager, String appPackageName, String hostClzName) {
+            this.mIPackageManager = iPackageManager;
+            this.mAppPackageName = appPackageName;
             this.mHostClzName = hostClzName;
         }
 
@@ -308,17 +309,17 @@ public class HookActivity8 {
                         break;
                     }
                 }
-                ComponentName componentName = new ComponentName(mPmName, mHostClzName);
+                ComponentName componentName = new ComponentName(mAppPackageName, mHostClzName);
                 args[index] = componentName;
             }
-            return method.invoke(mActivityManagerObject, args);
+            return method.invoke(mIPackageManager, args);
         }
     }
 
     /**
      * 获取包名
      */
-    private static String getPMName(Context context) {
+    private static String getAppPackageName(Context context) {
         Context applicationContext = context.getApplicationContext();
         return applicationContext.getPackageName();
     }
