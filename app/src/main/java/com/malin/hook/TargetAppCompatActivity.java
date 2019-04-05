@@ -12,7 +12,7 @@ public class TargetAppCompatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView textView = new TextView(this);
-        textView.setText("TargetAppCompatActivity");
+        textView.setText("TargetAppCompatActivity,成功!");
         setContentView(textView);
     }
 }

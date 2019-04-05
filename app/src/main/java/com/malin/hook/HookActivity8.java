@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -14,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * malin
@@ -182,9 +184,12 @@ public class HookActivity8 {
 
         //8.给mH增加mCallback
         //给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
-        mCallbackField.set(mHObj, new HandlerCallback(context, subActivityClass, isAppCompat));
-
-
+        if (Build.VERSION.SDK_INT >= 28) {
+            //android 9.0
+            mCallbackField.set(mHObj, new HandlerCallbackP(context, subActivityClass, isAppCompat));
+        } else {
+            mCallbackField.set(mHObj, new HandlerCallback(context, subActivityClass, isAppCompat));
+        }
     }
 
     private static class HandlerCallback implements Handler.Callback {
@@ -256,6 +261,95 @@ public class HookActivity8 {
                     e.printStackTrace();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    /**
+     * 对Android 9.0的处理
+     * https://www.cnblogs.com/Jax/p/9521305.html
+     */
+    private static class HandlerCallbackP implements Handler.Callback {
+
+        private Context context;
+        private Class<?> subActivityClass;
+        private boolean isAppCompat;
+
+        public HandlerCallbackP(Context context, Class<?> subActivityClass, boolean isAppCompat) {
+            this.context = context;
+            this.subActivityClass = subActivityClass;
+            this.isAppCompat = isAppCompat;
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            //android.app.ActivityThread$H.EXECUTE_TRANSACTION = 159
+            //android 9.0反射,Accessing hidden field Landroid/app/ActivityThread$H;->EXECUTE_TRANSACTION:I (dark greylist, reflection)
+            //android9.0 深灰名单（dark greylist）则debug版本在会弹出dialog提示框，在release版本会有Toast提示，均提示为"Detected problems with API compatibility"
+            if (msg.what == 159) {//直接写死,不反射了
+                handleActivity(msg);
+            }
+            return false;
+        }
+
+        private void handleActivity(Message msg) {
+            // 这里简单起见,直接取出TargetActivity;
+            //final ClientTransaction transaction = (ClientTransaction) msg.obj;
+
+            //1.获取ClientTransaction对象
+            Object clientTransactionObj = msg.obj;
+
+            try {
+                //2.获取ClientTransaction中属性mActivityCallbacks的值
+                //private List<ClientTransactionItem> mActivityCallbacks;
+                Field mActivityCallbacksField = clientTransactionObj.getClass().getDeclaredField("mActivityCallbacks");
+                mActivityCallbacksField.setAccessible(true);
+
+                List<Object> mActivityCallbacks = (List<Object>) mActivityCallbacksField.get(clientTransactionObj);
+
+                if (mActivityCallbacks.size() <= 0) return;
+                String className = "android.app.servertransaction.LaunchActivityItem";
+                if (className.equals(mActivityCallbacks.get(0).getClass().getCanonicalName())) {
+
+                    //LaunchActivityItem
+                    // public class LaunchActivityItem extends ClientTransactionItem
+                    Object launchActivityItem = mActivityCallbacks.get(0);
+
+                    //3.ClientTransactionItem的Class对象
+                    //package android.app.servertransaction;
+                    //public class LaunchActivityItem extends ClientTransactionItem
+                    Class<?> launchActivityItemClass = Class.forName("android.app.servertransaction.LaunchActivityItem");
+
+                    //4.ClientTransactionItem的mIntent属性的mIntent的Field
+                    //private Intent mIntent;
+                    Field mIntentField = launchActivityItemClass.getDeclaredField("mIntent");
+                    mIntentField.setAccessible(true);
+
+                    //5.获取mIntent属性的值,既桩Intent,安全的Intent
+                    Intent safeIntent = (Intent) mIntentField.get(launchActivityItem);
+
+                    //6.获取原始的Intent
+                    Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+
+                    //7.将原始的Intent,赋值给clientTransactionItem的mIntent属性
+                    mIntentField.set(launchActivityItem, originIntent);
+
+                    //8.处理未注册的Activity为AppCompatActivity类或者子类的情况
+                    try {
+                        if (isAppCompat) {
+                            hookPM(context, subActivityClass);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }

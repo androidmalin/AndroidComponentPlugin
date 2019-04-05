@@ -12,7 +12,7 @@ public class TargetActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView textView = new TextView(this);
-        textView.setText("TargetActivity");
+        textView.setText("TargetActivity,成功!");
         setContentView(textView);
     }
 }
