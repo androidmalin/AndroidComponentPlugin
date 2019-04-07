@@ -1,7 +1,6 @@
 package com.malin.hook;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,13 +17,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initView();
     }
 
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(newBase);
-        initHook();
+    private void initView() {
+        findViewById(R.id.btn_start).setOnClickListener(this);
     }
 
-    private void initHook() {
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.btn_start) {
+            MApplication.reset();
+            startHook();
+            if (APPCOMPAT_ACTIVITY) {
+                startActivity(new Intent(this, TargetAppCompatActivity.class));
+            } else {
+                startActivity(new Intent(this, TargetActivity.class));
+            }
+
+        }
+    }
+
+    private void startHook() {
         try {
             if (APPCOMPAT_ACTIVITY) {
                 HookAMS.hookStartActivity(this, StubAppCompatActivity.class, true);
@@ -37,22 +48,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
-    }
-
-
-    private void initView() {
-        findViewById(R.id.btn_start).setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btn_start) {
-            if (APPCOMPAT_ACTIVITY) {
-                startActivity(new Intent(this, TargetAppCompatActivity.class));
-            } else {
-                startActivity(new Intent(this, TargetActivity.class));
-            }
         }
     }
 }

@@ -4,12 +4,12 @@
     package="com.malin.hook">
 
     <application
+        android:name=".MApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
-        android:name=".MApplication"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".MainActivity">
             <intent-filter>
