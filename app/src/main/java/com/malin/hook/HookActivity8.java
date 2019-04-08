@@ -288,7 +288,7 @@ public class HookActivity8 {
             //android.app.ActivityThread$H.EXECUTE_TRANSACTION = 159
             //android 9.0反射,Accessing hidden field Landroid/app/ActivityThread$H;->EXECUTE_TRANSACTION:I (dark greylist, reflection)
             //android9.0 深灰名单（dark greylist）则debug版本在会弹出dialog提示框，在release版本会有Toast提示，均提示为"Detected problems with API compatibility"
-            if (msg.what == 159) {//直接写死,不反射了
+            if (msg.what == 159) {//直接写死,不反射了,否则在android9.0的设备上运行会弹出使用了反射的dialog提示框
                 handleActivity(msg);
             }
             return false;
@@ -304,45 +304,54 @@ public class HookActivity8 {
                 if (clientTransactionObj == null) return;
 
 
-                //2.ClientTransactionItem的Class对象
+                //2.获取ClientTransaction类中属性mActivityCallbacks的Field
+                //private List<ClientTransactionItem> mActivityCallbacks;
+                Field mActivityCallbacksField = clientTransactionObj.getClass().getDeclaredField("mActivityCallbacks");
+
+                //3.禁止Java访问检查
+                mActivityCallbacksField.setAccessible(true);
+
+                //4.获取ClientTransaction类中mActivityCallbacks属性的值,既List<ClientTransactionItem>
+                List mActivityCallbacks = (List) mActivityCallbacksField.get(clientTransactionObj);
+
+                if (mActivityCallbacks.size() <= 0) return;
+                if (mActivityCallbacks.get(0) == null) return;
+
+
+                //5.ClientTransactionItem的Class对象
                 //package android.app.servertransaction;
                 //public class LaunchActivityItem extends ClientTransactionItem
                 Class<?> launchActivityItemClass = Class.forName("android.app.servertransaction.LaunchActivityItem");
 
-                //3.获取ClientTransaction中属性mActivityCallbacks的值
-                //private List<ClientTransactionItem> mActivityCallbacks;
-                Field mActivityCallbacksField = clientTransactionObj.getClass().getDeclaredField("mActivityCallbacks");
-                mActivityCallbacksField.setAccessible(true);
-
-                List mActivityCallbacks = (List) mActivityCallbacksField.get(clientTransactionObj);
-
-                if (mActivityCallbacks.size() <= 0) return;
-
+                //6.判断集合中第一个元素的值是LaunchActivityItem类型的
                 if (!launchActivityItemClass.isInstance(mActivityCallbacks.get(0))) return;
 
-                //LaunchActivityItem
+                //7.获取LaunchActivityItem的实例
                 // public class LaunchActivityItem extends ClientTransactionItem
                 Object launchActivityItem = mActivityCallbacks.get(0);
 
 
-                //4.ClientTransactionItem的mIntent属性的mIntent的Field
+                //8.ClientTransactionItem的mIntent属性的mIntent的Field
                 //private Intent mIntent;
                 Field mIntentField = launchActivityItemClass.getDeclaredField("mIntent");
+
+                //9.禁止Java访问检查
                 mIntentField.setAccessible(true);
 
-                //5.获取mIntent属性的值,既桩Intent,安全的Intent
+                //10.获取mIntent属性的值,既桩Intent(安全的Intent)
+                //从LaunchActivityItem中获取属性mIntent的值
                 Intent safeIntent = (Intent) mIntentField.get(launchActivityItem);
 
-                //6.获取原始的Intent
+                //11.获取原始的Intent
                 Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
 
-                //需要判断originIntent != null
+                //12.需要判断originIntent != null
                 if (originIntent == null) return;
 
-                //7.将原始的Intent,赋值给clientTransactionItem的mIntent属性
+                //13.将原始的Intent,赋值给clientTransactionItem的mIntent属性
                 safeIntent.setComponent(originIntent.getComponent());
 
-                //8.处理未注册的Activity为AppCompatActivity类或者子类的情况
+                //14.处理未注册的Activity为AppCompatActivity类或者子类的情况
                 try {
                     if (isAppCompat) {
                         hookPM(context, subActivityClass);
@@ -360,8 +369,31 @@ public class HookActivity8 {
         }
     }
 
+    /*
+     Caused by: java.lang.IllegalArgumentException: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
+     at android.support.v4.app.NavUtils.getParentActivityName(NavUtils.java:222)
+     at android.support.v7.app.AppCompatDelegateImplV9.onCreate(AppCompatDelegateImplV9.java:155)
+     at android.support.v7.app.AppCompatDelegateImplV14.onCreate(AppCompatDelegateImplV14.java:61)
+     at android.support.v7.app.AppCompatActivity.onCreate(AppCompatActivity.java:72)
+     at com.malin.hook.TargetAppCompatActivity.onCreate(TargetAppCompatActivity.java:16)
+     at android.app.Activity.performCreate(Activity.java:7009)
+     at android.app.Activity.performCreate(Activity.java:7000)
+     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1214)
+     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2731)
+     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2856) 
+     at android.app.ActivityThread.-wrap11(Unknown Source:0) 
+     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1589) 
+     at android.os.Handler.dispatchMessage(Handler.java:106) 
+     at android.os.Looper.loop(Looper.java:164) 
+     at android.app.ActivityThread.main(ActivityThread.java:6494) 
+     at java.lang.reflect.Method.invoke(Native Method) 
+     at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:438) 
+     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:807)
+     **/
+
     /**
      * 处理未注册的Activity为AppCompatActivity类或者子类的情况
+     * https://blog.csdn.net/gdutxiaoxu/article/details/81459910
      *
      * @param context          context
      * @param subActivityClass 注册了的Activity的Class对象
@@ -419,6 +451,7 @@ public class HookActivity8 {
             this.mSubActivityClassName = subActivityClassName;
         }
 
+        @SuppressWarnings("ConstantConditions")
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             //IPackageManager
@@ -431,6 +464,24 @@ public class HookActivity8 {
                         break;
                     }
                 }
+
+                ComponentName originComponentName = null;
+                try {
+                    originComponentName = (ComponentName) args[index];
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if (originComponentName != null) {
+                    Log.e(TAG, "originComponentName != null");
+                    String packageName = originComponentName.getPackageName();
+                    String className = originComponentName.getClassName();
+                    Log.e(TAG, "originComponentName packageName:" + packageName);
+                    Log.e(TAG, "originComponentName className:" + className);
+                } else {
+                    Log.e(TAG, "originComponentName == null");
+                }
+
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
                 args[index] = componentName;
             }
