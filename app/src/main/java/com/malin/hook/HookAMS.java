@@ -37,11 +37,11 @@ public class HookAMS {
 
     public static Object storeAms() throws Exception {
         Field gDefaultField;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
             Class<?> activityManager = Class.forName("android.app.ActivityManager");
             gDefaultField = activityManager.getDeclaredField("IActivityManagerSingleton");
         } else {
-            Class<?> activityManagerNativeClass = Class.forName("android.app" + ".ActivityManagerNative");
+            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
             gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
         }
         gDefaultField.setAccessible(true);
@@ -67,11 +67,11 @@ public class HookAMS {
 
     public static void resetAms(Object amsObj) throws Exception {
         Field gDefaultField;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
             Class<?> activityManager = Class.forName("android.app.ActivityManager");
             gDefaultField = activityManager.getDeclaredField("IActivityManagerSingleton");
         } else {
-            Class<?> activityManagerNativeClass = Class.forName("android.app" + ".ActivityManagerNative");
+            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
             gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
         }
         gDefaultField.setAccessible(true);
