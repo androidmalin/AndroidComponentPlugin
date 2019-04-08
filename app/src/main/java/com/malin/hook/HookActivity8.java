@@ -473,13 +473,13 @@ public class HookActivity8 {
                 }
 
                 if (originComponentName != null) {
-                    Log.e(TAG, "originComponentName != null");
+                    Log.d(TAG, "originComponentName != null");
                     String packageName = originComponentName.getPackageName();
                     String className = originComponentName.getClassName();
-                    Log.e(TAG, "originComponentName packageName:" + packageName);
-                    Log.e(TAG, "originComponentName className:" + className);
+                    Log.d(TAG, "originComponentName packageName:" + packageName);
+                    Log.d(TAG, "originComponentName className:" + className);
                 } else {
-                    Log.e(TAG, "originComponentName == null");
+                    Log.d(TAG, "originComponentName == null");
                 }
 
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
