@@ -16,7 +16,7 @@ public class TargetActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
         TextView textView = new TextView(this);
-        textView.setText("TargetActivity,成功!");
+        textView.setText("未注册的TargetActivity,成功!");
         setContentView(textView);
     }
 

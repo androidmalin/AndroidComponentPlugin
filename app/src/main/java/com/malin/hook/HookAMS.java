@@ -3,7 +3,6 @@ package com.malin.hook;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
-import android.os.Handler;
 
 import java.lang.reflect.Field;
 
@@ -143,25 +142,32 @@ public class HookAMS {
      * @throws IllegalAccessException illegalAccessException
      */
     public static void resetActivityThreadInnerHandler(Object mH) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+
+        //1.获取ActivityThread的Class对象
         Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
+
+        //2.获取sCurrentActivityThread属性的Field
+        //private static volatile ActivityThread sCurrentActivityThread;
         Field sCurrentActivityThreadField = activityThreadClazz.getDeclaredField("sCurrentActivityThread");
+
+        //3.禁止Java访问检查
         sCurrentActivityThreadField.setAccessible(true);
 
-        //ActivityThread
+        //4.获取sCurrentActivityThread属性的值,既ActivityThread实例
         //private static volatile ActivityThread sCurrentActivityThread;
         Object sCurrentActivityThreadObj = sCurrentActivityThreadField.get(null);
 
 
+        //5.获取ActivityThread的中mH属性的Field
+        //final H mH = new H();
         Field mHField = activityThreadClazz.getDeclaredField("mH");
+
+        //6.禁止Java访问检查
         mHField.setAccessible(true);
 
-
-        //final Callback mCallback;
-        Field callBackField = Handler.class.getDeclaredField("mCallback");
-        callBackField.setAccessible(true);
-
-
-        callBackField.set(sCurrentActivityThreadObj, mH);
+        //7.给mH属性设置新值
+        //ActivityThread类中的mH属性设置新值
+        mHField.set(sCurrentActivityThreadObj, mH);
     }
 
 }

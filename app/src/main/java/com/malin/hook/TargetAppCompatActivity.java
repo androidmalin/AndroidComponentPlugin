@@ -16,7 +16,7 @@ public class TargetAppCompatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
         TextView textView = new TextView(this);
-        textView.setText("TargetAppCompatActivity,成功!");
+        textView.setText("未注册的TargetAppCompatActivity,成功!");
         setContentView(textView);
     }
 
