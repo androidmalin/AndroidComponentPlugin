@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
@@ -44,6 +46,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }

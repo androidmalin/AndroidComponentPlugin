@@ -43,22 +43,42 @@ public class HookActivity8 {
      */
     public static void hookStartActivity(Context context, Class<?> subActivityClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
-        //1.获取ActivityManager的Class对象
-        //package android.app
-        //public class ActivityManager
-        Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
+        Object IActivityManagerSingletonObj;
+        if (Build.VERSION.SDK_INT >= 26) {
+            //1.获取ActivityManager的Class对象
+            //package android.app
+            //public class ActivityManager
+            Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
 
-        //2.获取ActivityManager的私有属性IActivityManagerSingleton
-        //private static final Singleton<IActivityManager> IActivityManagerSingleton
-        Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+            //2.获取ActivityManager的私有属性IActivityManagerSingleton
+            //private static final Singleton<IActivityManager> IActivityManagerSingleton
+            Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
 
-        //3.取消java的权限检查
-        iActivityManagerSingletonField.setAccessible(true);
+            //3.取消java的权限检查
+            iActivityManagerSingletonField.setAccessible(true);
 
-        //4.获取IActivityManagerSingleton的实例对象
-        //Singleton<IActivityManager> IActivityManagerSingleton
-        //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-        Object IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
+            //4.获取IActivityManagerSingleton的实例对象
+            //Singleton<IActivityManager> IActivityManagerSingleton
+            //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+            IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
+        } else {
+            //1.获取ActivityManagerNative的Class对象
+            //package android.app
+            //public abstract class ActivityManagerNative
+            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
+
+            //2.获取 ActivityManagerNative的 私有属性gDefault
+            // private static final Singleton<IActivityManager> gDefault
+            Field singletonField = activityManagerNativeClass.getDeclaredField("gDefault");
+
+            //3.对私有属性gDefault,解除私有限定
+            singletonField.setAccessible(true);
+
+            //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
+            //所有静态对象的反射可以通过传null获取
+            //private static final Singleton<IActivityManager> gDefault
+            IActivityManagerSingletonObj = singletonField.get(null);
+        }
 
 
         //5.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
@@ -173,19 +193,23 @@ public class HookActivity8 {
      * @throws NoSuchFieldException   noSuchFieldException
      * @throws IllegalAccessException illegalAccessException
      */
-    public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+
         //1.获取ActivityThread的Class对象
         //package android.app
         //public final class ActivityThread
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取ActivityThread对象属性sCurrentActivityThread
-        //private static volatile ActivityThread sCurrentActivityThread;
-        Field sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
-        sCurrentActivityThreadField.setAccessible(true);
+        //public static ActivityThread currentActivityThread()
+        //2.获取currentActivityThread()方法
+        //public static ActivityThread currentActivityThread()
+        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+        currentActivityThreadMethod.setAccessible(true);
 
-        //3.获取ActivityThread的对象(sCurrentActivityThread的值)实例.被声明为静态的
-        Object activityThreadObj = sCurrentActivityThreadField.get(null);
+        //3.获取ActivityThread的对象实例
+        //public static ActivityThread currentActivityThread()
+        Object activityThreadObj = currentActivityThreadMethod.invoke(null);
+
 
         //4.获取ActivityThread 的属性mH
         //final H mH = new H();
@@ -431,9 +455,9 @@ public class HookActivity8 {
 
         //1.获取ActivityThread的值
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-        Field sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
-        sCurrentActivityThreadField.setAccessible(true);
-        Object activityThread = sCurrentActivityThreadField.get(null);
+        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+        currentActivityThreadMethod.setAccessible(true);
+        Object activityThread = currentActivityThreadMethod.invoke(null);
 
 
         //2.Hook getPackageManager方法

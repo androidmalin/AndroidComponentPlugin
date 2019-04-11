@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Build;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * AMS Hook
@@ -13,13 +15,9 @@ import java.lang.reflect.Field;
 @SuppressLint("PrivateApi")
 public class HookAMS {
 
-    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        if (Build.VERSION.SDK_INT >= 26) {
-            HookActivity8.hookStartActivity(context, subActivityClass);
-            HookActivity8.hookLauncherActivity(context, subActivityClass, isAppCompat);
-        } else {
-            HookActivity7.hookStartActivity();
-        }
+    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        HookActivity8.hookStartActivity(context, subActivityClass);
+        HookActivity8.hookLauncherActivity(context, subActivityClass, isAppCompat);
     }
 
 
@@ -105,32 +103,31 @@ public class HookAMS {
      * @throws NoSuchFieldException   noSuchFieldException
      * @throws IllegalAccessException illegalAccessException
      */
-    public static Object getActivityThreadInnerHandler() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        //1.获取ActivityThread类的Class对象
+    public static Object getActivityThreadInnerHandler() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        //1.获取ActivityThread的Class对象
         //package android.app
         //public final class ActivityThread
-        Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
+        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取sCurrentActivityThread属性的Field
-        //private static volatile ActivityThread sCurrentActivityThread;
-        Field sCurrentActivityThreadField = activityThreadClazz.getDeclaredField("sCurrentActivityThread");
+        //public static ActivityThread currentActivityThread()
+        //2.获取currentActivityThread()方法
+        //public static ActivityThread currentActivityThread()
+        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+        currentActivityThreadMethod.setAccessible(true);
 
-        //3.禁止Java语言访问检查
-        sCurrentActivityThreadField.setAccessible(true);
-
-        //4.获取sCurrentActivityThread属性的值,既ActivityThread的实例
-        //private static volatile ActivityThread sCurrentActivityThread;
-        Object sCurrentActivityThreadObj = sCurrentActivityThreadField.get(null);
+        //3.获取ActivityThread的对象
+        //public static ActivityThread currentActivityThread()
+        Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
         //5.获取mH属性的Field
         // final H mH = new H();
-        Field mHField = activityThreadClazz.getDeclaredField("mH");
+        Field mHField = activityThreadClass.getDeclaredField("mH");
 
         //6.禁止Java语言访问检查
         mHField.setAccessible(true);
 
         //7.获取mH属性对应的值,既ActivityThread类中的Handler
-        return mHField.get(sCurrentActivityThreadObj);
+        return mHField.get(activityThreadObj);
     }
 
     /**
@@ -141,33 +138,33 @@ public class HookAMS {
      * @throws NoSuchFieldException   noSuchFieldException
      * @throws IllegalAccessException illegalAccessException
      */
-    public static void resetActivityThreadInnerHandler(Object mH) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-
+    public static void resetActivityThreadInnerHandler(Object mH) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         //1.获取ActivityThread的Class对象
-        Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
+        //package android.app
+        //public final class ActivityThread
+        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取sCurrentActivityThread属性的Field
-        //private static volatile ActivityThread sCurrentActivityThread;
-        Field sCurrentActivityThreadField = activityThreadClazz.getDeclaredField("sCurrentActivityThread");
+        //public static ActivityThread currentActivityThread()
+        //2.获取currentActivityThread()方法
+        //public static ActivityThread currentActivityThread()
+        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+        currentActivityThreadMethod.setAccessible(true);
 
-        //3.禁止Java访问检查
-        sCurrentActivityThreadField.setAccessible(true);
-
-        //4.获取sCurrentActivityThread属性的值,既ActivityThread实例
-        //private static volatile ActivityThread sCurrentActivityThread;
-        Object sCurrentActivityThreadObj = sCurrentActivityThreadField.get(null);
+        //3.获取ActivityThread的对象
+        //public static ActivityThread currentActivityThread()
+        Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
 
-        //5.获取ActivityThread的中mH属性的Field
+        //4.获取ActivityThread的中mH属性的Field
         //final H mH = new H();
-        Field mHField = activityThreadClazz.getDeclaredField("mH");
+        Field mHField = activityThreadClass.getDeclaredField("mH");
 
-        //6.禁止Java访问检查
+        //5.禁止Java访问检查
         mHField.setAccessible(true);
 
-        //7.给mH属性设置新值
+        //6.给mH属性设置新值
         //ActivityThread类中的mH属性设置新值
-        mHField.set(sCurrentActivityThreadObj, mH);
+        mHField.set(activityThreadObj, mH);
     }
 
 }
