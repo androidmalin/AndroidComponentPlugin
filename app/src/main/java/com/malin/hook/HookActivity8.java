@@ -31,7 +31,17 @@ public class HookActivity8 {
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
 
 
-    public static void hookStartActivity(Context context, Class<?> aClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    /**
+     * 对IActivityManager接口中的startActivity方法进行动态代理,发生在app的进程中
+     * Activity#startActivityForResult-->Instrumentation#execStartActivity-->ActivityManager.getService().startActivity()
+     *
+     * @param context          context
+     * @param subActivityClass 在AndroidManifest.xml中注册了的Activity
+     * @throws ClassNotFoundException classNotFoundException
+     * @throws NoSuchFieldException   noSuchFieldException
+     * @throws IllegalAccessException illegalAccessException
+     */
+    public static void hookStartActivity(Context context, Class<?> subActivityClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
         //1.获取ActivityManager的Class对象
         //package android.app
@@ -40,48 +50,52 @@ public class HookActivity8 {
 
         //2.获取ActivityManager的私有属性IActivityManagerSingleton
         //private static final Singleton<IActivityManager> IActivityManagerSingleton
-        Field singletonIActivityManagerField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
-        singletonIActivityManagerField.setAccessible(true);
+        Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
 
-        //3.Singleton<IActivityManager> IActivityManagerSingleton
-        //所有静态对象的反射可以通过传null获取。如果是实列必须传实例
-        Object IActivityManagerSingletonObj = singletonIActivityManagerField.get(null);
+        //3.取消java的权限检查
+        iActivityManagerSingletonField.setAccessible(true);
+
+        //4.获取IActivityManagerSingleton的实例对象
+        //Singleton<IActivityManager> IActivityManagerSingleton
+        //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+        Object IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
 
 
-        //4.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance;
+        //5.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
         //既,为了获取一个IActivityManager的实例对象
+        //private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
 
-        //5.拿到该属性
 
-        //获取Singleton类对象
+        //6.获取Singleton类对象
         //package android.util
         //public abstract class Singleton<T>
         Class<?> singletonClass = Class.forName("android.util.Singleton");
 
-        //获取mInstance属性
+        //7.获取mInstance属性
         //private T mInstance;
         Field mInstanceField = singletonClass.getDeclaredField("mInstance");
 
-        //设置不检查
+        //8.取消java的权限检查
         mInstanceField.setAccessible(true);
 
+        //9.获取mInstance属性的值,既IActivityManager的实例
         //从Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
         Object iActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
 
 
-        //6.获取IActivityManager接口的类对象
+        //10.获取IActivityManager接口的类对象
         //package android.app
         //public interface IActivityManager
-
         Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
 
+        //11.创建一个IActivityManager接口的代理对象
         Object iActivityManagerProxy = Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{iActivityManagerClass},
-                new IActivityInvocationHandler(iActivityManager, context, aClass)
+                new IActivityInvocationHandler(iActivityManager, context, subActivityClass)
         );
 
-        //7.重新赋值
+        //11.重新赋值
         //给mInstance属性,赋新值
         //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
         mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
@@ -106,7 +120,18 @@ public class HookActivity8 {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Log.d(TAG, "invoke :" + method.getName() + " args:" + Arrays.toString(args));
-            //public int startActivity(android.app.IApplicationThread caller, java.lang.String callingPackage, android.content.Intent intent, java.lang.String resolvedType, android.os.IBinder resultTo, java.lang.String resultWho, int requestCode, int flags, android.app.ProfilerInfo profilerInfo, android.os.Bundle options) throws android.os.RemoteException;
+
+            //IActivityManager接口中的startActivity方法如下
+            //public int startActivity(android.app.IApplicationThread caller,
+            //                         java.lang.String callingPackage,
+            //                         android.content.Intent intent,
+            //                         java.lang.String resolvedType,
+            //                         android.os.IBinder resultTo,
+            //                         java.lang.String resultWho,
+            //                         int requestCode,
+            //                         int flags,
+            //                         android.app.ProfilerInfo profilerInfo,
+            //                         android.os.Bundle options) throws android.os.RemoteException;
             if (method.getName().equals("startActivity")) {
                 Log.d(TAG, "startActivity hook");
                 int intentIndex = 2;
@@ -116,6 +141,7 @@ public class HookActivity8 {
                         break;
                     }
                 }
+                //将启动的未注册的Activity对应的Intent,替换为安全的注册了的桩Activity的Intent
                 //1.将未注册的Activity对应的Intent,改为安全的Intent,既在AndroidManifest.xml中配置了的Activity的Intent
                 Intent originIntent = (Intent) args[intentIndex];
 
@@ -125,19 +151,20 @@ public class HookActivity8 {
                 //2.替换到原来的Intent,欺骗AMS
                 args[intentIndex] = safeIntent;
 
-                //3.之后,在换回来,启动我们未在AndroidManifest.xml中配置的Activity
+                //3.之后,再换回来,启动我们未在AndroidManifest.xml中配置的Activity
                 //final H mH = new H();
                 //hook Handler消息的处理,给Handler增加mCallback
 
 
             }
+            //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
             return method.invoke(mIActivityManager, args);
         }
     }
 
 
     /**
-     * 启动未注册的Activity
+     * 启动未注册的Activity,将之前替换了的Intent,换回去.我们的目标是要启动未注册的Activity
      *
      * @param context          context
      * @param subActivityClass 注册了的Activity的Class对象
@@ -149,7 +176,7 @@ public class HookActivity8 {
     public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         //1.获取ActivityThread的Class对象
         //package android.app
-        // public final class ActivityThread
+        //public final class ActivityThread
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
         //2.获取ActivityThread对象属性sCurrentActivityThread
@@ -216,8 +243,9 @@ public class HookActivity8 {
         try {
             //1.获取ActivityThread的内部类H的Class对象
             //package android.app
-            //public final class ActivityThread
-            //private class H extends Handler {}
+            //public final class ActivityThread{
+            //       private class H extends Handler {}
+            //}
             Class<?> hClass = Class.forName("android.app.ActivityThread$H");
 
             //2.public static final int LAUNCH_ACTIVITY = 100;
@@ -229,40 +257,33 @@ public class HookActivity8 {
             e.printStackTrace();
         }
 
-        if (msg.what == LAUNCH_ACTIVITY) {
-            //final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
-            //1.从msg中获取ActivityClientRecord对象
-            Object activityClientRecordObj = msg.obj;
+        if (msg.what != LAUNCH_ACTIVITY) return;
+        //final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
+        //1.从msg中获取ActivityClientRecord对象
+        Object activityClientRecordObj = msg.obj;
 
-            try {
-                //2.获取ActivityClientRecord的intent属性
-                // Intent intent;
-                Field safeIntentField = activityClientRecordObj.getClass().getDeclaredField("intent");
-                safeIntentField.setAccessible(true);
+        try {
+            //2.获取ActivityClientRecord的intent属性
+            // Intent intent;
+            Field safeIntentField = activityClientRecordObj.getClass().getDeclaredField("intent");
+            safeIntentField.setAccessible(true);
 
-                //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
-                Intent safeIntent = (Intent) safeIntentField.get(activityClientRecordObj);
+            //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
+            Intent safeIntent = (Intent) safeIntentField.get(activityClientRecordObj);
 
-                //4.获取原始的Intent
-                Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+            //4.获取原始的Intent
+            Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
 
-                if (originIntent == null) return;
+            if (originIntent == null) return;
 
-                //5.将安全的Intent,替换为原始的Intent
-                //给ActivityClientRecord对象的intent属性,赋值为原始的Intent(originIntent)
-                safeIntentField.set(activityClientRecordObj, originIntent);
+            //5.将安全的Intent,替换为原始的Intent,以启动我们要启动的未注册的Activity
+            safeIntent.setComponent(originIntent.getComponent());
 
-                //6.处理未注册的Activity为AppCompatActivity类或者子类的情况
-                try {
-                    if (isAppCompat) {
-                        hookPM(context, subActivityClass);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            //6.处理未注册的Activity为AppCompatActivity类或者子类的情况
+            if (!isAppCompat) return;
+            hookPM(context, subActivityClass);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -352,18 +373,10 @@ public class HookActivity8 {
                 safeIntent.setComponent(originIntent.getComponent());
 
                 //14.处理未注册的Activity为AppCompatActivity类或者子类的情况
-                try {
-                    if (isAppCompat) {
-                        hookPM(context, subActivityClass);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+                if (!isAppCompat) return;
+                hookPM(context, subActivityClass);
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -393,6 +406,14 @@ public class HookActivity8 {
 
     /**
      * 处理未注册的Activity为AppCompatActivity类或者子类的情况
+     * 对support中android.support.v4.app.NavUtils类的
+     * public static String getParentActivityName(@NonNull Context context,@NonNull ComponentName componentName){
+     * PackageManager pm = context.getPackageManager();
+     * //这里检测到了ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
+     * //targetActivity没有在AndroidManifest.xml中注册
+     * ActivityInfo info = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
+     * }
+     * <p>
      * https://blog.csdn.net/gdutxiaoxu/article/details/81459910
      *
      * @param context          context
