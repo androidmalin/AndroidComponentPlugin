@@ -18,16 +18,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * malin
- * 反射
+ * 对Activity启动流程中的两次拦截
+ * 参考文章如下:
  * https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html
  * https://blog.csdn.net/jiangwei0910410003/article/details/52550147
- * >=android 8.0以上的Hook
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint("PrivateApi")
-public class HookActivity8 {
-    private static final String TAG = "HookActivityUtils8";
+public class HookActivity {
+    private static final String TAG = "HookActivity";
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
 
 

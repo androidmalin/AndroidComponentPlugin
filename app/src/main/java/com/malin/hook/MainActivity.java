@@ -23,18 +23,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btn_start) {
-            MApplication.reset();
-            startHook(false);
-            startActivity(new Intent(this, TargetActivity.class));
-        } else if (v.getId() == R.id.btn_start_appcompat) {
-            MApplication.reset();
-            startHook(true);
-            startActivity(new Intent(this, TargetAppCompatActivity.class));
+        int id = v.getId();
+        switch (id) {
+            case R.id.btn_start: {
+                startHook(false);
+                startActivity(new Intent(this, TargetActivity.class));
+                break;
+            }
+            case R.id.btn_start_appcompat: {
+                startHook(true);
+                startActivity(new Intent(this, TargetAppCompatActivity.class));
+                break;
+            }
+            default: {
+                break;
+            }
         }
     }
 
     private void startHook(boolean isAppCompatActivity) {
+        MApplication.reset();
         try {
             if (isAppCompatActivity) {
                 HookAMS.hookStartActivity(this, StubAppCompatActivity.class, true);

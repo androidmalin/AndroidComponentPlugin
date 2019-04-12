@@ -16,8 +16,8 @@ import java.lang.reflect.Method;
 public class HookAMS {
 
     public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        HookActivity8.hookStartActivity(context, subActivityClass);
-        HookActivity8.hookLauncherActivity(context, subActivityClass, isAppCompat);
+        HookActivity.hookStartActivity(context, subActivityClass);
+        HookActivity.hookLauncherActivity(context, subActivityClass, isAppCompat);
     }
 
 

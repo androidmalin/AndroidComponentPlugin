@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+/**
+ * AppCompatActivity类型的桩Activity
+ */
 @SuppressLint("SetTextI18n")
 public class StubAppCompatActivity extends AppCompatActivity {
 

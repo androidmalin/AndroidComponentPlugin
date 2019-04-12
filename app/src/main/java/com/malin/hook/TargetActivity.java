@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+/**
+ * 普通类型的未注册的Activity
+ */
 @SuppressLint({"SetTextI18n", "Registered"})
 public class TargetActivity extends Activity {
 

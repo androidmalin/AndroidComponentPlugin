@@ -1,2 +1,4 @@
 #!/bin/bash
-pidcat -s CVH7N15C03002357 com.malin.hook
+first_device=`adb devices | awk  'NR==2' | awk  '{print $1}'`
+adb -s $first_device logcat -c
+pidcat -s $first_device

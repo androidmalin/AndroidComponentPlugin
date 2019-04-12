@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+/**
+ * AppCompatActivity类型的未注册的Activity
+ */
 @SuppressLint({"SetTextI18n", "Registered"})
 public class TargetAppCompatActivity extends AppCompatActivity {
 

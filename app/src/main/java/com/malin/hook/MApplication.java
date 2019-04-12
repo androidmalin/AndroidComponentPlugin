@@ -5,16 +5,14 @@ import android.content.Context;
 
 public class MApplication extends Application {
 
-    //为了重置,否则第二次之后的启动都是启动的注册的Activity
+    //为了重置,否则第二次之后的启动都是已经注册的Activity
     private static Object mIActivityManagerObj;
-    private static Object mHandlerObj;
 
     @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
         try {
             mIActivityManagerObj = HookAMS.getIActivityManagerObj();
-            mHandlerObj = HookAMS.getActivityThreadInnerHandler();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -23,7 +21,6 @@ public class MApplication extends Application {
     public static void reset() {
         try {
             HookAMS.resetIActivityManager(mIActivityManagerObj);
-            HookAMS.resetActivityThreadInnerHandler(mHandlerObj);
         } catch (Exception e) {
             e.printStackTrace();
         }

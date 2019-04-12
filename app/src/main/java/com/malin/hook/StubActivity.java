@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+/**
+ * 普通的桩Activity
+ */
 @SuppressLint("SetTextI18n")
 public class StubActivity extends Activity {
 
