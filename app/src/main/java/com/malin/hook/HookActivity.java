@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -485,8 +486,8 @@ public class HookActivity {
     }
 
     private static class IPackageManagerHandler implements InvocationHandler {
-        private final String mAppPackageName;
-        private final String mSubActivityClassName;
+        private String mAppPackageName;
+        private String mSubActivityClassName;
         private Object mIPackageManager;
 
         IPackageManagerHandler(Object iPackageManager, String appPackageName, String subActivityClassName) {
@@ -540,4 +541,117 @@ public class HookActivity {
         Context applicationContext = context.getApplicationContext();
         return applicationContext.getPackageName();
     }
+
+
+    /*com.malin.hook E/ActionBarView: Activity component name not found!
+     android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.malin.hook/com.malin.hook.TargetActivity}
+     at android.app.ApplicationPackageManager.getActivityInfo(ApplicationPackageManager.java:241)
+     at android.app.ApplicationPackageManager.getActivityLogo(ApplicationPackageManager.java:717)
+     at com.android.internal.widget.ActionBarView.<init>(ActionBarView.java:196)
+     at java.lang.reflect.Constructor.constructNative(Native Method)
+     at java.lang.reflect.Constructor.newInstance(Constructor.java:417)
+     at android.view.LayoutInflater.createView(LayoutInflater.java:594)
+     at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:696)
+     at android.view.LayoutInflater.rInflate(LayoutInflater.java:755)
+     at android.view.LayoutInflater.rInflate(LayoutInflater.java:758)
+     at android.view.LayoutInflater.rInflate(LayoutInflater.java:758)
+     at android.view.LayoutInflater.inflate(LayoutInflater.java:492)
+     at android.view.LayoutInflater.inflate(LayoutInflater.java:397)
+     at android.view.LayoutInflater.inflate(LayoutInflater.java:353)
+     at com.android.internal.policy.impl.PhoneWindow.generateLayout(PhoneWindow.java:2823)
+     at com.android.internal.policy.impl.PhoneWindow.installDecor(PhoneWindow.java:2886)
+     at com.android.internal.policy.impl.PhoneWindow.setContentView(PhoneWindow.java:282)
+     at com.android.internal.policy.impl.PhoneWindow.setContentView(PhoneWindow.java:276)
+     at android.app.Activity.setContentView(Activity.java:1915)
+     at com.malin.hook.TargetActivity.onCreate(TargetActivity.java:23)
+     at android.app.Activity.performCreate(Activity.java:5133)
+     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1087)
+     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2175)
+     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2261)
+     at android.app.ActivityThread.access$600(ActivityThread.java:141)
+     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1256)
+     at android.os.Handler.dispatchMessage(Handler.java:99)
+     at android.os.Looper.loop(Looper.java:137)
+     at android.app.ActivityThread.main(ActivityThread.java:5103)
+     at java.lang.reflect.Method.invokeNative(Native Method)
+     at java.lang.reflect.Method.invoke(Method.java:525)
+     at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:737)
+     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:553)
+     at dalvik.system.NativeStart.main(Native Method)
+     **/
+
+    /**
+     * hook IPackageManager,处理android 4.3一下启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
+     * <p>
+     * http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/
+     *
+     * @param context          context
+     * @param subActivityClass 注册了的Activity的class对象
+     */
+    public static void hookPackageManager(Context context, Class<?> subActivityClass) {
+
+        try {
+            //1.获取ActivityThread的值
+            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            currentActivityThreadMethod.setAccessible(true);
+            Object activityThread = currentActivityThreadMethod.invoke(null);
+
+            //2.获取ActivityThread里面原始的 sPackageManager
+            Field sPackageManagerField = activityThreadClass.getDeclaredField("sPackageManager");
+            sPackageManagerField.setAccessible(true);
+            Object sPackageManager = sPackageManagerField.get(activityThread);
+
+            //3.准备好代理对象, 用来替换原始的对象
+            Class<?> iPackageManagerClass = Class.forName("android.content.pm.IPackageManager");
+            Object proxy = Proxy.newProxyInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    new Class<?>[]{iPackageManagerClass},
+                    new PackageManagerProxyHandler(sPackageManager, getAppPackageName(context), subActivityClass.getName()));
+
+            //4.替换掉ActivityThread里面的 sPackageManager 字段
+            sPackageManagerField.set(activityThread, proxy);
+
+            //5.替换 ApplicationPackageManager里面的 mPM对象
+            PackageManager packageManager = context.getPackageManager();
+            Field mPmField = packageManager.getClass().getDeclaredField("mPM");
+            mPmField.setAccessible(true);
+            mPmField.set(packageManager, proxy);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static class PackageManagerProxyHandler implements InvocationHandler {
+        private String mSubActivityClassName;
+        private Object mIPackageManagerObj;
+        private String mAppPackageName;
+
+        public PackageManagerProxyHandler(Object iPackageManagerObj, String appPackageName, String subActivityClassName) {
+            this.mIPackageManagerObj = iPackageManagerObj;
+            this.mSubActivityClassName = subActivityClassName;
+            this.mAppPackageName = appPackageName;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+            //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
+            if ("getActivityInfo".equals(method.getName())) {
+                ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
+                args[0] = componentName;
+            }
+            return method.invoke(mIPackageManagerObj, args);
+        }
+    }
+
+
 }
