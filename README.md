@@ -17,6 +17,31 @@
 
 2. 从整体宏观的角度看,我们到底做了什么?
 
+3. 对PackageManager的hook,为什么要hook两个地方
+
+[hook技术(三)对AMS&PMS进行Hook](https://blog.csdn.net/wangwei708846696/article/details/79525467)
+
+```java
+@Override
+public PackageManager getPackageManager() {
+    if (mPackageManager != null) {
+        return mPackageManager;
+    }
+    IPackageManager pm = ActivityThread.getPackageManager();
+    if (pm != null) {
+        return (mPackageManager = new ApplicationPackageManager(this, pm));
+    }
+    return null;
+}
+```
+
+由于系统的执行肯定在我们代码之前，所以系统先生成了一个pm，这个是原生的pm然后保存在ApplicationPackageManager中，
+使得以后使用ContextImp.getPackageManager()都返回这个IPackageManager 对象。
+就算我们后来替换了ActivityThread.getPackageManager()，但是也不影响mPackageManager 里面之前包装好的。
+所以我们还需要改变mPackageManager 里面的原来的pm对象。
+
+
+
 ### 参考文章列表
 1. [Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
 2. [Android：学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
