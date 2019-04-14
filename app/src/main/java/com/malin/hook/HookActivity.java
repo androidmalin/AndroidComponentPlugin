@@ -20,9 +20,6 @@ import java.util.List;
 
 /**
  * 对Activity启动流程中的两次拦截
- * 参考文章如下:
- * https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html
- * https://blog.csdn.net/jiangwei0910410003/article/details/52550147
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint("PrivateApi")
@@ -200,7 +197,6 @@ public class HookActivity {
         //public final class ActivityThread
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //public static ActivityThread currentActivityThread()
         //2.获取currentActivityThread()方法
         //public static ActivityThread currentActivityThread()
         Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
@@ -581,7 +577,7 @@ public class HookActivity {
      **/
 
     /**
-     * hook IPackageManager,处理android 4.3一下启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
+     * hook IPackageManager,处理android 4.3以下(<= 18)启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
      * <p>
      * http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/
      *
@@ -593,11 +589,15 @@ public class HookActivity {
         try {
             //1.获取ActivityThread的值
             Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            //public static ActivityThread currentActivityThread() {
+            //        return sCurrentActivityThread;
+            //    }
             Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
             Object activityThread = currentActivityThreadMethod.invoke(null);
 
             //2.获取ActivityThread里面原始的 sPackageManager
+            //static IPackageManager sPackageManager;
             Field sPackageManagerField = activityThreadClass.getDeclaredField("sPackageManager");
             sPackageManagerField.setAccessible(true);
             Object sPackageManager = sPackageManagerField.get(activityThread);
@@ -614,6 +614,8 @@ public class HookActivity {
 
             //5.替换 ApplicationPackageManager里面的 mPM对象
             PackageManager packageManager = context.getPackageManager();
+            //PackageManager的实现类ApplicationPackageManager中的mPM
+            //private final IPackageManager mPM;
             Field mPmField = packageManager.getClass().getDeclaredField("mPM");
             mPmField.setAccessible(true);
             mPmField.set(packageManager, proxy);

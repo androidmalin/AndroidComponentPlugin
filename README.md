@@ -8,3 +8,19 @@
 5. [Activity启动流程以及其中涉及到的两次跨进程通信](https://blog.csdn.net/jiangwei0910410003/article/details/52549333)
 6. [Handler消息处理机制](https://blog.csdn.net/guolin_blog/article/details/9991569)
 7. [Activity启动拦截](https://blog.csdn.net/jiangwei0910410003/article/details/52550147)
+
+
+### 问题思考
+1. 如何确保我们启动的未注册的Activity,有正常的Activity的生命周期?
+[源码探索系列29---插件化基础之启动插件的Activity](http://sanjay-f.github.io/2016/04/01/%E6%BA%90%E7%A0%81%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%9729---%E6%8F%92%E4%BB%B6%E5%8C%96%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%90%AF%E5%8A%A8%E6%8F%92%E4%BB%B6%E7%9A%84Activity/)
+
+2. 从整体宏观的角度看,我们到底做了什么?
+
+### 参考文章列表
+[Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
+[Android：学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
+[大白话说Java反射：入门、使用、原理](https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html)
+[Android 插件化原理解析——Hook机制之AMS&PMS](http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/)
+[Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](https://blog.csdn.net/jiangwei0910410003/article/details/52550147)
+[Android插件化的兼容性（中）：Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
+[Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
