@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * 对Activity启动流程中的两次拦截
  */
-@SuppressWarnings("JavaReflectionMemberAccess")
+@SuppressWarnings("ALL")
 @SuppressLint("PrivateApi")
 public class HookActivity {
     private static final String TAG = "HookActivity";

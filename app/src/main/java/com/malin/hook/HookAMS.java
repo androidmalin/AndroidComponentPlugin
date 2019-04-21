@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 /**
  * AMS Hook
  */
-@SuppressWarnings("JavaReflectionMemberAccess")
+@SuppressWarnings("ALL")
 @SuppressLint("PrivateApi")
 public class HookAMS {
 
