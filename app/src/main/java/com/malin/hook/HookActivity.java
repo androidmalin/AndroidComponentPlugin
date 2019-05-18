@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -15,7 +16,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,7 +30,11 @@ public class HookActivity {
 
     /**
      * 对IActivityManager接口中的startActivity方法进行动态代理,发生在app的进程中
-     * Activity#startActivityForResult-->Instrumentation#execStartActivity-->ActivityManager.getService().startActivity()
+     * {@link android.app.Activity#startActivity(Intent)}
+     * {@link android.app.Activity#startActivityForResult(Intent, int, Bundle)}
+     * {@link android.app.Instrumentation#execStartActivity()}
+     * Activity#startActivityForResult-->Instrumentation#execStartActivity-->ActivityManager.getService().startActivity()-->
+     * IActivityManager public int startActivity(android.app.IApplicationThread caller, java.lang.String callingPackage, android.content.Intent intent, java.lang.String resolvedType, android.os.IBinder resultTo, java.lang.String resultWho, int requestCode, int flags, android.app.ProfilerInfo profilerInfo, android.os.Bundle options) throws android.os.RemoteException;
      *
      * @param context          context
      * @param subActivityClass 在AndroidManifest.xml中注册了的Activity
@@ -47,15 +51,15 @@ public class HookActivity {
             //public class ActivityManager
             Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
 
-            //2.获取ActivityManager的私有属性IActivityManagerSingleton
+            //2.获取ActivityManager的私有静态属性IActivityManagerSingleton
             //private static final Singleton<IActivityManager> IActivityManagerSingleton
             Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
 
-            //3.取消java的权限检查
+            //3.取消Java的权限检查
             iActivityManagerSingletonField.setAccessible(true);
 
             //4.获取IActivityManagerSingleton的实例对象
-            //Singleton<IActivityManager> IActivityManagerSingleton
+            //private static final Singleton<IActivityManager> IActivityManagerSingleton
             //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
             IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
         } else {
@@ -78,7 +82,7 @@ public class HookActivity {
         }
 
 
-        //5.获取Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
+        //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
         //既,为了获取一个IActivityManager的实例对象
         //private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
 
@@ -92,11 +96,11 @@ public class HookActivity {
         //private T mInstance;
         Field mInstanceField = singletonClass.getDeclaredField("mInstance");
 
-        //8.取消java的权限检查
+        //8.取消Java的权限检查
         mInstanceField.setAccessible(true);
 
         //9.获取mInstance属性的值,既IActivityManager的实例
-        //从Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
+        //从private static final Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
         Object iActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
 
 
@@ -121,6 +125,9 @@ public class HookActivity {
     }
 
 
+    /**
+     * 对IActivityManager接口进行动态代理
+     */
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private Object mIActivityManager;
@@ -136,7 +143,6 @@ public class HookActivity {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Log.d(TAG, "invoke :" + method.getName() + " args:" + Arrays.toString(args));
 
             //IActivityManager接口中的startActivity方法如下
             //public int startActivity(android.app.IApplicationThread caller,
@@ -163,6 +169,8 @@ public class HookActivity {
                 Intent originIntent = (Intent) args[intentIndex];
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClass);
+                //public class Intent implements Parcelable;
+                //Intent类已经实现了Parcelable接口
                 safeIntent.putExtra(EXTRA_ORIGIN_INTENT, originIntent);
 
                 //2.替换到原来的Intent,欺骗AMS
@@ -197,13 +205,13 @@ public class HookActivity {
         //public final class ActivityThread
         Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取currentActivityThread()方法
-        //public static ActivityThread currentActivityThread()
+        //2.获取currentActivityThread()静态方法;为了保证在多个版本中兼容性,使用该静态方法获取ActivityThread的实例
+        //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
         Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
         currentActivityThreadMethod.setAccessible(true);
 
         //3.获取ActivityThread的对象实例
-        //public static ActivityThread currentActivityThread()
+        //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
         Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
 
@@ -212,7 +220,7 @@ public class HookActivity {
         Field mHField = activityThreadClass.getDeclaredField("mH");
         mHField.setAccessible(true);
 
-        //5.获取mH的值
+        //5.获取mH的值,既获取ActivityThread类中H类的实例对象
         //从ActivityThread实例中获取mH属性对应的值,既mH的值
         Object mHObj = mHField.get(activityThreadObj);
 
@@ -225,6 +233,7 @@ public class HookActivity {
 
         //7.获取mCallback属性
         //final Callback mCallback;
+        //Callback是Handler类内部的一个接口
         Field mCallbackField = handlerClass.getDeclaredField("mCallback");
         mCallbackField.setAccessible(true);
 
@@ -239,6 +248,9 @@ public class HookActivity {
         }
     }
 
+    /**
+     * 对应<9.0情况,创建一个Handler的Callback接口的实例对象
+     */
     private static class HandlerCallback implements Handler.Callback {
         private Context context;
         private Class<?> subActivityClass;
@@ -268,7 +280,8 @@ public class HookActivity {
             //}
             Class<?> hClass = Class.forName("android.app.ActivityThread$H");
 
-            //2.public static final int LAUNCH_ACTIVITY = 100;
+            //2.获取LAUNCH_ACTIVITY属性的Field
+            // public static final int LAUNCH_ACTIVITY = 100;
             Field launch_activity_field = hClass.getField("LAUNCH_ACTIVITY");
 
             //3.获取LAUNCH_ACTIVITY的值
@@ -299,9 +312,9 @@ public class HookActivity {
             //5.将安全的Intent,替换为原始的Intent,以启动我们要启动的未注册的Activity
             safeIntent.setComponent(originIntent.getComponent());
 
-            //6.处理未注册的Activity为AppCompatActivity类或者子类的情况
+            //6.处理启动的Activity为AppCompatActivity类或者子类的情况
             if (!isAppCompat) return;
-            hookPM(context, subActivityClass);
+            hookPackageManager(context, subActivityClass);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -394,7 +407,7 @@ public class HookActivity {
 
                 //14.处理未注册的Activity为AppCompatActivity类或者子类的情况
                 if (!isAppCompat) return;
-                hookPM(context, subActivityClass);
+                hookPackageManager(context, subActivityClass);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -402,133 +415,6 @@ public class HookActivity {
         }
     }
 
-    /*
-     Caused by: java.lang.IllegalArgumentException: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
-     at android.support.v4.app.NavUtils.getParentActivityName(NavUtils.java:222)
-     at android.support.v7.app.AppCompatDelegateImplV9.onCreate(AppCompatDelegateImplV9.java:155)
-     at android.support.v7.app.AppCompatDelegateImplV14.onCreate(AppCompatDelegateImplV14.java:61)
-     at android.support.v7.app.AppCompatActivity.onCreate(AppCompatActivity.java:72)
-     at com.malin.hook.TargetAppCompatActivity.onCreate(TargetAppCompatActivity.java:16)
-     at android.app.Activity.performCreate(Activity.java:7009)
-     at android.app.Activity.performCreate(Activity.java:7000)
-     at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1214)
-     at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2731)
-     at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2856) 
-     at android.app.ActivityThread.-wrap11(Unknown Source:0) 
-     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1589) 
-     at android.os.Handler.dispatchMessage(Handler.java:106) 
-     at android.os.Looper.loop(Looper.java:164) 
-     at android.app.ActivityThread.main(ActivityThread.java:6494) 
-     at java.lang.reflect.Method.invoke(Native Method) 
-     at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:438) 
-     at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:807)
-     **/
-
-    /**
-     * 处理未注册的Activity为AppCompatActivity类或者子类的情况
-     * 对support中android.support.v4.app.NavUtils类的
-     * public static String getParentActivityName(@NonNull Context context,@NonNull ComponentName componentName){
-     * PackageManager pm = context.getPackageManager();
-     * //这里检测到了ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
-     * //targetActivity没有在AndroidManifest.xml中注册
-     * ActivityInfo info = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
-     * }
-     * <p>
-     * https://blog.csdn.net/gdutxiaoxu/article/details/81459910
-     *
-     * @param context          context
-     * @param subActivityClass 注册了的Activity的Class对象
-     * @throws ClassNotFoundException    classNotFoundException
-     * @throws NoSuchFieldException      noSuchFieldException
-     * @throws IllegalAccessException    illegalAccessException
-     * @throws NoSuchMethodException     noSuchMethodException
-     * @throws InvocationTargetException invocationTargetException
-     */
-    private static void hookPM(Context context, Class<?> subActivityClass) throws ClassNotFoundException, NoSuchFieldException,
-            IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        String appPackageName = getAppPackageName(context);
-        String subActivityClassName = subActivityClass.getName();
-
-        //1.获取ActivityThread的值
-        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
-        currentActivityThreadMethod.setAccessible(true);
-        Object activityThread = currentActivityThreadMethod.invoke(null);
-
-
-        //2.Hook getPackageManager方法
-        //public static IPackageManager getPackageManager() {}
-        Method getPackageManagerMethod = activityThread.getClass().getDeclaredMethod("getPackageManager");
-
-        //3.获取getPackageManager方法的返回值IPackageManager,使用activityThread对象的实例,调用getPackageManager()方法返回IPackageManager对象的实例
-        Object iPackageManager = getPackageManagerMethod.invoke(activityThread);
-
-
-        Class<?> iPackageManagerClass = Class.forName("android.content.pm.IPackageManager");
-
-        Object iPackageManagerProxy = Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class<?>[]{iPackageManagerClass},
-                new IPackageManagerHandler(iPackageManager, appPackageName, subActivityClassName));
-
-        //4.获取 sPackageManager 属性的Field
-        //static IPackageManager sPackageManager;
-        Field iPackageManagerField = activityThread.getClass().getDeclaredField("sPackageManager");
-        iPackageManagerField.setAccessible(true);
-
-        //5.给ActivityThread的属性sPackageManager设置新的值
-        //activityThread实例对象设置sPackageManager属性的值
-        iPackageManagerField.set(activityThread, iPackageManagerProxy);
-    }
-
-    private static class IPackageManagerHandler implements InvocationHandler {
-        private String mAppPackageName;
-        private String mSubActivityClassName;
-        private Object mIPackageManager;
-
-        IPackageManagerHandler(Object iPackageManager, String appPackageName, String subActivityClassName) {
-            this.mIPackageManager = iPackageManager;
-            this.mAppPackageName = appPackageName;
-            this.mSubActivityClassName = subActivityClassName;
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            //IPackageManager
-            //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId) throws android.os.RemoteException;
-            if (method.getName().equals("getActivityInfo")) {
-                int index = 0;
-                for (int i = 0; i < args.length; i++) {
-                    if (args[i] instanceof ComponentName) {
-                        index = i;
-                        break;
-                    }
-                }
-
-                ComponentName originComponentName = null;
-                try {
-                    originComponentName = (ComponentName) args[index];
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                if (originComponentName != null) {
-                    Log.d(TAG, "originComponentName != null");
-                    String packageName = originComponentName.getPackageName();
-                    String className = originComponentName.getClassName();
-                    Log.d(TAG, "originComponentName packageName:" + packageName);
-                    Log.d(TAG, "originComponentName className:" + className);
-                } else {
-                    Log.d(TAG, "originComponentName == null");
-                }
-
-                ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
-                args[index] = componentName;
-            }
-            return method.invoke(mIPackageManager, args);
-        }
-    }
 
     /**
      * 获取包名
@@ -538,8 +424,41 @@ public class HookActivity {
         return applicationContext.getPackageName();
     }
 
+     /*1.处理使用com.android.support:appcompat-v7:27.1.1会出现这个问题.使用28.0.0则不会
+     https://blog.csdn.net/gdutxiaoxu/article/details/81459910
 
-    /*com.malin.hook E/ActionBarView: Activity component name not found!
+     对support中android.support.v4.app.NavUtils类的
+     public static String getParentActivityName(@NonNull Context context,@NonNull ComponentName componentName){
+     PackageManager pm = context.getPackageManager();
+     //这里检测到了ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
+     //TargetAppCompatActivity没有在AndroidManifest.xml中注册
+     ActivityInfo info = pm.getActivityInfo(componentName, PackageManager.GET_META_DATA)
+
+     Caused by: android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.malin.hook/com.malin.hook.TargetAppCompatActivity}
+        at android.app.ApplicationPackageManager.getActivityInfo(ApplicationPackageManager.java:418)
+        at android.support.v4.app.NavUtils.getParentActivityName(NavUtils.java:240)
+        at android.support.v4.app.NavUtils.getParentActivityName(NavUtils.java:219)
+        at android.support.v7.app.AppCompatDelegateImplV9.onCreate(AppCompatDelegateImplV9.java:155) 
+        at android.support.v7.app.AppCompatDelegateImplV14.onCreate(AppCompatDelegateImplV14.java:61) 
+        at android.support.v7.app.AppCompatActivity.onCreate(AppCompatActivity.java:72) 
+        at com.malin.hook.TargetAppCompatActivity.onCreate(TargetAppCompatActivity.java:19) 
+        at android.app.Activity.performCreate(Activity.java:7009) 
+        at android.app.Activity.performCreate(Activity.java:7000) 
+        at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1214) 
+        at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2731) 
+        at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2856) 
+        at android.app.ActivityThread.-wrap11(Unknown Source:0) 
+        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1589) 
+        at android.os.Handler.dispatchMessage(Handler.java:106) 
+        at android.os.Looper.loop(Looper.java:164) 
+        at android.app.ActivityThread.main(ActivityThread.java:6494) 
+        at java.lang.reflect.Method.invoke(Native Method) 
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:438) 
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:807) 
+     **/
+
+    /*2.处理android 4.3以下(<= 18)启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
+     com.malin.hook E/ActionBarView: Activity component name not found!
      android.content.pm.PackageManager$NameNotFoundException: ComponentInfo{com.malin.hook/com.malin.hook.TargetActivity}
      at android.app.ApplicationPackageManager.getActivityInfo(ApplicationPackageManager.java:241)
      at android.app.ApplicationPackageManager.getActivityLogo(ApplicationPackageManager.java:717)
@@ -577,7 +496,8 @@ public class HookActivity {
      **/
 
     /**
-     * hook IPackageManager,处理android 4.3以下(<= 18)启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
+     * 1.处理未注册的Activity为AppCompatActivity类或者子类的情况
+     * 2.hook IPackageManager,处理android 4.3以下(<= 18)启动Activity,在ApplicationPackageManager.getActivityInfo方法中未找到注册的Activity的异常
      * <p>
      * http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/
      *
@@ -648,8 +568,36 @@ public class HookActivity {
         public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
             //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo".equals(method.getName())) {
+
+                int index = 0;
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i] instanceof ComponentName) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                //test start
+                ComponentName originComponentName = null;
+                try {
+                    originComponentName = (ComponentName) args[index];
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if (originComponentName != null) {
+                    Log.d(TAG, "originComponentName != null");
+                    String packageName = originComponentName.getPackageName();
+                    String className = originComponentName.getClassName();
+                    Log.d(TAG, "originComponentName packageName:" + packageName);
+                    Log.d(TAG, "originComponentName className:" + className);
+                } else {
+                    Log.d(TAG, "originComponentName == null");
+                }
+                //test end
+
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
-                args[0] = componentName;
+                args[index] = componentName;
             }
             return method.invoke(mIPackageManagerObj, args);
         }
