@@ -142,7 +142,34 @@ public class HookActivity {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+
+//android-q
+//            try {
+//                intent.migrateExtraStreamToClipData();
+//                intent.prepareToLeaveProcess(who);
+//                int result = ActivityManager.getService()
+//                        .startActivity(whoThread, who.getBasePackageName(), intent,
+//                                intent.resolveTypeIfNeeded(who.getContentResolver()),
+//                                token, target != null ? target.mEmbeddedID : null,
+//                                requestCode, 0, null, options);
+//                checkStartActivityResult(result, intent);
+//            } catch (RemoteException e) {
+//                throw new RuntimeException("Failure from system", e);
+//            }
+
+//android-q
+//            int startActivity(
+//            in IApplicationThread caller,
+//            in String callingPackage,
+//            in Intent intent,
+//            in String resolvedType,
+//            in IBinder resultTo,
+//            in String resultWho,
+//            int requestCode,
+//            int flags,
+//            in ProfilerInfo profilerInfo,
+//            in Bundle options);
 
             //IActivityManager接口中的startActivity方法如下
             //public int startActivity(android.app.IApplicationThread caller,

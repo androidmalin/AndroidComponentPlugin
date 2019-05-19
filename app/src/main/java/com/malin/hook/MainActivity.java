@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
+
+import androidx.core.os.BuildCompat;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -26,11 +29,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_start: {
+                if (BuildCompat.isAtLeastQ()) {
+                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 startHook(false);
                 startActivity(new Intent(this, TargetActivity.class));
                 break;
             }
             case R.id.btn_start_appcompat: {
+                if (BuildCompat.isAtLeastQ()) {
+                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 startHook(true);
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
                 break;
