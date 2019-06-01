@@ -40,6 +40,7 @@ public PackageManager getPackageManager() {
 就算我们后来替换了ActivityThread.getPackageManager()，但是也不影响mPackageManager 里面之前包装好的。
 所以我们还需要改变mPackageManager 里面的原来的pm对象。
 
+4. Hook AMS和Hook Instrumentation两种方式的区别?
 
 
 ### 参考文章列表
