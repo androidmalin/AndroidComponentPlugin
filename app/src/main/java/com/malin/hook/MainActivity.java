@@ -4,25 +4,66 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.core.os.BuildCompat;
 
 import java.lang.reflect.InvocationTargetException;
 
+
 public class MainActivity extends Activity implements View.OnClickListener {
+
+    private Button mBtnHookAmsActivity;
+    private Button mBtnHookAmsAppCompatActivity;
+    private Button mBtnHookInstrumentationActivity;
+    private Button mBtnHookInstrumentationAppCompatActivity;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        initData();
+        initListener();
+
     }
 
     private void initView() {
-        findViewById(R.id.btn_start).setOnClickListener(this);
-        findViewById(R.id.btn_start_appcompat).setOnClickListener(this);
+        mBtnHookAmsActivity = findViewById(R.id.btn_start);
+        mBtnHookAmsAppCompatActivity = findViewById(R.id.btn_start_appcompat);
+        mBtnHookInstrumentationActivity = findViewById(R.id.btn_start_instrumentation);
+        mBtnHookInstrumentationAppCompatActivity = findViewById(R.id.btn_start_instrumentation_appCompat);
     }
+
+
+    private void initData() {
+        if (MApplication.getInstance().isHookInstrumentation()) {
+            mBtnHookAmsActivity.setVisibility(View.GONE);
+            mBtnHookAmsAppCompatActivity.setVisibility(View.GONE);
+            if (MApplication.getInstance().isHookInstrumentationIsAppCompatActivity()) {
+                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.VISIBLE);
+                mBtnHookInstrumentationActivity.setVisibility(View.GONE);
+            } else {
+                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
+                mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
+            }
+        } else {
+            mBtnHookAmsActivity.setVisibility(View.VISIBLE);
+            mBtnHookAmsAppCompatActivity.setVisibility(View.VISIBLE);
+            mBtnHookInstrumentationActivity.setVisibility(View.GONE);
+            mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
+        }
+    }
+
+    private void initListener() {
+        mBtnHookAmsActivity.setOnClickListener(this);
+        mBtnHookAmsAppCompatActivity.setOnClickListener(this);
+        mBtnHookInstrumentationActivity.setOnClickListener(this);
+        mBtnHookInstrumentationAppCompatActivity.setOnClickListener(this);
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -46,6 +87,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
                 break;
             }
+
+            case R.id.btn_start_instrumentation: {
+                HookActivity.hookPackageManager(this, StubActivity.class);
+                startActivity(new Intent(this, TargetActivity.class));
+                break;
+            }
+
+            case R.id.btn_start_instrumentation_appCompat: {
+                HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
+                startActivity(new Intent(this, TargetAppCompatActivity.class));
+                break;
+            }
+
             default: {
                 break;
             }
