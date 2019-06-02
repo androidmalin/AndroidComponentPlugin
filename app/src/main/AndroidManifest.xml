@@ -25,6 +25,11 @@
         <activity
             android:name=".StubAppCompatActivity"
             android:theme="@style/AppCompatTheme" />
+
+        <!--代理Service-->
+        <service
+            android:name=".service.ProxyService"
+            android:process=":daemon" />
     </application>
 
 </manifest>

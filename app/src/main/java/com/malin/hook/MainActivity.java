@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.core.os.BuildCompat;
 
+import com.malin.hook.service.TargetService;
+
 import java.lang.reflect.InvocationTargetException;
 
 
@@ -18,6 +20,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnHookAmsAppCompatActivity;
     private Button mBtnHookInstrumentationActivity;
     private Button mBtnHookInstrumentationAppCompatActivity;
+    private Button mBtnHookService;
 
 
     @Override
@@ -35,6 +38,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookAmsAppCompatActivity = findViewById(R.id.btn_start_appcompat);
         mBtnHookInstrumentationActivity = findViewById(R.id.btn_start_instrumentation);
         mBtnHookInstrumentationAppCompatActivity = findViewById(R.id.btn_start_instrumentation_appCompat);
+        mBtnHookService = findViewById(R.id.btn_service);
     }
 
 
@@ -62,6 +66,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookAmsAppCompatActivity.setOnClickListener(this);
         mBtnHookInstrumentationActivity.setOnClickListener(this);
         mBtnHookInstrumentationAppCompatActivity.setOnClickListener(this);
+        mBtnHookService.setOnClickListener(this);
     }
 
 
@@ -97,6 +102,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.btn_start_instrumentation_appCompat: {
                 HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
+                break;
+            }
+
+            case R.id.btn_service: {
+                startService(new Intent(this, TargetService.class));
                 break;
             }
 

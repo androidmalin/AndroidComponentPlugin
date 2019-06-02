@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
+import com.malin.hook.service.HookService;
+import com.malin.hook.service.ProxyService;
+
 import me.weishu.reflection.Reflection;
 
 public class MApplication extends Application {
@@ -35,6 +38,7 @@ public class MApplication extends Application {
             if (Build.VERSION.SDK_INT >= 28) {
                 Reflection.unseal(context);
             }
+            HookService.hookAMSForService(context, ProxyService.class);
             if (mHookInstrumentation) {
                 if (mHookInstrumentation_is_appcompatActivity) {
                     HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class.getCanonicalName());
