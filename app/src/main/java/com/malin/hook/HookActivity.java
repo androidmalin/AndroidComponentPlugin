@@ -38,90 +38,93 @@ public class HookActivity {
      *
      * @param context          context
      * @param subActivityClass 在AndroidManifest.xml中注册了的Activity
-     * @throws ClassNotFoundException classNotFoundException
-     * @throws NoSuchFieldException   noSuchFieldException
-     * @throws IllegalAccessException illegalAccessException
      */
-    public static void hookStartActivity(Context context, Class<?> subActivityClass) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static void hookStartActivity(Context context, Class<?> subActivityClass) {
 
-        Object IActivityManagerSingletonObj;
-        if (Build.VERSION.SDK_INT >= 26) {
-            //1.获取ActivityManager的Class对象
+        try {
+            Object IActivityManagerSingletonObj;
+            if (Build.VERSION.SDK_INT >= 26) {
+                //1.获取ActivityManager的Class对象
+                //package android.app
+                //public class ActivityManager
+                Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
+
+                //2.获取ActivityManager的私有静态属性IActivityManagerSingleton
+                //private static final Singleton<IActivityManager> IActivityManagerSingleton
+                Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+
+                //3.取消Java的权限检查
+                iActivityManagerSingletonField.setAccessible(true);
+
+                //4.获取IActivityManagerSingleton的实例对象
+                //private static final Singleton<IActivityManager> IActivityManagerSingleton
+                //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+                IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
+            } else {
+                //1.获取ActivityManagerNative的Class对象
+                //package android.app
+                //public abstract class ActivityManagerNative
+                Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
+
+                //2.获取 ActivityManagerNative的 私有属性gDefault
+                // private static final Singleton<IActivityManager> gDefault
+                Field singletonField = activityManagerNativeClass.getDeclaredField("gDefault");
+
+                //3.对私有属性gDefault,解除私有限定
+                singletonField.setAccessible(true);
+
+                //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
+                //所有静态对象的反射可以通过传null获取
+                //private static final Singleton<IActivityManager> gDefault
+                IActivityManagerSingletonObj = singletonField.get(null);
+            }
+
+
+            //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
+            //既,为了获取一个IActivityManager的实例对象
+            //private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
+
+
+            //6.获取Singleton类对象
+            //package android.util
+            //public abstract class Singleton<T>
+            Class<?> singletonClass = Class.forName("android.util.Singleton");
+
+            //7.获取mInstance属性
+            //private T mInstance;
+            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
+
+            //8.取消Java的权限检查
+            mInstanceField.setAccessible(true);
+
+            //9.获取mInstance属性的值,既IActivityManager的实例
+            //从private static final Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
+            Object iActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
+
+
+            //10.获取IActivityManager接口的类对象
             //package android.app
-            //public class ActivityManager
-            Class<?> activityManagerClass = Class.forName("android.app.ActivityManager");
+            //public interface IActivityManager
+            Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
 
-            //2.获取ActivityManager的私有静态属性IActivityManagerSingleton
-            //private static final Singleton<IActivityManager> IActivityManagerSingleton
-            Field iActivityManagerSingletonField = activityManagerClass.getDeclaredField("IActivityManagerSingleton");
+            //11.创建一个IActivityManager接口的代理对象
+            Object iActivityManagerProxy = Proxy.newProxyInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    new Class[]{iActivityManagerClass},
+                    new IActivityInvocationHandler(iActivityManager, context, subActivityClass)
+            );
 
-            //3.取消Java的权限检查
-            iActivityManagerSingletonField.setAccessible(true);
-
-            //4.获取IActivityManagerSingleton的实例对象
-            //private static final Singleton<IActivityManager> IActivityManagerSingleton
-            //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-            IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
-        } else {
-            //1.获取ActivityManagerNative的Class对象
-            //package android.app
-            //public abstract class ActivityManagerNative
-            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
-
-            //2.获取 ActivityManagerNative的 私有属性gDefault
-            // private static final Singleton<IActivityManager> gDefault
-            Field singletonField = activityManagerNativeClass.getDeclaredField("gDefault");
-
-            //3.对私有属性gDefault,解除私有限定
-            singletonField.setAccessible(true);
-
-            //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
-            //所有静态对象的反射可以通过传null获取
-            //private static final Singleton<IActivityManager> gDefault
-            IActivityManagerSingletonObj = singletonField.get(null);
+            //11.重新赋值
+            //给mInstance属性,赋新值
+            //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
+            mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-
-
-        //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
-        //既,为了获取一个IActivityManager的实例对象
-        //private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
-
-
-        //6.获取Singleton类对象
-        //package android.util
-        //public abstract class Singleton<T>
-        Class<?> singletonClass = Class.forName("android.util.Singleton");
-
-        //7.获取mInstance属性
-        //private T mInstance;
-        Field mInstanceField = singletonClass.getDeclaredField("mInstance");
-
-        //8.取消Java的权限检查
-        mInstanceField.setAccessible(true);
-
-        //9.获取mInstance属性的值,既IActivityManager的实例
-        //从private static final Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
-        Object iActivityManager = mInstanceField.get(IActivityManagerSingletonObj);
-
-
-        //10.获取IActivityManager接口的类对象
-        //package android.app
-        //public interface IActivityManager
-        Class<?> iActivityManagerClass = Class.forName("android.app.IActivityManager");
-
-        //11.创建一个IActivityManager接口的代理对象
-        Object iActivityManagerProxy = Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class[]{iActivityManagerClass},
-                new IActivityInvocationHandler(iActivityManager, context, subActivityClass)
-        );
-
-        //11.重新赋值
-        //给mInstance属性,赋新值
-        //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
-        mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
-
-
     }
 
 
@@ -186,53 +189,65 @@ public class HookActivity {
      * @throws NoSuchFieldException   noSuchFieldException
      * @throws IllegalAccessException illegalAccessException
      */
-    public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
 
-        //1.获取ActivityThread的Class对象
-        //package android.app
-        //public final class ActivityThread
-        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+        try {
+            //1.获取ActivityThread的Class对象
+            //package android.app
+            //public final class ActivityThread
+            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-        //2.获取currentActivityThread()静态方法;为了保证在多个版本中兼容性,使用该静态方法获取ActivityThread的实例
-        //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
-        Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
-        currentActivityThreadMethod.setAccessible(true);
+            //2.获取currentActivityThread()静态方法;为了保证在多个版本中兼容性,使用该静态方法获取ActivityThread的实例
+            //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
+            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            currentActivityThreadMethod.setAccessible(true);
 
-        //3.获取ActivityThread的对象实例
-        //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
-        Object activityThreadObj = currentActivityThreadMethod.invoke(null);
-
-
-        //4.获取ActivityThread 的属性mH
-        //final H mH = new H();
-        Field mHField = activityThreadClass.getDeclaredField("mH");
-        mHField.setAccessible(true);
-
-        //5.获取mH的值,既获取ActivityThread类中H类的实例对象
-        //从ActivityThread实例中获取mH属性对应的值,既mH的值
-        Object mHObj = mHField.get(activityThreadObj);
+            //3.获取ActivityThread的对象实例
+            //public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
+            Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
 
-        //6.获取Handler的Class对象
-        //package android.os
-        //public class Handler
-        Class<?> handlerClass = Class.forName("android.os.Handler");
+            //4.获取ActivityThread 的属性mH
+            //final H mH = new H();
+            Field mHField = activityThreadClass.getDeclaredField("mH");
+            mHField.setAccessible(true);
+
+            //5.获取mH的值,既获取ActivityThread类中H类的实例对象
+            //从ActivityThread实例中获取mH属性对应的值,既mH的值
+            Object mHObj = mHField.get(activityThreadObj);
 
 
-        //7.获取mCallback属性
-        //final Callback mCallback;
-        //Callback是Handler类内部的一个接口
-        Field mCallbackField = handlerClass.getDeclaredField("mCallback");
-        mCallbackField.setAccessible(true);
+            //6.获取Handler的Class对象
+            //package android.os
+            //public class Handler
+            Class<?> handlerClass = Class.forName("android.os.Handler");
 
 
-        //8.给mH增加mCallback
-        //给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
-        if (Build.VERSION.SDK_INT >= 28) {
-            //android 9.0
-            mCallbackField.set(mHObj, new HandlerCallbackP(context, subActivityClass, isAppCompat));
-        } else {
-            mCallbackField.set(mHObj, new HandlerCallback(context, subActivityClass, isAppCompat));
+            //7.获取mCallback属性
+            //final Callback mCallback;
+            //Callback是Handler类内部的一个接口
+            Field mCallbackField = handlerClass.getDeclaredField("mCallback");
+            mCallbackField.setAccessible(true);
+
+
+            //8.给mH增加mCallback
+            //给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
+            if (Build.VERSION.SDK_INT >= 28) {
+                //android 9.0
+                mCallbackField.set(mHObj, new HandlerCallbackP(context, subActivityClass, isAppCompat));
+            } else {
+                mCallbackField.set(mHObj, new HandlerCallback(context, subActivityClass, isAppCompat));
+            }
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

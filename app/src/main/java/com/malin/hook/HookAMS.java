@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 @SuppressLint("PrivateApi")
 public class HookAMS {
 
-    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
         if (Build.VERSION.SDK_INT <= 18) {
             HookActivity.hookPackageManager(context, subActivityClass);
         }

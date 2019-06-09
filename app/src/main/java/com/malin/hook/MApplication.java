@@ -12,6 +12,7 @@ public class MApplication extends Application {
 
     //为了重置,否则第二次之后的启动都是已经注册的Activity
     private static Object mIActivityManagerObj;
+    private static Object mPmsObj;
 
 
     /**
@@ -19,12 +20,12 @@ public class MApplication extends Application {
      * true:Hook Instrumentation
      * false:Hook AMS and PMS
      */
-    private final boolean mHookInstrumentation = true;
+    private final boolean mHookInstrumentation = false;
 
     /**
      * Hook Instrumentation的方式下,是否启动appcompatActivity类型的Activity.
      */
-    private final boolean mHookInstrumentation_is_appcompatActivity = false;
+    private final boolean mHookInstrumentation_is_appcompatActivity = true;
 
 
     @Override
@@ -36,6 +37,7 @@ public class MApplication extends Application {
                 Reflection.unseal(context);
             }
             HookService.hookAMSForService(context, ProxyService.class);
+            mPmsObj = HookPMS.getPackageManager();
             if (mHookInstrumentation) {
                 if (mHookInstrumentation_is_appcompatActivity) {
                     HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class.getCanonicalName());
@@ -50,13 +52,24 @@ public class MApplication extends Application {
         }
     }
 
-    public static void reset() {
-        try {
-            if (mIActivityManagerObj != null) {
+    public static void resetAms() {
+        if (mIActivityManagerObj != null) {
+            try {
                 HookAMS.resetIActivityManager(mIActivityManagerObj);
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
-        } catch (Throwable e) {
-            e.printStackTrace();
+        }
+    }
+
+    public static void resetPms() {
+        if (mPmsObj != null) {
+            try {
+                HookPMS.resetPackageManager(mPmsObj);
+                HookPMS.resetApplicationPackageManager(getInstance().getApplicationContext(), mPmsObj);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
         }
     }
 
