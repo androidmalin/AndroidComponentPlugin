@@ -28,7 +28,7 @@
 
         <!--代理Service-->
         <service
-            android:name=".service.ProxyService"
+            android:name=".ProxyService"
             android:process=":daemon" />
     </application>
 

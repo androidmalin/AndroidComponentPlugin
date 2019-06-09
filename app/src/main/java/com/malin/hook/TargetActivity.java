@@ -12,7 +12,7 @@ import android.widget.TextView;
 @SuppressLint({"SetTextI18n", "Registered"})
 public class TargetActivity extends Activity {
 
-    private static final String TAG = "Target";
+    private static final String TAG = "TargetActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

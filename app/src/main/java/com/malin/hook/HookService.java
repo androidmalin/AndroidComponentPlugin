@@ -1,4 +1,4 @@
-package com.malin.hook.service;
+package com.malin.hook;
 
 
 import android.annotation.SuppressLint;
@@ -68,6 +68,7 @@ public class HookService {
 
         }
 
+        @SuppressWarnings("ConstantConditions")
         @Override
         public Object invoke(Object o, Method method, Object[] args) throws Throwable {
             if ("startService".equals(method.getName())) {

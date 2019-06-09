@@ -1,10 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-//    compileSdkVersion 'android-Q'
-//    buildToolsVersion '29.0.0 rc3'
     compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '29.0.0'
     defaultConfig {
         applicationId "com.malin.hook"
         minSdkVersion 15
@@ -26,6 +24,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
+    implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
     implementation 'me.weishu:free_reflection:2.0.0'
 }

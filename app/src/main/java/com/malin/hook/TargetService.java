@@ -1,4 +1,4 @@
-package com.malin.hook.service;
+package com.malin.hook;
 
 import android.annotation.SuppressLint;
 import android.app.Service;

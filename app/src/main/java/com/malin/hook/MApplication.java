@@ -4,9 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
-import com.malin.hook.service.HookService;
-import com.malin.hook.service.ProxyService;
-
 import me.weishu.reflection.Reflection;
 
 public class MApplication extends Application {
@@ -22,7 +19,7 @@ public class MApplication extends Application {
      * true:Hook Instrumentation
      * false:Hook AMS and PMS
      */
-    private final boolean mHookInstrumentation = false;
+    private final boolean mHookInstrumentation = true;
 
     /**
      * Hook Instrumentation的方式下,是否启动appcompatActivity类型的Activity.
