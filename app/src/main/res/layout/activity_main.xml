@@ -47,4 +47,21 @@
         android:layout_marginTop="30dp"
         android:text="启动未注册的Service"
         tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_download_plugin_apk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="下载插件APK"
+        tools:ignore="HardcodedText" />
+
+
+    <Button
+        android:id="@+id/btn_start_plugin_apk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="启动插件APK"
+        tools:ignore="HardcodedText" />
 </LinearLayout>
