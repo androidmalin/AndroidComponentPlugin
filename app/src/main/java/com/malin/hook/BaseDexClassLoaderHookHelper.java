@@ -1,7 +1,6 @@
 package com.malin.hook;
 
 import android.os.Build;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +25,6 @@ import dalvik.system.DexFile;
 @SuppressWarnings("deprecation")
 public final class BaseDexClassLoaderHookHelper {
 
-    private static final String TAG = "BaseDexHelper";
-
     /**
      * 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的CLassLoader加载所有的类；
      * 我们的思路是告诉宿主ClassLoader我们在哪，让其帮助完成类加载的过程。
@@ -41,10 +38,6 @@ public final class BaseDexClassLoaderHookHelper {
 
         try {
             Class<?> superClass = DexClassLoader.class.getSuperclass();
-            if (superClass == null) {
-                Log.e(TAG, "superClass == null");
-                return;
-            }
             //1. 获取 BaseDexClassLoader : pathList
             //BaseDexClassLoader private final DexPathList pathList;
             Field pathListField = superClass.getDeclaredField("pathList");
@@ -66,11 +59,6 @@ public final class BaseDexClassLoaderHookHelper {
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
             Class<?> elementClass = dexElements.getClass().getComponentType();
 
-            if (elementClass == null) {
-                Log.e(TAG, "elementClass == null");
-                return;
-            }
-
             //6. 创建一个数组, 用来替换原始的数组
             //通过Array.newInstance()可以反射生成数组对象,生成数组，指定元素类型和数组长度
             Object[] newElements = (Object[]) Array.newInstance(elementClass, dexElements.length + 1);
@@ -86,7 +74,7 @@ public final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 elementObj = constructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
-            } else {
+            } else if (Build.VERSION.SDK_INT >= 18) {
                 //7. 构造插件Element(File file, boolean isDirectory, File zip, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
@@ -95,6 +83,19 @@ public final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 elementObj = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+            } else {
+                //<=17
+                //TODO:未解决
+                //java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
+
+                //7. 构造插件public Element(File file, File zip, DexFile dexFile){} 这个构造函数
+                //DexPathList的静态内部类static class Element {}
+                //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
+                Constructor<?> constructor = elementClass.getConstructor(File.class, File.class, DexFile.class);
+                constructor.setAccessible(true);
+
+                //8. 生成Element的实例对象
+                elementObj = constructor.newInstance(apkFile, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
             }
 
             Object[] toAddElementArray = new Object[]{elementObj};
