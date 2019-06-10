@@ -3,7 +3,6 @@ package com.malin.hook;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,7 +21,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnHookInstrumentationAppCompatActivity;
     private Button mBtnHookService;
     private Button mBtnDownloadPlugin;
-    private Button mBtnStartPlugin;
+    private Button mBtnStartPluginActivity;
+    private Button mBtnStartPluginAppCompatActivity;
 
 
     @Override
@@ -42,7 +42,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookInstrumentationAppCompatActivity = findViewById(R.id.btn_start_instrumentation_appCompat);
         mBtnHookService = findViewById(R.id.btn_service);
         mBtnDownloadPlugin = findViewById(R.id.btn_download_plugin_apk);
-        mBtnStartPlugin = findViewById(R.id.btn_start_plugin_apk);
+        mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
+        mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
     }
 
 
@@ -72,7 +73,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookInstrumentationAppCompatActivity.setOnClickListener(this);
         mBtnHookService.setOnClickListener(this);
         mBtnDownloadPlugin.setOnClickListener(this);
-        mBtnStartPlugin.setOnClickListener(this);
+        mBtnStartPluginActivity.setOnClickListener(this);
+        mBtnStartPluginAppCompatActivity.setOnClickListener(this);
     }
 
 
@@ -119,26 +121,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_download_plugin_apk: {
-                if (Build.VERSION.SDK_INT >= 18 && Build.VERSION.SDK_INT <= 25) {
-                    PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
-                    File dexFile = getFileStreamPath("pluginapk-debug.apk");
-                    File optDexFile = getFileStreamPath("pluginapk-debug.dex");
-                    BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
-                } else {
-                    Toast.makeText(this, "暂时只支持18~23", Toast.LENGTH_SHORT).show();
-                }
+                PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
+                File dexFile = getFileStreamPath("pluginapk-debug.apk");
+                File optDexFile = getFileStreamPath("pluginapk-debug.dex");
+                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
                 break;
             }
 
-            case R.id.btn_start_plugin_apk: {
-                if (Build.VERSION.SDK_INT >= 18 && Build.VERSION.SDK_INT <= 25) {
-                    startHook(false);
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this, "暂时只支持18~23", Toast.LENGTH_SHORT).show();
-                }
+            case R.id.btn_start_plugin_apk_activity: {
+                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
+                MApplication.resetPms();
+                HookActivity.hookPackageManager(this, StubActivity.class);
+
+                //start plugin activity
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
+                startActivity(intent);
+                break;
+            }
+
+
+            case R.id.btn_start_plugin_apk_appcompat_activity: {
+                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
+                MApplication.resetPms();
+                HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
+
+                //start plugin activity
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
+                startActivity(intent);
                 break;
             }
 

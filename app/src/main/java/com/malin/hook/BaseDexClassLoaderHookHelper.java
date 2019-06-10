@@ -1,5 +1,6 @@
 package com.malin.hook;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -74,13 +75,27 @@ public final class BaseDexClassLoaderHookHelper {
             //通过Array.newInstance()可以反射生成数组对象,生成数组，指定元素类型和数组长度
             Object[] newElements = (Object[]) Array.newInstance(elementClass, dexElements.length + 1);
 
-            //7. 构造插件Element(File file, boolean isDirectory, File zip, DexFile dexFile) 这个构造函数
-            //DexPathList的静态内部类static class Element {}
-            //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-            Constructor<?> constructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
 
-            //8. 生成Element的实例对象
-            Object elementObj = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+            Object elementObj;
+            if (Build.VERSION.SDK_INT >= 26) {
+                //7.构造插件Element
+                // 构造函数 public Element(DexFile dexFile, File dexZipPath){}
+                //这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
+                Constructor<?> constructor = elementClass.getConstructor(DexFile.class, File.class);
+                constructor.setAccessible(true);
+
+                //8. 生成Element的实例对象
+                elementObj = constructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
+            } else {
+                //7. 构造插件Element(File file, boolean isDirectory, File zip, DexFile dexFile){} 这个构造函数
+                //DexPathList的静态内部类static class Element {}
+                //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
+                Constructor<?> constructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
+                constructor.setAccessible(true);
+
+                //8. 生成Element的实例对象
+                elementObj = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+            }
 
             Object[] toAddElementArray = new Object[]{elementObj};
 
