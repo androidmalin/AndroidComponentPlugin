@@ -25,9 +25,11 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import libcore.io.ClassPathURLStreamHandler;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
@@ -62,7 +64,8 @@ import static android.system.OsConstants.S_ISDIR;
     private Element[] dexElements;
 
     /** List of native library path elements. */
-    private final NativeLibraryElement[] nativeLibraryPathElements;
+    // Some applications rely on this field being an array or we'd use a final list here
+    /* package visible for testing */ NativeLibraryElement[] nativeLibraryPathElements;
 
     /** List of application native library directories. */
     private final List<File> nativeLibraryDirectories;
@@ -126,7 +129,11 @@ import static android.system.OsConstants.S_ISDIR;
      */
     public DexPathList(ClassLoader definingContext, String dexPath,
             String librarySearchPath, File optimizedDirectory) {
+        this(definingContext, dexPath, librarySearchPath, optimizedDirectory, false);
+    }
 
+    DexPathList(ClassLoader definingContext, String dexPath,
+            String librarySearchPath, File optimizedDirectory, boolean isTrusted) {
         if (definingContext == null) {
             throw new NullPointerException("definingContext == null");
         }
@@ -155,7 +162,7 @@ import static android.system.OsConstants.S_ISDIR;
         ArrayList<IOException> suppressedExceptions = new ArrayList<IOException>();
         // save dexPath for BaseDexClassLoader
         this.dexElements = makeDexElements(splitDexPath(dexPath), optimizedDirectory,
-                                           suppressedExceptions, definingContext);
+                                           suppressedExceptions, definingContext, isTrusted);
 
         // Native libraries may exist in both the system and
         // application library paths, and we use this search order:
@@ -211,9 +218,13 @@ import static android.system.OsConstants.S_ISDIR;
      * system directory for same
      */
     public void addDexPath(String dexPath, File optimizedDirectory) {
+      addDexPath(dexPath, optimizedDirectory, false);
+    }
+
+    public void addDexPath(String dexPath, File optimizedDirectory, boolean isTrusted) {
         final List<IOException> suppressedExceptionList = new ArrayList<IOException>();
         final Element[] newElements = makeDexElements(splitDexPath(dexPath), optimizedDirectory,
-                suppressedExceptionList, definingContext);
+                suppressedExceptionList, definingContext, isTrusted);
 
         if (newElements != null && newElements.length > 0) {
             final Element[] oldElements = dexElements;
@@ -307,6 +318,12 @@ import static android.system.OsConstants.S_ISDIR;
      */
     private static Element[] makeDexElements(List<File> files, File optimizedDirectory,
             List<IOException> suppressedExceptions, ClassLoader loader) {
+        return makeDexElements(files, optimizedDirectory, suppressedExceptions, loader, false);
+    }
+
+
+    private static Element[] makeDexElements(List<File> files, File optimizedDirectory,
+            List<IOException> suppressedExceptions, ClassLoader loader, boolean isTrusted) {
       Element[] elements = new Element[files.size()];
       int elementsPos = 0;
       /*
@@ -320,10 +337,11 @@ import static android.system.OsConstants.S_ISDIR;
           } else if (file.isFile()) {
               String name = file.getName();
 
+              DexFile dex = null;
               if (name.endsWith(DEX_SUFFIX)) {
                   // Raw dex file (not inside a zip/jar).
                   try {
-                      DexFile dex = loadDexFile(file, optimizedDirectory, loader, elements);
+                      dex = loadDexFile(file, optimizedDirectory, loader, elements);
                       if (dex != null) {
                           elements[elementsPos++] = new Element(dex, null);
                       }
@@ -332,7 +350,6 @@ import static android.system.OsConstants.S_ISDIR;
                       suppressedExceptions.add(suppressed);
                   }
               } else {
-                  DexFile dex = null;
                   try {
                       dex = loadDexFile(file, optimizedDirectory, loader, elements);
                   } catch (IOException suppressed) {
@@ -351,6 +368,9 @@ import static android.system.OsConstants.S_ISDIR;
                   } else {
                       elements[elementsPos++] = new Element(dex, file);
                   }
+              }
+              if (dex != null && isTrusted) {
+                dex.setTrusted();
               }
           } else {
               System.logW("ClassLoader referenced unknown path: " + file);
@@ -550,6 +570,33 @@ import static android.system.OsConstants.S_ISDIR;
             }
         }
         return dexPaths;
+    }
+
+    /**
+     * Adds a collection of library paths from which to load native libraries. Paths can be absolute
+     * native library directories (i.e. /data/app/foo/lib/arm64) or apk references (i.e.
+     * /data/app/foo/base.apk!/lib/arm64).
+     *
+     * Note: This method will attempt to dedupe elements.
+     * Note: This method replaces the value of {@link #nativeLibraryPathElements}
+     */
+    public void addNativePath(Collection<String> libPaths) {
+        if (libPaths.isEmpty()) {
+            return;
+        }
+        List<File> libFiles = new ArrayList<>(libPaths.size());
+        for (String path : libPaths) {
+            libFiles.add(new File(path));
+        }
+        ArrayList<NativeLibraryElement> newPaths =
+                new ArrayList<>(nativeLibraryPathElements.length + libPaths.size());
+        newPaths.addAll(Arrays.asList(nativeLibraryPathElements));
+        for (NativeLibraryElement element : makePathElements(libFiles)) {
+            if (!newPaths.contains(element)) {
+                newPaths.add(element);
+            }
+        }
+        nativeLibraryPathElements = newPaths.toArray(new NativeLibraryElement[newPaths.size()]);
     }
 
     /**
@@ -797,6 +844,20 @@ import static android.system.OsConstants.S_ISDIR;
             }
 
             return null;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof NativeLibraryElement)) return false;
+            NativeLibraryElement that = (NativeLibraryElement) o;
+            return Objects.equals(path, that.path) &&
+                    Objects.equals(zipDir, that.zipDir);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(path, zipDir);
         }
     }
 }

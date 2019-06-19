@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.zip.ZipFile;
 
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
@@ -21,7 +22,10 @@ import dalvik.system.DexFile;
  * <p>
  * 这个类用来进行对于BaseDexClassLoader的Hook
  * com from wei shu
+ * http://weishu.me/2016/04/05/understand-plugin-framework-classloader/
+ * https://blog.fangweb.com/2019/03/09/%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AC%9B%E8%A7%A3-android-hook%E7%84%A1%E6%B8%85%E5%96%AE%E5%95%9F%E5%8B%95activity%E7%9A%84%E6%87%89%E7%94%A8/zh-my/
  */
+@SuppressWarnings("deprecation")
 public final class BaseDexClassLoaderHookHelper {
 
     /**
@@ -36,6 +40,8 @@ public final class BaseDexClassLoaderHookHelper {
 
     /**
      * 使用宿主ClassLoader帮助加载插件类
+     * TODO:未解决,android16,android17,android18,android19使用AppCompatActivity时，出现如下错误,androidx包重复了。有两个。
+     * java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
      *
      * @param classLoader 表示宿主的LoadedApk在Application类中有一个成员变量mLoadedApk，而这个变量是从ContextImpl中获取的；
      *                    ContextImpl重写了getClassLoader方法，
@@ -47,6 +53,7 @@ public final class BaseDexClassLoaderHookHelper {
 
         try {
             Class<?> superClass = DexClassLoader.class.getSuperclass();
+            if (superClass == null) return;
             //1. 获取 BaseDexClassLoader : pathList
             //private final DexPathList pathList;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
@@ -60,16 +67,17 @@ public final class BaseDexClassLoaderHookHelper {
             //3. 获取 DexPathList的属性: Element[] dexElements
             //private final Element[] dexElements;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
-            Field dexElementArray = dexPathList.getClass().getDeclaredField("dexElements");
-            dexElementArray.setAccessible(true);
+            Field dexElementArrayField = dexPathList.getClass().getDeclaredField("dexElements");
+            dexElementArrayField.setAccessible(true);
 
             //4.获取 DexPathList的属性 Element[] dexElements;值
             //Element是DexPathList的内部类
-            Object[] dexElements = (Object[]) dexElementArray.get(dexPathList);
+            Object[] dexElements = (Object[]) dexElementArrayField.get(dexPathList);
 
             //5. Element 类型
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
             Class<?> elementClass = dexElements.getClass().getComponentType();
+            if (elementClass == null) return;
 
             //6. 创建一个数组, 用来替换原始的数组
             //通过Array.newInstance()可以反射生成数组对象,生成数组，指定元素类型和数组长度
@@ -78,41 +86,52 @@ public final class BaseDexClassLoaderHookHelper {
 
             Object elementObj;
             if (Build.VERSION.SDK_INT >= 26) {
+                //8.0~10.0
                 //7.构造插件Element
                 // 构造函数 public Element(DexFile dexFile, File dexZipPath){}
                 //这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
-                Constructor<?> constructor = elementClass.getConstructor(DexFile.class, File.class);
-                constructor.setAccessible(true);
+                Constructor<?> elementConstructor = elementClass.getConstructor(DexFile.class, File.class);
+                elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
                 //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
-                elementObj = constructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
+                elementObj = elementConstructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
                 ///data/data/com.malin.hook/files
                 // /data/data/com.malin.hook/files/oat/arm64/pluginapk-debug.odex
                 // /data/data/com.malin.hook/files/oat/arm64/pluginapk-debug.vdex
             } else if (Build.VERSION.SDK_INT >= 18) {
+                //18~25
+                //4.3~7.1.1
                 //7. 构造插件Element(File file, boolean isDirectory, File zip, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-                Constructor<?> constructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
-                constructor.setAccessible(true);
+                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
+                elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                elementObj = constructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
-            } else {
-                //<=17
-                //TODO:未解决
-                //java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
-
+                elementObj = elementConstructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+            } else if (Build.VERSION.SDK_INT == 17) {
+                //4.2
                 //7. 构造插件public Element(File file, File zip, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-                Constructor<?> constructor = elementClass.getConstructor(File.class, File.class, DexFile.class);
-                constructor.setAccessible(true);
+                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, File.class, DexFile.class);
+                elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                elementObj = constructor.newInstance(apkFile, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+                elementObj = elementConstructor.newInstance(apkFile, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+            } else {
+                //15~16
+                //7. 构造插件public Element(File file, ZipFile zipFile, DexFile dexFile){} 这个构造函数
+                //DexPathList的静态内部类static class Element {}
+                //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
+                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, ZipFile.class, DexFile.class);
+                elementConstructor.setAccessible(true);
+
+                //8. 生成Element的实例对象
+                elementObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
             }
+
 
             Object[] toAddElementArray = new Object[]{elementObj};
 
@@ -123,7 +142,7 @@ public final class BaseDexClassLoaderHookHelper {
             System.arraycopy(toAddElementArray, 0, newElements, dexElements.length, toAddElementArray.length);
 
             // 替换
-            dexElementArray.set(dexPathList, newElements);
+            dexElementArrayField.set(dexPathList, newElements);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {

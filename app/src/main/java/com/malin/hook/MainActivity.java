@@ -130,7 +130,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
-                if (Build.VERSION.SDK_INT >= 18) {
                     //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
                     MApplication.resetPms();
                     HookActivity.hookPackageManager(this, StubActivity.class);
@@ -139,15 +138,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Intent intent = new Intent();
                     intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
                     startActivity(intent);
-                } else {
-                    Toast.makeText(this, "暂时只支持android aip>=18", Toast.LENGTH_SHORT).show();
-                }
                 break;
             }
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
-                if (Build.VERSION.SDK_INT >= 18) {
                     //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
                     MApplication.resetPms();
                     HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
@@ -156,9 +151,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Intent intent = new Intent();
                     intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
                     startActivity(intent);
-                } else {
-                    Toast.makeText(this, "暂时只支持android aip>=18", Toast.LENGTH_SHORT).show();
-                }
                 break;
             }
 

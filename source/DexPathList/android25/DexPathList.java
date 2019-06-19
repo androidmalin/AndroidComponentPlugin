@@ -93,7 +93,8 @@ import static android.system.OsConstants.S_ISDIR;
      * should be found and written to, or {@code null} to use the default
      * system directory for same
      */
-    public DexPathList(ClassLoader definingContext, String dexPath, String librarySearchPath, File optimizedDirectory) {
+    public DexPathList(ClassLoader definingContext, String dexPath,
+            String librarySearchPath, File optimizedDirectory) {
 
         if (definingContext == null) {
             throw new NullPointerException("definingContext == null");
