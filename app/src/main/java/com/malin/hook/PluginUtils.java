@@ -30,7 +30,7 @@ public class PluginUtils {
             File extractFile = context.getFileStreamPath(sourceName);
             fos = new FileOutputStream(extractFile);
             byte[] buffer = new byte[1024];
-            int count = 0;
+            int count;
             while ((count = is.read(buffer)) > 0) {
                 fos.write(buffer, 0, count);
             }
@@ -59,9 +59,7 @@ public class PluginUtils {
     }
 
     private static void closeSilently(Closeable closeable) {
-        if (closeable == null) {
-            return;
-        }
+        if (closeable == null) return;
         try {
             closeable.close();
         } catch (Throwable e) {
