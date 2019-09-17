@@ -52,16 +52,17 @@ public final class BaseDexClassLoaderHookHelper {
     public static void patchClassLoader(ClassLoader classLoader, File apkFile, File optDexFile) {
 
         try {
-            Class<?> superClass = DexClassLoader.class.getSuperclass();
-            if (superClass == null) return;
+            Class<?> baseDexClassLoaderClazz = DexClassLoader.class.getSuperclass();
+            if (baseDexClassLoaderClazz == null) return;
             //1. 获取 BaseDexClassLoader : pathList
             //private final DexPathList pathList;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
-            Field pathListField = superClass.getDeclaredField("pathList");
+            Field pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList");
             pathListField.setAccessible(true);
 
             //2.获取DexPathList pathList;
             Object dexPathList = pathListField.get(classLoader);
+            if (dexPathList == null) return;
 
 
             //3. 获取 DexPathList的属性: Element[] dexElements
@@ -73,15 +74,16 @@ public final class BaseDexClassLoaderHookHelper {
             //4.获取 DexPathList的属性 Element[] dexElements;值
             //Element是DexPathList的内部类
             Object[] dexElements = (Object[]) dexElementArrayField.get(dexPathList);
+            if (dexElements == null) return;
 
             //5. Element 类型
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
-            Class<?> elementClass = dexElements.getClass().getComponentType();
-            if (elementClass == null) return;
+            Class<?> elementClazz = dexElements.getClass().getComponentType();
+            if (elementClazz == null) return;
 
             //6. 创建一个数组, 用来替换原始的数组
             //通过Array.newInstance()可以反射生成数组对象,生成数组，指定元素类型和数组长度
-            Object[] newElements = (Object[]) Array.newInstance(elementClass, dexElements.length + 1);
+            Object[] newElements = (Object[]) Array.newInstance(elementClazz, dexElements.length + 1);
 
 
             Object elementObj;
@@ -90,7 +92,7 @@ public final class BaseDexClassLoaderHookHelper {
                 //7.构造插件Element
                 // 构造函数 public Element(DexFile dexFile, File dexZipPath){}
                 //这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
-                Constructor<?> elementConstructor = elementClass.getConstructor(DexFile.class, File.class);
+                Constructor<?> elementConstructor = elementClazz.getConstructor(DexFile.class, File.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -105,7 +107,7 @@ public final class BaseDexClassLoaderHookHelper {
                 //7. 构造插件Element(File file, boolean isDirectory, File zip, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, boolean.class, File.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, boolean.class, File.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -115,7 +117,7 @@ public final class BaseDexClassLoaderHookHelper {
                 //7. 构造插件public Element(File file, File zip, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, File.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, File.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -125,7 +127,7 @@ public final class BaseDexClassLoaderHookHelper {
                 //7. 构造插件public Element(File file, ZipFile zipFile, DexFile dexFile){} 这个构造函数
                 //DexPathList的静态内部类static class Element {}
                 //构造函数:public Element(File dir, boolean isDirectory, File zip, DexFile dexFile)
-                Constructor<?> elementConstructor = elementClass.getConstructor(File.class, ZipFile.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, ZipFile.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象

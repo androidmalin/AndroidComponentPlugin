@@ -83,6 +83,18 @@ public class HookInstrumentation {
 
             try {
                 //TODO:queryIntentActivities API23以上才有的问题.
+                //http://androidxref.com/9.0.0_r3/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com//8.1.0_r33/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/8.0.0_r4/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/7.1.2_r36/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com//7.0.0_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com//6.0.1_r10/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com//5.1.1_r6/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/5.0.0_r2/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.4_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.3_r2.1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.2_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.1.2/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
