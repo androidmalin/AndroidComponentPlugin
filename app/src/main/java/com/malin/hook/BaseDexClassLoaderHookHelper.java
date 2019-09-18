@@ -43,6 +43,8 @@ public final class BaseDexClassLoaderHookHelper {
      * 使用宿主ClassLoader帮助加载插件类
      * TODO:未解决,android16,android17,android18,android19使用AppCompatActivity时，出现如下错误,androidx包重复了。有两个。
      * java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
+     * 在插件apk和宿主中包含了相同的Jar包;解决方法,插件编译时使用compileOnly依赖和宿主相同的依赖.
+     * https://blog.csdn.net/berber78/article/details/41721877
      *
      * @param classLoader 表示宿主的LoadedApk在Application类中有一个成员变量mLoadedApk，而这个变量是从ContextImpl中获取的；
      *                    ContextImpl重写了getClassLoader方法，
