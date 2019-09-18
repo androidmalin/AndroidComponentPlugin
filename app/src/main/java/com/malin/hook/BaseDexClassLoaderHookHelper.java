@@ -10,8 +10,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.zip.ZipFile;
 
-import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
+import dalvik.system.PathClassLoader;
 
 /**
  * 由于应用程序使用的ClassLoader为PathClassLoader
@@ -24,6 +24,7 @@ import dalvik.system.DexFile;
  * com from wei shu
  * http://weishu.me/2016/04/05/understand-plugin-framework-classloader/
  * https://blog.fangweb.com/2019/03/09/%E6%89%8B%E6%8A%8A%E6%89%8B%E8%AC%9B%E8%A7%A3-android-hook%E7%84%A1%E6%B8%85%E5%96%AE%E5%95%9F%E5%8B%95activity%E7%9A%84%E6%87%89%E7%94%A8/zh-my/
+ * https://www.jianshu.com/p/a8184c8fe688?tdsourcetag=s_pcqq_aiomsg
  */
 @SuppressWarnings("deprecation")
 public final class BaseDexClassLoaderHookHelper {
@@ -52,7 +53,7 @@ public final class BaseDexClassLoaderHookHelper {
     public static void patchClassLoader(ClassLoader classLoader, File apkFile, File optDexFile) {
 
         try {
-            Class<?> baseDexClassLoaderClazz = DexClassLoader.class.getSuperclass();
+            Class<?> baseDexClassLoaderClazz = PathClassLoader.class.getSuperclass();
             if (baseDexClassLoaderClazz == null) return;
             //1. 获取 BaseDexClassLoader : pathList
             //private final DexPathList pathList;
@@ -97,6 +98,10 @@ public final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
+
+                //DexFile.loadDex(String sourcePathName,String outputPathName,int flag);
+                //  @param sourcePathName Jar or APK file with "classes.dex".  (May expand this to include "raw DEX" in the future.)
+                //  @param outputPathName File that will hold the optimized form of the DEX data.
                 elementObj = elementConstructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
                 ///data/data/com.malin.hook/files
                 // /data/data/com.malin.hook/files/oat/arm64/pluginapk-debug.odex
@@ -135,13 +140,13 @@ public final class BaseDexClassLoaderHookHelper {
             }
 
 
-            Object[] toAddElementArray = new Object[]{elementObj};
+            Object[] pluginElementArray = new Object[]{elementObj};
 
             // 把原始的elements复制进去
             System.arraycopy(dexElements, 0, newElements, 0, dexElements.length);
 
             // 插件的那个element复制进去
-            System.arraycopy(toAddElementArray, 0, newElements, dexElements.length, toAddElementArray.length);
+            System.arraycopy(pluginElementArray, 0, newElements, dexElements.length, pluginElementArray.length);
 
             // 替换
             dexElementArrayField.set(dexPathList, newElements);
