@@ -83,7 +83,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_start: {
-                if (BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && BuildCompat.isAtLeastQ()) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -92,7 +92,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && BuildCompat.isAtLeastQ()) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }

@@ -42,8 +42,27 @@ public class HookActivity {
     public static void hookStartActivity(Context context, Class<?> subActivityClass) {
 
         try {
-            Object IActivityManagerSingletonObj;
-            if (Build.VERSION.SDK_INT >= 26) {
+            if (Build.VERSION.SDK_INT >= 29) {
+                //1.获取ActivityTaskManager的Class对象
+                //package android.app;
+                //public class ActivityTaskManager
+                Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
+
+                //2.获取ActivityTaskManager的私有静态属性IActivityTaskManagerSingleton
+                // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                Field iActivityTaskManagerSingletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
+
+                //3.取消Java的权限检查
+                iActivityTaskManagerSingletonField.setAccessible(true);
+
+                //4.获取IActivityManagerSingleton的实例对象
+                //private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+                Object IActivityTaskManagerSingletonObj = iActivityTaskManagerSingletonField.get(null);
+
+                //5.
+                handleIActivityTaskManager(context, subActivityClass, IActivityTaskManagerSingletonObj);
+            } else if (Build.VERSION.SDK_INT >= 26 && Build.VERSION.SDK_INT <= 28) {
                 //1.获取ActivityManager的Class对象
                 //package android.app
                 //public class ActivityManager
@@ -59,7 +78,7 @@ public class HookActivity {
                 //4.获取IActivityManagerSingleton的实例对象
                 //private static final Singleton<IActivityManager> IActivityManagerSingleton
                 //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-                IActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
+                handleIActivityManager(context, subActivityClass, iActivityManagerSingletonField.get(null));
             } else {
                 //1.获取ActivityManagerNative的Class对象
                 //package android.app
@@ -76,10 +95,73 @@ public class HookActivity {
                 //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
                 //所有静态对象的反射可以通过传null获取
                 //private static final Singleton<IActivityManager> gDefault
-                IActivityManagerSingletonObj = singletonField.get(null);
+                handleIActivityManager(context, subActivityClass, singletonField.get(null));
             }
 
 
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleIActivityTaskManager(Context context, Class<?> subActivityClass, Object IActivityTaskManagerSingletonObj) {
+
+        try {
+            //5.获取private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton对象中的属性private T mInstance的值
+            //既,为了获取一个IActivityTaskManager的实例对象
+            //private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton = new Singleton<IActivityTaskManager>() {...}
+
+
+            //6.获取Singleton类对象
+            //package android.util
+            //public abstract class Singleton<T>
+            Class<?> singletonClass = Class.forName("android.util.Singleton");
+
+            //7.获取mInstance属性
+            //private T mInstance;
+            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
+
+            //8.取消Java的权限检查
+            mInstanceField.setAccessible(true);
+
+            //9.获取mInstance属性的值,既IActivityTaskManager的实例
+            //从private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityTaskManager
+            Object IActivityTaskManager = mInstanceField.get(IActivityTaskManagerSingletonObj);
+
+
+            //10.获取IActivityTaskManager接口的类对象
+            //package android.app
+            //public interface IActivityTaskManager
+            Class<?> IActivityTaskManagerClass = Class.forName("android.app.IActivityTaskManager");
+
+            //11.创建一个IActivityTaskManager接口的代理对象
+            Object IActivityTaskManagerProxy = Proxy.newProxyInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    new Class[]{IActivityTaskManagerClass},
+                    new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClass)
+            );
+
+            //11.重新赋值
+            //给mInstance属性,赋新值
+            //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
+            mInstanceField.set(IActivityTaskManagerSingletonObj, IActivityTaskManagerProxy);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static void handleIActivityManager(Context context, Class<?> subActivityClass, Object IActivityManagerSingletonObj) {
+
+        try {
             //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
             //既,为了获取一个IActivityManager的实例对象
             //private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
@@ -129,7 +211,7 @@ public class HookActivity {
 
 
     /**
-     * 对IActivityManager接口进行动态代理
+     * 对IActivityManager/IActivityTaskManager接口进行动态代理
      */
     private static class IActivityInvocationHandler implements InvocationHandler {
 
@@ -174,6 +256,7 @@ public class HookActivity {
 
             }
             //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
+            //public abstract int android.app.IActivityTaskManager.startActivity(whoThread, who.getBasePackageName(), intent,intent.resolveTypeIfNeeded(who.getContentResolver()),token, target != null ? target.mEmbeddedID : null,requestCode, 0, null, options);
             return method.invoke(mIActivityManager, args);
         }
     }
