@@ -34,7 +34,17 @@ public class HookAMS {
      */
     public static Object getIActivityManagerObj() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Field gDefaultField;
-        if (Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            //1.获取ActivityTaskManager的Class对象
+            //package android.app;
+            //public class ActivityTaskManager
+            Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
+
+            //2.获取ActivityTaskManager的私有静态属性IActivityTaskManagerSingleton
+            // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+            gDefaultField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
+
+        } else if (Build.VERSION.SDK_INT >= 26 && Build.VERSION.SDK_INT <= 28) {
             //1.获取ActivityManager的Class对象
             //package android.app
             //public class ActivityManager
@@ -83,7 +93,17 @@ public class HookAMS {
      */
     public static void resetIActivityManager(Object iActivityManagerObj) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Field gDefaultField;
-        if (Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            //1.获取ActivityTaskManager的Class对象
+            //package android.app;
+            //public class ActivityTaskManager
+            Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
+
+            //2.获取ActivityTaskManager的私有静态属性IActivityTaskManagerSingleton
+            // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+            gDefaultField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
+
+        } else if (Build.VERSION.SDK_INT >= 26 && Build.VERSION.SDK_INT <= 28) {
             Class<?> activityManager = Class.forName("android.app.ActivityManager");
             gDefaultField = activityManager.getDeclaredField("IActivityManagerSingleton");
         } else {
