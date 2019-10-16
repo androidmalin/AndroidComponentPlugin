@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
  * AMS Hook
  */
 @SuppressWarnings("ALL")
-@SuppressLint("PrivateApi")
+@SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
 public class HookAMS {
 
     public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {

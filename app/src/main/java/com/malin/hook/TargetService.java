@@ -7,7 +7,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 @SuppressLint("Registered")
-@SuppressWarnings("deprecation")
 public class TargetService extends Service {
     private static final String TAG = "TargetService";
 

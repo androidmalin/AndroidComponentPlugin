@@ -42,6 +42,15 @@ public PackageManager getPackageManager() {
 
 4. Hook AMS和Hook Instrumentation两种方式的区别?
 
+5. [为什么偶尔出现pre-verified异常?](https://github.com/wequick/Small/wiki/Android-FAQ)
+这个问题属于dex热修复范畴。首先出现这个问题的充分条件：
+    (1) 一个“独善其身”的A.dex（所有的类引用都在本dex内，没有跨dex调用）
+    (2) 另一个B.dex包含(1)中的某个类XiaoMing
+    (3) 一个类加载器同时加载了(1)跟(2)，查找时(2)优先于(1)
+当程序试图调用XiaoMing时，在B中发现了，但是回头一看XiaoMing早已被A包养了。遂崩溃。
+通常我们并不满足(1)。插件并非独立的，或多或少依赖于宿主包或者公共库，难以“独善其身”，无法被打上CLASS_ISPREVERIFIED标签。
+当出现这个问题时，请确认在不同的插件中是否引用了同一个第三方库或者其不同版本。
+
 
 ### 参考文章列表
 1. [Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)

@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 @SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
-@SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation","deprecation"})
+@SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
 public class ProxyService extends Service {
     private static final String TAG = "ProxyService";
     public static final String TARGET_SERVICE = "target_service";
