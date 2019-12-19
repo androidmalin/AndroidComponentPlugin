@@ -3,11 +3,14 @@ package com.malin.hook;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.os.BuildCompat;
 
 import java.io.File;
@@ -15,6 +18,7 @@ import java.io.File;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
+    private static final String TAG = "AMS_HOOK";
     private Button mBtnHookAmsActivity;
     private Button mBtnHookAmsAppCompatActivity;
     private Button mBtnHookInstrumentationActivity;
@@ -33,6 +37,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initData();
         initListener();
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState");
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d(TAG, "onRestoreInstanceState");
     }
 
     private void initView() {
@@ -83,7 +99,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_start: {
-                if (BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -92,7 +108,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -129,6 +145,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
                 MApplication.resetPms();
                 HookActivity.hookPackageManager(this, StubActivity.class);
@@ -142,6 +162,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
                 MApplication.resetPms();
                 HookActivity.hookPackageManager(this, StubAppCompatActivity.class);

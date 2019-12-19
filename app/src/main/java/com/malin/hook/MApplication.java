@@ -2,7 +2,6 @@ package com.malin.hook;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 
 import me.weishu.reflection.Reflection;
 
@@ -33,9 +32,7 @@ public class MApplication extends Application {
         super.attachBaseContext(context);
         mApplication = this;
         try {
-            if (Build.VERSION.SDK_INT >= 28) {
-                Reflection.unseal(context);
-            }
+            Reflection.unseal(context);
             HookService.hookAMSForService(context, ProxyService.class);
             mPmsObj = HookPMS.getPackageManager();
             if (mHookInstrumentation) {

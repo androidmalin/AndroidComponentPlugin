@@ -28,7 +28,7 @@ public class HookInstrumentation {
     public static void hookInstrumentation(Context context, String stubActivityClassName) {
 
         try {
-            //1.ContextImpl-->ContextImpl
+            //1.ContextImpl-->mMainThread
             //package android.app
             //class ContextImpl
             Class<?> contextImplClazz = Class.forName("android.app.ContextImpl");
@@ -61,7 +61,7 @@ public class HookInstrumentation {
 
     @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
-    public static class InstrumentationProxy extends Instrumentation {
+    private static class InstrumentationProxy extends Instrumentation {
 
         private Instrumentation mInstrumentation;
         private PackageManager mPackageManager;

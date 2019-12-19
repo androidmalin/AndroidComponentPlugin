@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'project-report'
 
 android {
     compileSdkVersion 29
@@ -24,8 +25,8 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'me.weishu:free_reflection:2.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'
+    implementation 'me.weishu:free_reflection:2.2.0'
 }
 
 //因为 Gradle 的依赖发生冲突的时候, 会解决冲突, 默认是使用最高的版本,
@@ -125,4 +126,4 @@ project.getGradle().addBuildListener(new BuildListener() {
             }
         }
     }
-});
+})
