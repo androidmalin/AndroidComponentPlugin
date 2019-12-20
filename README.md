@@ -1,5 +1,25 @@
 ### Android Hook AMS PMS, 启动未在AndroidManifest.xml中注册的Activity,Service;
 
+| 版本\组件 | Activity | Activity |
+| :----: | :----:  | :----: |
+| android15 | ✔ | ✔ |
+| android16 | ✔ | ✔ |
+| android17 | ✔ | ✔ |
+| android18 | ✔ | ✔ |
+| android19 | ✔ | ✔ |
+| android20 | ✔ | ✔ |
+| android21 | ✔ | ✔ |
+| android22 | ✔ | ✔ |
+| android23 | ✔ | ✔ |
+| android24 | ✔ | ✔ |
+| android25 | ✔ | ✔ |
+| android26 | ✔ | ✔ |
+| android27 | ✔ | ✔ |
+| android28 | ✔ | ✔ |
+| android29 | ✔ | ✔ |
+
+✔表示测试通过.
+
 适配了Android4-10,四大组件中的Activity和Service的插件化; 要彻底搞清楚代码,需要提前掌握的知识点如下:
 1. [反射的使用](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
 2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
