@@ -1,0 +1,50 @@
+1.HookInstrumentation
+android15上 Activity和AppCompatActivity启动错误
+//Activity
+           AndroidRuntime  D  Shutting down VM
+                 dalvikvm  W  threadid=1: thread exiting with uncaught exception (group=0x9800f180)
+           AndroidRuntime  E  FATAL EXCEPTION: main
+                           E  android.content.ActivityNotFoundException: Unable to find explicit activity class {com.malin.plugin/com.malin
+                              .plugin.PluginActivity}; have you declared this activity in your AndroidManifest.xml?
+                           E      at android.app.Instrumentation.checkStartActivityResult(Instrumentation.java:1508)
+                           E      at android.app.Instrumentation.execStartActivity(Instrumentation.java:1384)
+                           E      at android.app.Activity.startActivityForResult(Activity.java:3190)
+                           E      at android.app.Activity.startActivity(Activity.java:3297)
+                           E      at com.malin.hook.MainActivity.onClick(MainActivity.java:159)
+                           E      at android.view.View.performClick(View.java:3511)
+                           E      at android.view.View$PerformClick.run(View.java:14105)
+                           E      at android.os.Handler.handleCallback(Handler.java:605)
+                           E      at android.os.Handler.dispatchMessage(Handler.java:92)
+                           E      at android.os.Looper.loop(Looper.java:137)
+                           E      at android.app.ActivityThread.main(ActivityThread.java:4424)
+                           E      at java.lang.reflect.Method.invokeNative(Native Method)
+                           E      at java.lang.reflect.Method.invoke(Method.java:511)
+                           E      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:784)
+                           E      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:551)
+                           E      at dalvik.system.NativeStart.main(Native Method)
+                 dalvikvm  I  threadid=3: reacting to signal 3
+                           I  Wrote stack traces to '/data/anr/traces.txt'
+//AppCompatActivity
+           AndroidRuntime  D  Shutting down VM
+                 dalvikvm  W  threadid=1: thread exiting with uncaught exception (group=0x9800f180)
+           AndroidRuntime  E  FATAL EXCEPTION: main
+                           E  android.content.ActivityNotFoundException: Unable to find explicit activity class {com.malin.plugin/com.malin
+                              .plugin.PluginAppCompatActivity}; have you declared this activity in your AndroidManifest.xml?
+                           E      at android.app.Instrumentation.checkStartActivityResult(Instrumentation.java:1508)
+                           E      at android.app.Instrumentation.execStartActivity(Instrumentation.java:1384)
+                           E      at android.app.Activity.startActivityForResult(Activity.java:3190)
+                           E      at android.app.Activity.startActivity(Activity.java:3297)
+                           E      at com.malin.hook.MainActivity.onClick(MainActivity.java:176)
+                           E      at android.view.View.performClick(View.java:3511)
+                           E      at android.view.View$PerformClick.run(View.java:14105)
+                           E      at android.os.Handler.handleCallback(Handler.java:605)
+                           E      at android.os.Handler.dispatchMessage(Handler.java:92)
+                           E      at android.os.Looper.loop(Looper.java:137)
+                           E      at android.app.ActivityThread.main(ActivityThread.java:4424)
+                           E      at java.lang.reflect.Method.invokeNative(Native Method)
+                           E      at java.lang.reflect.Method.invoke(Method.java:511)
+                           E      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:784)
+                           E      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:551)
+                           E      at dalvik.system.NativeStart.main(Native Method)
+                 dalvikvm  I  threadid=3: reacting to signal 3
+                           I  Wrote stack traces to '/data/anr/traces.txt'

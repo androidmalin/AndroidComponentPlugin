@@ -1,0 +1,8 @@
+Hook Service
+android15-android29中,全部兼容了
+
+Hook BaseDexClassLoader
+android15-android29中,全部兼容了
+
+HookInstrumentation
+android15-android29中,只有android15上 Activity和AppCompatActivity启动错误

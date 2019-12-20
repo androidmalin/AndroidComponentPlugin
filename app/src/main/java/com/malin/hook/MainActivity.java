@@ -99,7 +99,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_start: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -145,7 +145,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -162,7 +162,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ()) {
+                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }

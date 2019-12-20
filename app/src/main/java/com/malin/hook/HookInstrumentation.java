@@ -73,7 +73,45 @@ public class HookInstrumentation {
             mStubActivityClassName = stubActivityClassName;
         }
 
+
         /**
+         * just for android-15
+         * Instrumentation的execStartActivity方法激活Activity生命周期
+         * 使用占坑的Activity来通过AMS的验证.
+         * http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/app/Instrumentation.java
+         */
+        public ActivityResult execStartActivity(Context who, IBinder contextThread, IBinder token, Activity target, Intent intent, int requestCode) {
+
+            List<ResolveInfo> resolveInfoList = null;
+
+            try {
+                //TODO:queryIntentActivities API23以上才有的问题.
+                //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            if (resolveInfoList == null || resolveInfoList.size() == 0) {
+                //目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
+                if (intent.getComponent() != null) {
+                    intent.putExtra(TARGET_INTENT_NAME, intent.getComponent().getClassName());//未注册的Activity的名字
+                    intent.setClassName(who, mStubActivityClassName);//替换要启动的Activity为 桩Activity
+                }
+            }
+            try {
+                //just for android-15
+                //通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
+                Method execMethod = Instrumentation.class.getDeclaredMethod("execStartActivity", Context.class, IBinder.class, IBinder.class, Activity.class, Intent.class, int.class);
+                return (ActivityResult) execMethod.invoke(mInstrumentation, who, contextThread, token, target, intent, requestCode);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        /**
+         * android16-android29
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */
@@ -95,6 +133,7 @@ public class HookInstrumentation {
                 //http://androidxref.com/4.3_r2.1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 //http://androidxref.com/4.2_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 //http://androidxref.com/4.1.2/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();

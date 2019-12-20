@@ -1,0 +1,41 @@
+插件apk启动 AppCompatActivity
+
+插件使用
+implementation 'androidx.appcompat:appcompat:1.2.0-alpha01' 依赖出现问题
+compileOnly 不会出现问题
+
+                 dalvikvm  W  Class resolved by unexpected DEX: Lcom/malin/plugin/PluginAppCompatActivity;(0x9d051b00):0x8ae75000 ref [Land
+                              roidx/appcompat/app/AppCompatActivity;] Landroidx/appcompat/app/AppCompatActivity;(0x9d051b00):0x8bc24000
+                           W  (Lcom/malin/plugin/PluginAppCompatActivity; had used a different Landroidx/appcompat/app/AppCompatActivity; d
+                              uring pre-verification)
+                           W  Unable to resolve superclass of Lcom/malin/plugin/PluginAppCompatActivity; (643)
+                           W  Link of class 'Lcom/malin/plugin/PluginAppCompatActivity;' failed
+           AndroidRuntime  D  Shutting down VM
+                 dalvikvm  W  threadid=1: thread exiting with uncaught exception (group=0x9cd5db20)
+           AndroidRuntime  E  FATAL EXCEPTION: main
+                           E  Process: com.malin.hook, PID: 2582
+                           E  java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
+                           E      at dalvik.system.DexFile.defineClassNative(Native Method)
+                           E      at dalvik.system.DexFile.defineClass(DexFile.java:222)
+                           E      at dalvik.system.DexFile.loadClassBinaryName(DexFile.java:215)
+                           E      at dalvik.system.DexPathList.findClass(DexPathList.java:322)
+                           E      at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:54)
+                           E      at java.lang.ClassLoader.loadClass(ClassLoader.java:497)
+                           E      at java.lang.ClassLoader.loadClass(ClassLoader.java:457)
+                           E      at android.app.Instrumentation.newActivity(Instrumentation.java:1061)
+                           E      at com.malin.hook.HookInstrumentation$InstrumentationProxy.newActivity(HookInstrumentation.java:136)
+                           E      at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2112)
+                           E      at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2245)
+                           E      at android.app.ActivityThread.access$800(ActivityThread.java:135)
+                           E      at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1196)
+                           E      at android.os.Handler.dispatchMessage(Handler.java:102)
+                           E      at android.os.Looper.loop(Looper.java:136)
+                           E      at android.app.ActivityThread.main(ActivityThread.java:5017)
+                           E      at java.lang.reflect.Method.invokeNative(Native Method)
+                           E      at java.lang.reflect.Method.invoke(Method.java:515)
+                           E      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:779)
+                           E      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:595)
+                           E      at dalvik.system.NativeStart.main(Native Method)
+                  Process  I  Sending signal. PID: 2582 SIG: 9
+
+                              Process com.malin.hook (PID: 2582) ended
