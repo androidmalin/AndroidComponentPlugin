@@ -1,6 +1,6 @@
-### Android Hook AMS PMS, 启动未在AndroidManifest.xml中注册的Activity,Service;
+### Android上简单实现Activity和Service的插件化, 启动未在AndroidManifest.xml中注册的Activity,Service;
 
-| 版本\组件 | Activity | Activity |
+| 版本\组件 | Activity | Service |
 | :----: | :----:  | :----: |
 | android15 | ✔ | ✔ |
 | android16 | ✔ | ✔ |
