@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.core.os.BuildCompat;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -27,6 +28,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnDownloadPlugin;
     private Button mBtnStartPluginActivity;
     private Button mBtnStartPluginAppCompatActivity;
+    private Button mBtnTestBlackListApi;
 
 
     @Override
@@ -36,8 +38,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initView();
         initData();
         initListener();
-
     }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -60,6 +62,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnDownloadPlugin = findViewById(R.id.btn_download_plugin_apk);
         mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
+        mBtnTestBlackListApi = findViewById(R.id.btn_test_hide_black_api);
     }
 
 
@@ -91,6 +94,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnDownloadPlugin.setOnClickListener(this);
         mBtnStartPluginActivity.setOnClickListener(this);
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
+        mBtnTestBlackListApi.setOnClickListener(this);
     }
 
 
@@ -98,6 +102,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
+
+            case R.id.btn_test_hide_black_api: {
+                testBlackListApi();
+                break;
+            }
             case R.id.btn_start: {
                 if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
@@ -190,6 +199,39 @@ public class MainActivity extends Activity implements View.OnClickListener {
             HookAMS.hookStartActivity(this, StubAppCompatActivity.class, true);
         } else {
             HookAMS.hookStartActivity(this, StubActivity.class, false);
+        }
+    }
+
+    /**
+     * 测试黑名单API
+     * <p>
+     * 正常情况
+     * Accessing hidden field Landroid/app/ActivityManager;->INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS:I (blacklist, reflection, denied)
+     * System.err  W  java.lang.NoSuchFieldException: INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS
+     */
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private void testBlackListApi() {
+        try {
+            //1.
+            //package android.app;
+            //ActivityManager
+            Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
+
+            //2.
+            //Disable hidden API checks for the newly started instrumentation.
+            // @hide
+            //public static final int INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
+            Field field = activityManagerClazz.getField("INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS");
+
+            //3.get value
+            int check_flag = (int) field.get(null);
+            Log.d(TAG, "get blacklist api :" + check_flag);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 }

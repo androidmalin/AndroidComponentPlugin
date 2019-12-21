@@ -2,9 +2,11 @@ package com.malin.hook;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 public class MApplication extends Application {
 
+    private static final String TAG = "MApplication";
     private static MApplication mApplication;
 
     //为了重置,否则第二次之后的启动都是已经注册的Activity
@@ -30,7 +32,12 @@ public class MApplication extends Application {
         super.attachBaseContext(context);
         mApplication = this;
         try {
-            Reflection.unseal();
+            int reflection = Reflection.unseal();
+            if (reflection == 0) {
+                Log.d(TAG, "hide api 解除成功");
+            } else {
+                Log.e(TAG, "hide api 解除失败");
+            }
             HookService.hookAMSForService(context, ProxyService.class);
             mPmsObj = HookPMS.getPackageManager();
             if (mHookInstrumentation) {

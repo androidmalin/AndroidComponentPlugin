@@ -23,6 +23,15 @@
         android:text="Hook AMS 启动未注册的AppCompatActivity"
         tools:ignore="HardcodedText" />
 
+
+    <Button
+        android:id="@+id/btn_test_hide_black_api"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="测试反射调用黑名单API"
+        tools:ignore="HardcodedText" />
+
     <Button
         android:id="@+id/btn_start_instrumentation"
         android:layout_width="wrap_content"
