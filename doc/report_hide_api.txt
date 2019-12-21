@@ -1,0 +1,609 @@
+NOTE: appcompat.sh is still under development. It can report
+API uses that do not execute at runtime, and reflection uses
+that do not exist. It can also miss on reflection uses.
+#1: Reflection greylist Landroid/animation/ArgbEvaluator;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#2: Reflection greylist-max-o Landroid/app/ActionBar;->onDestroy potential use(s):
+       Lcom/malin/hook/ProxyService;->onDestroy()V
+       Lcom/malin/hook/TargetService;->onDestroy()V
+
+#3: Reflection greylist-max-o Landroid/app/ActionBar;->onMenuKeyEvent potential use(s):
+       Landroidx/core/view/KeyEventDispatcher;->actionBarOnMenuKeyEventPre28(Landroid/app/ActionBar;Landroid/view/KeyEvent;)Z
+
+#4: Reflection greylist Landroid/app/Activity;->attach potential use(s):
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#5: Reflection greylist Landroid/app/Activity;->mInstrumentation potential use(s):
+       Lcom/malin/hook/HookInstrumentation;->hookInstrumentation(Landroid/content/Context;Ljava/lang/String;)V
+
+#6: Reflection greylist Landroid/app/Activity;->mIntent potential use(s):
+       Lcom/malin/hook/HookActivity$HandlerCallbackP;->handleActivity(Landroid/os/Message;)V
+
+#7: Reflection greylist Landroid/app/Activity;->mMainThread potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getMainThreadField()Ljava/lang/reflect/Field;
+       Lcom/malin/hook/HookInstrumentation;->hookInstrumentation(Landroid/content/Context;Ljava/lang/String;)V
+
+#8: Reflection greylist Landroid/app/Activity;->mToken potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getTokenField()Ljava/lang/reflect/Field;
+
+#9: Reflection greylist Landroid/app/ActivityManager;->IActivityManagerSingleton potential use(s):
+       Lcom/malin/hook/HookAMS;->getIActivityManagerObj()Ljava/lang/Object;
+       Lcom/malin/hook/HookAMS;->resetIActivityManager(Ljava/lang/Object;)V
+       Lcom/malin/hook/HookActivity;->hookStartActivity(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/HookService;->hookAMSForService(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#10: Reflection greylist Landroid/app/ActivityThread;->attach potential use(s):
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#11: Reflection greylist Landroid/app/ActivityThread;->currentActivityThread potential use(s):
+       Lcom/malin/hook/HookAMS;->getActivityThreadInnerHandler()Ljava/lang/Object;
+       Lcom/malin/hook/HookAMS;->resetActivityThreadInnerHandler(Ljava/lang/Object;)V
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+       Lcom/malin/hook/HookActivity;->hookPackageManager(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/HookPMS;->getPackageManager()Ljava/lang/Object;
+       Lcom/malin/hook/HookPMS;->resetPackageManager(Ljava/lang/Object;)V
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#12: Reflection greylist Landroid/app/ActivityThread;->getApplicationThread potential use(s):
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#13: Reflection greylist Landroid/app/ActivityThread;->mH potential use(s):
+       Landroidx/activity/ImmLeaksCleaner;->initializeReflectiveFields()V
+       Lcom/malin/hook/HookAMS;->getActivityThreadInnerHandler()Ljava/lang/Object;
+       Lcom/malin/hook/HookAMS;->resetActivityThreadInnerHandler(Ljava/lang/Object;)V
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#14: Reflection greylist Landroid/app/ActivityThread;->mInstrumentation potential use(s):
+       Lcom/malin/hook/HookInstrumentation;->hookInstrumentation(Landroid/content/Context;Ljava/lang/String;)V
+
+#15: Reflection greylist Landroid/app/ActivityThread;->performStopActivity potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getPerformStopActivity2Params(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+       Landroidx/core/app/ActivityRecreator;->getPerformStopActivity3Params(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#16: Reflection greylist Landroid/app/ActivityThread;->sPackageManager potential use(s):
+       Lcom/malin/hook/HookActivity;->hookPackageManager(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/HookPMS;->getPackageManager()Ljava/lang/Object;
+       Lcom/malin/hook/HookPMS;->resetPackageManager(Ljava/lang/Object;)V
+
+#17: Reflection greylist Landroid/app/AlarmManager;->set potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->createAnimatorFromXml(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/animation/AnimatorSet;IF)Landroid/animation/Animator;
+
+#18: Reflection greylist-max-o Landroid/app/AppComponentFactory;->DEFAULT potential use(s):
+       Landroidx/core/accessibilityservice/AccessibilityServiceInfoCompat;->flagToString(I)Ljava/lang/String;
+
+#19: Reflection greylist Landroid/app/AppOpsManager;->OP_POST_NOTIFICATION potential use(s):
+       Landroidx/core/app/NotificationManagerCompat;->areNotificationsEnabled()Z
+
+#20: Reflection greylist Landroid/app/AppOpsManager;->checkOpNoThrow potential use(s):
+       Landroidx/core/app/NotificationManagerCompat;->areNotificationsEnabled()Z
+
+#21: Reflection greylist Landroid/app/Application;->attach potential use(s):
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#22: Reflection greylist Landroid/app/ContextImpl;->mMainThread potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getMainThreadField()Ljava/lang/reflect/Field;
+       Lcom/malin/hook/HookInstrumentation;->hookInstrumentation(Landroid/content/Context;Ljava/lang/String;)V
+
+#23: Reflection greylist-max-o Landroid/app/Dialog;->SHOW potential use(s):
+       Landroidx/fragment/app/BackStackRecord;->dump(Ljava/lang/String;Ljava/io/PrintWriter;Z)V
+
+#24: Reflection greylist Landroid/app/Dialog;->mOnKeyListener potential use(s):
+       Landroidx/core/view/KeyEventDispatcher;->getDialogKeyListenerPre28(Landroid/app/Dialog;)Landroid/content/DialogInterface$OnKeyListener;
+
+#25: Reflection blacklist Landroid/app/DownloadManager;->query potential use(s):
+       Landroidx/appcompat/widget/SearchView;->createIntent(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Landroid/content/Intent;
+
+#26: Reflection greylist-max-o Landroid/app/Fragment;->CREATED potential use(s):
+       Landroidx/lifecycle/Lifecycle$State;-><clinit>()V
+
+#27: Reflection greylist-max-o Landroid/app/Fragment;->RESUMED potential use(s):
+       Landroidx/lifecycle/Lifecycle$State;-><clinit>()V
+
+#28: Reflection greylist-max-o Landroid/app/Fragment;->STARTED potential use(s):
+       Landroidx/lifecycle/Lifecycle$State;-><clinit>()V
+
+#29: Reflection greylist Landroid/app/IActivityManager;->startActivity potential use(s):
+       Lcom/malin/hook/HookActivity$IActivityInvocationHandler;->invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+
+#30: Reflection greylist-max-o Landroid/app/IActivityManager;->startService potential use(s):
+       Lcom/malin/hook/HookService$IActivityManagerProxy;->invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+
+#31: Reflection greylist Landroid/app/Instrumentation;->execStartActivity potential use(s):
+       Lcom/malin/hook/HookInstrumentation$InstrumentationProxy;->execStartActivity(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Landroid/app/Activity;Landroid/content/Intent;I)Landroid/app/Instrumentation$ActivityResult;
+       Lcom/malin/hook/HookInstrumentation$InstrumentationProxy;->execStartActivity(Landroid/content/Context;Landroid/os/IBinder;Landroid/os/IBinder;Landroid/app/Activity;Landroid/content/Intent;ILandroid/os/Bundle;)Landroid/app/Instrumentation$ActivityResult;
+
+#32: Reflection greylist-max-o Landroid/app/Notification$Action$Builder;->mIntent potential use(s):
+       Lcom/malin/hook/HookActivity$HandlerCallbackP;->handleActivity(Landroid/os/Message;)V
+
+#33: Reflection greylist Landroid/app/Service;->attach potential use(s):
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#34: Reflection greylist Landroid/app/Service;->mToken potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getTokenField()Ljava/lang/reflect/Field;
+
+#35: Reflection greylist-max-o Landroid/app/job/JobInfo;->extras potential use(s):
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->getMessageFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$MessagingStyle$Message;
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/RemoteInput;
+       Landroidx/core/app/NotificationCompatJellybean;->getActionFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$Action;
+       Landroidx/core/app/NotificationCompatJellybean;->getBundleForAction(Landroidx/core/app/NotificationCompat$Action;)Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->getExtras(Landroid/app/Notification;)Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->toBundle(Landroidx/core/app/RemoteInput;)Landroid/os/Bundle;
+
+#36: Reflection greylist-max-p Landroid/app/job/JobInfo;->flags potential use(s):
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;-><init>(Landroidx/core/app/NotificationCompat$Action;)V
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Action$Builder;)Landroidx/core/app/NotificationCompat$Action$Builder;
+       Landroidx/core/app/NotificationCompat$WearableExtender;-><init>(Landroid/app/Notification;)V
+       Landroidx/core/app/NotificationCompat$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Builder;)Landroidx/core/app/NotificationCompat$Builder;
+
+#37: Reflection greylist-max-o Landroid/app/job/JobParameters;->extras potential use(s):
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->getMessageFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$MessagingStyle$Message;
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/RemoteInput;
+       Landroidx/core/app/NotificationCompatJellybean;->getActionFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$Action;
+       Landroidx/core/app/NotificationCompatJellybean;->getBundleForAction(Landroidx/core/app/NotificationCompat$Action;)Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->getExtras(Landroid/app/Notification;)Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompatJellybean;->toBundle(Landroidx/core/app/RemoteInput;)Landroid/os/Bundle;
+
+#38: Reflection greylist-max-o Landroid/app/job/JobParameters;->network potential use(s):
+       Landroidx/appcompat/app/TwilightManager;->getLastKnownLocation()Landroid/location/Location;
+       Landroidx/core/location/LocationManagerCompat;->isLocationEnabled(Landroid/location/LocationManager;)Z
+
+#39: Reflection greylist-max-p Landroid/app/job/JobWorkItem;->mIntent potential use(s):
+       Lcom/malin/hook/HookActivity$HandlerCallbackP;->handleActivity(Landroid/os/Message;)V
+
+#40: Reflection greylist Landroid/app/servertransaction/LaunchActivityItem;->mIntent potential use(s):
+       Lcom/malin/hook/HookActivity$HandlerCallbackP;->handleActivity(Landroid/os/Message;)V
+
+#41: Reflection greylist-max-o Landroid/content/ClipData$Item;->mIntent potential use(s):
+       Lcom/malin/hook/HookActivity$HandlerCallbackP;->handleActivity(Landroid/os/Message;)V
+
+#42: Reflection greylist Landroid/content/pm/IPackageManager;->getActivityInfo potential use(s):
+       Lcom/malin/hook/HookActivity$PackageManagerProxyHandler;->invoke(Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
+
+#43: Reflection greylist Landroid/content/res/Resources;->mResourcesImpl potential use(s):
+       Landroidx/appcompat/app/ResourcesFlusher;->flushNougats(Landroid/content/res/Resources;)V
+
+#44: Reflection greylist-max-o Landroid/content/res/ThemedResourceCache;->mUnthemedEntries potential use(s):
+       Landroidx/appcompat/app/ResourcesFlusher;->flushThemedResourcesCache(Ljava/lang/Object;)V
+
+#45: Reflection greylist-max-o Landroid/graphics/Bitmap;->getOpticalInsets potential use(s):
+       Landroidx/appcompat/widget/DrawableUtils;->getOpticalBounds(Landroid/graphics/drawable/Drawable;)Landroid/graphics/Rect;
+
+#46: Reflection greylist Landroid/graphics/FontFamily;->abortCreation potential use(s):
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->obtainAbortCreationMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#47: Reflection greylist Landroid/graphics/FontFamily;->addFontFromAssetManager potential use(s):
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->obtainAddFontFromAssetManagerMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#48: Reflection greylist Landroid/graphics/FontFamily;->addFontFromBuffer potential use(s):
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->obtainAddFontFromBufferMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#49: Reflection greylist Landroid/graphics/FontFamily;->freeze potential use(s):
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->obtainFreezeMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#50: Reflection greylist Landroid/graphics/Matrix;->native_instance potential use(s):
+       Landroidx/core/graphics/TypefaceCompatBaseImpl;->getUniqueKey(Landroid/graphics/Typeface;)J
+
+#51: Reflection greylist-max-o Landroid/graphics/PathMeasure;->native_instance potential use(s):
+       Landroidx/core/graphics/TypefaceCompatBaseImpl;->getUniqueKey(Landroid/graphics/Typeface;)J
+
+#52: Reflection greylist Landroid/graphics/Typeface;->createFromFamiliesWithDefault potential use(s):
+       Landroidx/core/graphics/TypefaceCompatApi21Impl;->init()V
+       Landroidx/core/graphics/TypefaceCompatApi24Impl;-><clinit>()V
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->obtainCreateFromFamiliesWithDefaultMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+       Landroidx/core/graphics/TypefaceCompatApi28Impl;->obtainCreateFromFamiliesWithDefaultMethod(Ljava/lang/Class;)Ljava/lang/reflect/Method;
+
+#53: Reflection greylist Landroid/graphics/Typeface;->native_instance potential use(s):
+       Landroidx/core/graphics/TypefaceCompatBaseImpl;->getUniqueKey(Landroid/graphics/Typeface;)J
+
+#54: Reflection greylist-max-o Landroid/graphics/drawable/AnimatedVectorDrawable;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#55: Reflection greylist Landroid/graphics/drawable/Drawable;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#56: Reflection greylist-max-o Landroid/graphics/drawable/DrawableContainer$DrawableContainerState;->setLayoutDirection potential use(s):
+       Landroidx/core/graphics/drawable/DrawableCompat;->setLayoutDirection(Landroid/graphics/drawable/Drawable;I)Z
+
+#57: Reflection greylist-max-o Landroid/hardware/fingerprint/FingerprintManager;->mToken potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getTokenField()Ljava/lang/reflect/Field;
+
+#58: Reflection greylist Landroid/hardware/input/InputManager;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#59: Reflection greylist-max-o Landroid/icu/util/ULocale;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#60: Reflection greylist-max-o Landroid/media/session/MediaSessionManager;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#61: Reflection greylist Landroid/net/ConnectivityManager;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#62: Reflection greylist-max-o Landroid/net/Uri$Builder;->fragment potential use(s):
+       Landroidx/fragment/app/FragmentManagerImpl;->onCreateView(Landroid/view/View;Ljava/lang/String;Landroid/content/Context;Landroid/util/AttributeSet;)Landroid/view/View;
+
+#63: Reflection greylist-max-o Landroid/net/Uri$Builder;->path potential use(s):
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+       Landroidx/vectordrawable/graphics/drawable/VectorDrawableCompat;->inflateInternal(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#64: Reflection greylist-max-o Landroid/net/Uri$Builder;->query potential use(s):
+       Landroidx/appcompat/widget/SearchView;->createIntent(Ljava/lang/String;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Landroid/content/Intent;
+
+#65: Reflection greylist Landroid/os/Bundle;->getIBinder potential use(s):
+       Landroidx/core/app/BundleCompat$BundleCompatBaseImpl;->getBinder(Landroid/os/Bundle;Ljava/lang/String;)Landroid/os/IBinder;
+
+#66: Reflection greylist Landroid/os/Bundle;->putIBinder potential use(s):
+       Landroidx/core/app/BundleCompat$BundleCompatBaseImpl;->putBinder(Landroid/os/Bundle;Ljava/lang/String;Landroid/os/IBinder;)V
+
+#67: Reflection greylist Landroid/os/Handler;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#68: Reflection greylist Landroid/os/Message;->flags potential use(s):
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;-><init>(Landroidx/core/app/NotificationCompat$Action;)V
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Action$Builder;)Landroidx/core/app/NotificationCompat$Action$Builder;
+       Landroidx/core/app/NotificationCompat$WearableExtender;-><init>(Landroid/app/Notification;)V
+       Landroidx/core/app/NotificationCompat$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Builder;)Landroidx/core/app/NotificationCompat$Builder;
+
+#69: Reflection greylist Landroid/os/Message;->target potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatedVectorDrawableCompat;->inflate(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#70: Reflection greylist-max-o Landroid/os/PowerManager$WakeLock;->mToken potential use(s):
+       Landroidx/core/app/ActivityRecreator;->getTokenField()Ljava/lang/reflect/Field;
+
+#71: Reflection greylist-max-o Landroid/telephony/SubscriptionManager;->COLOR potential use(s):
+       Landroidx/annotation/InspectableProperty$ValueType;-><clinit>()V
+
+#72: Reflection greylist-max-o Landroid/text/Layout;->getTextDirectionHeuristic potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuring(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;II)Landroid/text/StaticLayout;
+
+#73: Reflection greylist-max-o Landroid/text/Layout;->mSpacingAdd potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#74: Reflection greylist-max-o Landroid/text/Layout;->mSpacingMult potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#75: Reflection greylist-max-o Landroid/text/StaticLayout$Builder;->mIncludePad potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#76: Reflection greylist-max-o Landroid/text/StaticLayout$Builder;->mSpacingAdd potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#77: Reflection greylist-max-o Landroid/text/StaticLayout$Builder;->mSpacingMult potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#78: Reflection greylist Landroid/util/Singleton;->mInstance potential use(s):
+       Lcom/malin/hook/HookAMS;->getIActivityManagerObj()Ljava/lang/Object;
+       Lcom/malin/hook/HookAMS;->resetIActivityManager(Ljava/lang/Object;)V
+       Lcom/malin/hook/HookActivity;->hookStartActivity(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/HookService;->hookAMSForService(Landroid/content/Context;Ljava/lang/Class;)V
+       Lcom/malin/hook/ProxyService;->onStartCommand(Landroid/content/Intent;II)I
+
+#79: Reflection greylist Landroid/view/Display;->getType potential use(s):
+       Landroidx/core/graphics/drawable/IconCompat;->getType(Landroid/graphics/drawable/Icon;)I
+
+#80: Reflection blacklist Landroid/view/KeyEvent;->setTime potential use(s):
+       Landroidx/core/app/NotificationCompat$Style;->applyStandardTemplate(ZIZ)Landroid/widget/RemoteViews;
+
+#81: Reflection greylist Landroid/view/LayoutInflater;->mFactory2 potential use(s):
+       Landroidx/core/view/LayoutInflaterCompat;->forceSetFactory2(Landroid/view/LayoutInflater;Landroid/view/LayoutInflater$Factory2;)V
+
+#82: Reflection greylist-max-o Landroid/view/PointerIcon;->getType potential use(s):
+       Landroidx/core/graphics/drawable/IconCompat;->getType(Landroid/graphics/drawable/Icon;)I
+
+#83: Reflection greylist Landroid/view/View;->computeFitSystemWindows potential use(s):
+       Landroidx/appcompat/widget/ViewUtils;-><clinit>()V
+
+#84: Reflection greylist-max-o Landroid/view/View;->getOpticalInsets potential use(s):
+       Landroidx/appcompat/widget/DrawableUtils;->getOpticalBounds(Landroid/graphics/drawable/Drawable;)Landroid/graphics/Rect;
+
+#85: Reflection greylist Landroid/view/View;->mAccessibilityDelegate potential use(s):
+       Landroidx/core/view/ViewCompat;->getAccessibilityDelegateInternal(Landroid/view/View;)Landroid/view/View$AccessibilityDelegate;
+
+#86: Reflection greylist-max-p Landroid/view/View;->mMinHeight potential use(s):
+       Landroidx/core/view/ViewCompat;->getMinimumHeight(Landroid/view/View;)I
+
+#87: Reflection greylist-max-p Landroid/view/View;->mMinWidth potential use(s):
+       Landroidx/core/view/ViewCompat;->getMinimumWidth(Landroid/view/View;)I
+
+#88: Reflection greylist Landroid/view/View;->makeOptionalFitsSystemWindows potential use(s):
+       Landroidx/appcompat/widget/ViewUtils;->makeOptionalFitsSystemWindows(Landroid/view/View;)V
+
+#89: Reflection greylist Landroid/view/ViewConfiguration;->getScaledScrollFactor potential use(s):
+       Landroidx/core/view/ViewConfigurationCompat;-><clinit>()V
+
+#90: Reflection greylist Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows potential use(s):
+       Landroidx/appcompat/widget/ViewUtils;->makeOptionalFitsSystemWindows(Landroid/view/View;)V
+
+#91: Reflection greylist-max-o Landroid/view/ViewPropertyAnimator;->NONE potential use(s):
+       Landroidx/annotation/InspectableProperty$ValueType;-><clinit>()V
+
+#92: Reflection greylist-max-o Landroid/view/ViewPropertyAnimator;->setValue potential use(s):
+       Landroidx/lifecycle/LiveData;->setValue(Ljava/lang/Object;)V
+
+#93: Reflection greylist Landroid/view/Window;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#94: Reflection greylist Landroid/view/accessibility/AccessibilityManager;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#95: Reflection greylist-max-o Landroid/view/accessibility/AccessibilityManager;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#96: Reflection greylist-max-o Landroid/view/accessibility/AccessibilityNodeInfo;->DEFAULT potential use(s):
+       Landroidx/core/accessibilityservice/AccessibilityServiceInfoCompat;->flagToString(I)Ljava/lang/String;
+
+#97: Reflection greylist-max-o Landroid/view/accessibility/AccessibilityNodeInfo;->FLAG_INCLUDE_NOT_IMPORTANT_VIEWS potential use(s):
+       Landroidx/core/accessibilityservice/AccessibilityServiceInfoCompat;->flagToString(I)Ljava/lang/String;
+
+#98: Reflection greylist-max-o Landroid/view/accessibility/AccessibilityNodeInfo;->FLAG_REPORT_VIEW_IDS potential use(s):
+       Landroidx/core/accessibilityservice/AccessibilityServiceInfoCompat;->flagToString(I)Ljava/lang/String;
+
+#99: Reflection greylist-max-o Landroid/view/animation/AnticipateOvershootInterpolator;->a potential use(s):
+       Landroidx/versionedparcelable/ParcelUtils;->getVersionedParcelable(Landroid/os/Bundle;Ljava/lang/String;)Landroidx/versionedparcelable/VersionedParcelable;
+       Landroidx/versionedparcelable/ParcelUtils;->getVersionedParcelableList(Landroid/os/Bundle;Ljava/lang/String;)Ljava/util/List;
+       Landroidx/versionedparcelable/ParcelUtils;->putVersionedParcelable(Landroid/os/Bundle;Ljava/lang/String;Landroidx/versionedparcelable/VersionedParcelable;)V
+       Landroidx/versionedparcelable/ParcelUtils;->putVersionedParcelableList(Landroid/os/Bundle;Ljava/lang/String;Ljava/util/List;)V
+
+#100: Reflection greylist Landroid/view/inputmethod/InputMethodManager;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#101: Reflection greylist-max-p Landroid/view/inputmethod/InputMethodManager;->mH potential use(s):
+       Landroidx/activity/ImmLeaksCleaner;->initializeReflectiveFields()V
+       Lcom/malin/hook/HookAMS;->getActivityThreadInnerHandler()Ljava/lang/Object;
+       Lcom/malin/hook/HookAMS;->resetActivityThreadInnerHandler(Ljava/lang/Object;)V
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#102: Reflection greylist-max-p Landroid/view/inputmethod/InputMethodManager;->mNextServedView potential use(s):
+       Landroidx/activity/ImmLeaksCleaner;->initializeReflectiveFields()V
+
+#103: Reflection greylist-max-p Landroid/view/inputmethod/InputMethodManager;->mServedView potential use(s):
+       Landroidx/activity/ImmLeaksCleaner;->initializeReflectiveFields()V
+
+#104: Reflection greylist Landroid/view/textservice/TextServicesManager;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#105: Reflection greylist-max-o Landroid/widget/AbsListView;->mAccessibilityDelegate potential use(s):
+       Landroidx/core/view/ViewCompat;->getAccessibilityDelegateInternal(Landroid/view/View;)Landroid/view/View$AccessibilityDelegate;
+
+#106: Reflection greylist Landroid/widget/AbsListView;->mIsChildViewEnabled potential use(s):
+       Landroidx/appcompat/widget/DropDownListView;-><init>(Landroid/content/Context;Z)V
+
+#107: Reflection greylist-max-p Landroid/widget/AutoCompleteTextView;->doAfterTextChanged potential use(s):
+       Landroidx/appcompat/widget/SearchView$PreQAutoCompleteTextViewReflector;-><init>()V
+
+#108: Reflection greylist-max-p Landroid/widget/AutoCompleteTextView;->doBeforeTextChanged potential use(s):
+       Landroidx/appcompat/widget/SearchView$PreQAutoCompleteTextViewReflector;-><init>()V
+
+#109: Reflection greylist-max-p Landroid/widget/AutoCompleteTextView;->ensureImeVisible potential use(s):
+       Landroidx/appcompat/widget/SearchView$PreQAutoCompleteTextViewReflector;-><init>()V
+
+#110: Reflection greylist Landroid/widget/CompoundButton;->mButtonDrawable potential use(s):
+       Landroidx/core/widget/CompoundButtonCompat;->getButtonDrawable(Landroid/widget/CompoundButton;)Landroid/graphics/drawable/Drawable;
+
+#111: Reflection greylist-max-o Landroid/widget/ListPopupWindow;->mOverlapAnchor potential use(s):
+       Landroidx/core/widget/PopupWindowCompat;->getOverlapAnchor(Landroid/widget/PopupWindow;)Z
+       Landroidx/core/widget/PopupWindowCompat;->setOverlapAnchor(Landroid/widget/PopupWindow;Z)V
+
+#112: Reflection greylist-max-p Landroid/widget/PopupWindow;->mOverlapAnchor potential use(s):
+       Landroidx/core/widget/PopupWindowCompat;->getOverlapAnchor(Landroid/widget/PopupWindow;)Z
+       Landroidx/core/widget/PopupWindowCompat;->setOverlapAnchor(Landroid/widget/PopupWindow;Z)V
+
+#113: Reflection greylist-max-p Landroid/widget/ProgressBar;->mMinHeight potential use(s):
+       Landroidx/core/view/ViewCompat;->getMinimumHeight(Landroid/view/View;)I
+
+#114: Reflection greylist-max-p Landroid/widget/ProgressBar;->mMinWidth potential use(s):
+       Landroidx/core/view/ViewCompat;->getMinimumWidth(Landroid/view/View;)I
+
+#115: Reflection greylist-max-p Landroid/widget/TextView;->getHorizontallyScrolling potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->autoSizeText()V
+
+#116: Reflection greylist Landroid/widget/TextView;->getLayoutAlignment potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->suggestedSizeFitsInSpace(ILandroid/graphics/RectF;)Z
+
+#117: Reflection greylist Landroid/widget/TextView;->mIncludePad potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#118: Reflection greylist Landroid/widget/TextView;->mMaxMode potential use(s):
+       Landroidx/core/widget/TextViewCompat;->getMaxLines(Landroid/widget/TextView;)I
+
+#119: Reflection greylist Landroid/widget/TextView;->mMaximum potential use(s):
+       Landroidx/core/widget/TextViewCompat;->getMaxLines(Landroid/widget/TextView;)I
+
+#120: Reflection greylist Landroid/widget/TextView;->mMinMode potential use(s):
+       Landroidx/core/widget/TextViewCompat;->getMinLines(Landroid/widget/TextView;)I
+
+#121: Reflection greylist Landroid/widget/TextView;->mMinWidth potential use(s):
+       Landroidx/core/view/ViewCompat;->getMinimumWidth(Landroid/view/View;)I
+
+#122: Reflection greylist Landroid/widget/TextView;->mMinimum potential use(s):
+       Landroidx/core/widget/TextViewCompat;->getMinLines(Landroid/widget/TextView;)I
+
+#123: Reflection greylist Landroid/widget/TextView;->mSpacingAdd potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#124: Reflection greylist Landroid/widget/TextView;->mSpacingMult potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->createStaticLayoutForMeasuringPre16(Ljava/lang/CharSequence;Landroid/text/Layout$Alignment;I)Landroid/text/StaticLayout;
+
+#125: Reflection greylist Landroid/widget/TextView;->nullLayouts potential use(s):
+       Landroidx/appcompat/widget/AppCompatTextViewAutoSizeHelper;->setRawTextSize(F)V (2 occurrences)
+
+#126: Reflection greylist-max-o Lcom/android/internal/view/menu/MenuBuilder;->mCallback potential use(s):
+       Lcom/malin/hook/HookActivity;->hookLauncherActivity(Landroid/content/Context;Ljava/lang/Class;Z)V
+
+#127: Reflection greylist-max-o Lcom/android/internal/view/menu/MenuBuilder;->removeItemAt potential use(s):
+       Landroidx/core/widget/TextViewCompat$OreoCallback;->recomputeProcessTextMenuItems(Landroid/view/Menu;)V
+
+#128: Reflection greylist,core-platform-api Ldalvik/system/VMRuntime;->getRuntime potential use(s):
+       Lcom/malin/hook/Reflection;-><clinit>()V
+
+#129: Reflection blacklist,core-platform-api Ldalvik/system/VMRuntime;->setHiddenApiExemptions potential use(s):
+       Lcom/malin/hook/Reflection;-><clinit>()V
+
+#130: Reflection greylist Ljava/io/File;->path potential use(s):
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+       Landroidx/vectordrawable/graphics/drawable/VectorDrawableCompat;->inflateInternal(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#131: Reflection greylist-max-o Ljava/io/FileInputStream;->path potential use(s):
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+       Landroidx/vectordrawable/graphics/drawable/VectorDrawableCompat;->inflateInternal(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#132: Reflection greylist-max-o Ljava/io/FileOutputStream;->path potential use(s):
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+       Landroidx/vectordrawable/graphics/drawable/VectorDrawableCompat;->inflateInternal(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#133: Reflection greylist-max-o Ljava/io/ObjectStreamClass;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#134: Reflection greylist-max-p Ljava/lang/Boolean;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#135: Reflection greylist-max-p Ljava/lang/Character;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#136: Reflection greylist Ljava/lang/Class;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#137: Reflection greylist-max-p Ljava/lang/Double;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#138: Reflection greylist Ljava/lang/Enum;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#139: Reflection greylist-max-p Ljava/lang/Float;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#140: Reflection greylist-max-p Ljava/lang/Integer;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#141: Reflection greylist-max-p Ljava/lang/Long;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#142: Reflection greylist Ljava/lang/Thread;->group potential use(s):
+       Landroidx/appcompat/view/SupportMenuInflater;->parseMenu(Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/view/Menu;)V
+       Landroidx/vectordrawable/graphics/drawable/VectorDrawableCompat;->inflateInternal(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#143: Reflection greylist Ljava/lang/Thread;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#144: Reflection greylist Ljava/lang/Thread;->target potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatedVectorDrawableCompat;->inflate(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#145: Reflection greylist-max-o Ljava/lang/reflect/Field;->type potential use(s):
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->getMessageFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$MessagingStyle$Message;
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/content/res/GradientColorInflaterCompat;->createFromXmlInner(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)Landroid/graphics/Shader;
+       Landroidx/core/graphics/drawable/IconCompat;->createFromBundle(Landroid/os/Bundle;)Landroidx/core/graphics/drawable/IconCompat;
+       Landroidx/core/graphics/drawable/IconCompat;->toBundle()Landroid/os/Bundle;
+
+#146: Reflection greylist-max-o Ljava/lang/reflect/InvocationTargetException;->target potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatedVectorDrawableCompat;->inflate(Landroid/content/res/Resources;Lorg/xmlpull/v1/XmlPullParser;Landroid/util/AttributeSet;Landroid/content/res/Resources$Theme;)V
+
+#147: Reflection greylist-max-o Ljava/lang/reflect/Modifier;->DEFAULT potential use(s):
+       Landroidx/core/accessibilityservice/AccessibilityServiceInfoCompat;->flagToString(I)Ljava/lang/String;
+
+#148: Reflection greylist-max-o Ljava/nio/channels/FileChannel$MapMode;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#149: Reflection greylist-max-o Ljava/nio/charset/Charset;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#150: Reflection greylist Ljava/security/Signature;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#151: Reflection greylist Ljava/text/NumberFormat;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#152: Reflection greylist-max-o Ljava/util/Collections;->r potential use(s):
+       Landroidx/core/content/FileProvider;->modeToMode(Ljava/lang/String;)I
+       Landroidx/core/graphics/TypefaceCompatApi21Impl;->createFromFontInfo(Landroid/content/Context;Landroid/os/CancellationSignal;[Landroidx/core/provider/FontsContractCompat$FontInfo;I)Landroid/graphics/Typeface;
+       Landroidx/core/graphics/TypefaceCompatApi26Impl;->createFromFontInfo(Landroid/content/Context;Landroid/os/CancellationSignal;[Landroidx/core/provider/FontsContractCompat$FontInfo;I)Landroid/graphics/Typeface;
+       Landroidx/core/graphics/TypefaceCompatUtil;->mmap(Landroid/content/Context;Landroid/os/CancellationSignal;Landroid/net/Uri;)Ljava/nio/ByteBuffer;
+
+#153: Reflection greylist-max-o Ljava/util/Locale;->getInstance potential use(s):
+       Landroidx/core/content/pm/ShortcutManagerCompat;->getShortcutInfoSaverInstance(Landroid/content/Context;)Landroidx/core/content/pm/ShortcutInfoCompatSaver;
+
+#154: Reflection greylist-max-o Ljava/util/concurrent/ThreadPoolExecutor;->RUNNING potential use(s):
+       Landroidx/loader/content/ModernAsyncTask$Status;-><clinit>()V
+
+#155: Reflection greylist-max-o Ljava/util/concurrent/TimeUnit;->x potential use(s):
+       Landroidx/core/graphics/drawable/IconCompat;->toString()Ljava/lang/String;
+
+#156: Reflection greylist-max-o Ljava/util/concurrent/atomic/AtomicBoolean;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#157: Reflection greylist Ljava/util/concurrent/atomic/AtomicInteger;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#158: Reflection greylist-max-o Ljava/util/concurrent/atomic/AtomicReference;->value potential use(s):
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->inferValueTypeOfKeyframe(Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;Lorg/xmlpull/v1/XmlPullParser;)I
+       Landroidx/vectordrawable/graphics/drawable/AnimatorInflaterCompat;->loadKeyframe(Landroid/content/Context;Landroid/content/res/Resources;Landroid/content/res/Resources$Theme;Landroid/util/AttributeSet;ILorg/xmlpull/v1/XmlPullParser;)Landroid/animation/Keyframe;
+
+#159: Reflection blacklist Ljava/util/regex/Matcher;->text potential use(s):
+       Landroidx/core/app/NotificationCompat$CarExtender;->getBundleForUnreadConversation(Landroidx/core/app/NotificationCompat$CarExtender$UnreadConversation;)Landroid/os/Bundle;
+       Landroidx/core/app/NotificationCompat$CarExtender;->getUnreadConversationFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$CarExtender$UnreadConversation;
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->getMessageFromBundle(Landroid/os/Bundle;)Landroidx/core/app/NotificationCompat$MessagingStyle$Message;
+       Landroidx/core/app/NotificationCompat$MessagingStyle$Message;->toBundle()Landroid/os/Bundle;
+
+#160: Reflection greylist-max-o Ljava/util/regex/Pattern;->flags potential use(s):
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;-><init>(Landroidx/core/app/NotificationCompat$Action;)V
+       Landroidx/core/app/NotificationCompat$Action$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Action$Builder;)Landroidx/core/app/NotificationCompat$Action$Builder;
+       Landroidx/core/app/NotificationCompat$WearableExtender;-><init>(Landroid/app/Notification;)V
+       Landroidx/core/app/NotificationCompat$WearableExtender;->extend(Landroidx/core/app/NotificationCompat$Builder;)Landroidx/core/app/NotificationCompat$Builder;
+
+#161: Reflection greylist-max-o Ljava/util/zip/ZipFile;->name potential use(s):
+       Landroidx/core/app/Person;->fromBundle(Landroid/os/Bundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->fromPersistableBundle(Landroid/os/PersistableBundle;)Landroidx/core/app/Person;
+       Landroidx/core/app/Person;->toBundle()Landroid/os/Bundle;
+       Landroidx/core/app/Person;->toPersistableBundle()Landroid/os/PersistableBundle;
+       Landroidx/core/content/FileProvider;->parsePathStrategy(Landroid/content/Context;Ljava/lang/String;)Landroidx/core/content/FileProvider$PathStrategy;
+
+#162: Reflection greylist-max-o Ljava/util/zip/ZipFile;->read potential use(s):
+       Landroidx/versionedparcelable/VersionedParcel;->getReadMethod(Ljava/lang/String;)Ljava/lang/reflect/Method;
+
+#163: Reflection greylist Llibcore/icu/ICU;->addLikelySubtags potential use(s):
+       Landroidx/core/text/ICUCompat;-><clinit>()V
+
+#164: Reflection greylist Llibcore/icu/ICU;->getScript potential use(s):
+       Landroidx/core/text/ICUCompat;-><clinit>()V
+
+164 hidden API(s) used: 0 linked against, 164 through reflection
+       78 in greylist
+       4 in blacklist
+       62 in greylist-max-o
+       20 in greylist-max-p
