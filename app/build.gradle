@@ -58,32 +58,32 @@ project.getGradle().addBuildListener(new BuildListener() {
             if (variant.getAssemble().state.executed) {
                 if (this.gradle.gradleVersion >= "4.1") {
                     // android plugin 3.0 以上
-                    def runtime = project.configurations.create("d_analyse" + variant.runtimeConfiguration.name);
-                    runtime.setCanBeConsumed(false);
-                    runtime.extendsFrom(variant.runtimeConfiguration);
+                    def runtime = project.configurations.create("d_analyse" + variant.runtimeConfiguration.name)
+                    runtime.setCanBeConsumed(false)
+                    runtime.extendsFrom(variant.runtimeConfiguration)
                     runtime.getAttributes().attribute(Attribute.of("artifactType", String.class), "jar")
                     variant.runtimeConfiguration.getAttributes().keySet().forEach({
-                        runtime.getAttributes().attribute(it, variant.runtimeConfiguration.getAttributes().getAttribute(it));
+                        runtime.getAttributes().attribute(it, variant.runtimeConfiguration.getAttributes().getAttribute(it))
                     })
                     println("${variant.name}  analyse")
                     println("runtime dependency ")
                     println("------------------")
                     runtime.resolvedConfiguration.resolvedArtifacts.forEach({
-                        def id = it.moduleVersion.id;
+                        def id = it.moduleVersion.id
                         println(id.group + ":" + id.name + ":" + id.version)
                     })
                     println("------------------\n ")
-                    def packageC = project.configurations.create("d_analyse_" + variant.compileConfiguration.name);
-                    packageC.setCanBeConsumed(false);
-                    packageC.extendsFrom(variant.compileConfiguration);
+                    def packageC = project.configurations.create("d_analyse_" + variant.compileConfiguration.name)
+                    packageC.setCanBeConsumed(false)
+                    packageC.extendsFrom(variant.compileConfiguration)
                     packageC.getAttributes().attribute(Attribute.of("artifactType", String.class), "jar")
                     variant.compileConfiguration.getAttributes().keySet().forEach({
-                        packageC.getAttributes().attribute(it, variant.compileConfiguration.getAttributes().getAttribute(it));
+                        packageC.getAttributes().attribute(it, variant.compileConfiguration.getAttributes().getAttribute(it))
                     })
                     println("package dependency ")
                     println("------------------")
                     packageC.resolvedConfiguration.resolvedArtifacts.forEach({
-                        def id = it.moduleVersion.id;
+                        def id = it.moduleVersion.id
                         println(id.group + ":" + id.name + ":" + id.version)
                     })
                     println("------------------\n ")
@@ -91,30 +91,30 @@ project.getGradle().addBuildListener(new BuildListener() {
 
                 } else {
                     // android plugin 3.0  以下
-                    def appPlugin = project.plugins.findPlugin("com.android.application");
+                    def appPlugin = project.plugins.findPlugin("com.android.application")
                     appPlugin.variantManager.variantDataList.forEach({
-                        def variantDependencies = it.variantDependency;
+                        def variantDependencies = it.variantDependency
 
                         if (variant.name == variantDependencies.name) {
                             println("${variant.name}  analyse")
-                            def runtime = project.configurations.create("d_analyse" + variantDependencies.compileConfiguration.name);
+                            def runtime = project.configurations.create("d_analyse" + variantDependencies.compileConfiguration.name)
                             runtime.setCanBeConsumed(false)
-                            runtime.extendsFrom(variantDependencies.compileConfiguration);
+                            runtime.extendsFrom(variantDependencies.compileConfiguration)
                             println("runtime dependency ")
                             println("------------------")
                             runtime.resolvedConfiguration.resolvedArtifacts.forEach({
-                                def id = it.moduleVersion.id;
+                                def id = it.moduleVersion.id
                                 println(id.group + ":" + id.name + ":" + id.version)
                             })
                             println("------------------\n ")
 
-                            def packageC = project.configurations.create("d_analyse" + variantDependencies.packageConfiguration.name);
+                            def packageC = project.configurations.create("d_analyse" + variantDependencies.packageConfiguration.name)
                             packageC.setCanBeConsumed(false)
-                            packageC.extendsFrom(variantDependencies.packageConfiguration);
+                            packageC.extendsFrom(variantDependencies.packageConfiguration)
                             println("package dependency ")
                             println("------------------")
                             packageC.resolvedConfiguration.resolvedArtifacts.forEach({
-                                def id = it.moduleVersion.id;
+                                def id = it.moduleVersion.id
                                 println(id.group + ":" + id.name + ":" + id.version)
                             })
                             println("------------------\n ")

@@ -108,6 +108,8 @@ public class Reflection {
         }
 
         try {
+            // class dalvik.system.VMRuntime;
+            // public native void setHiddenApiExemptions(String[] signaturePrefixes);
             setHiddenApiExemptions.invoke(sVmRuntime, new Object[]{methods});
             return true;
         } catch (Throwable e) {

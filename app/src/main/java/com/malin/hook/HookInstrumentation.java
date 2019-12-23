@@ -87,6 +87,9 @@ public class HookInstrumentation {
             try {
                 //TODO:queryIntentActivities API23以上才有的问题.
                 //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/app/ApplicationPackageManager.java#queryIntentActivities
+                //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/IPackageManager.aidl
+                //http://androidxref.com/4.0.3_r1/xref/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
                 resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
