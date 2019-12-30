@@ -57,12 +57,16 @@ final class BaseDexClassLoaderHookHelper {
      */
     static void patchClassLoader(ClassLoader classLoader, File apkFile, File optDexFile) {
 
+        // -->PathClassLoader
+        // -->BaseDexClassLoader
+        // -->BaseDexClassLoader中DexPathList pathList
+        // -->DexPathList中 Element[] dexElements
         try {
-            //0.获取dalvik.system.BaseDexClassLoader的Class
+            //0. 获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
             Class<?> baseDexClassLoaderClazz = PathClassLoader.class.getSuperclass();
             if (baseDexClassLoaderClazz == null) return;
 
-            //1. 获取 BaseDexClassLoader : pathList
+            //1. 获取 BaseDexClassLoader的成员DexPathList pathList
             //private final DexPathList pathList;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
             Field pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList");
@@ -73,18 +77,18 @@ final class BaseDexClassLoaderHookHelper {
             if (dexPathList == null) return;
 
 
-            //3. 获取 DexPathList的属性: Element[] dexElements
+            //3. 获取 DexPathList的成员: Element[] dexElements 的Field
             //private final Element[] dexElements;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
             Field dexElementArrayField = dexPathList.getClass().getDeclaredField("dexElements");
             dexElementArrayField.setAccessible(true);
 
-            //4.获取 DexPathList的属性 Element[] dexElements;值
+            //4.获取 DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
             Object[] dexElements = (Object[]) dexElementArrayField.get(dexPathList);
             if (dexElements == null) return;
 
-            //5. 获取数组的类型 (Element)
+            //5. 获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
             Class<?> elementClazz = dexElements.getClass().getComponentType();
             if (elementClazz == null) return;
@@ -110,7 +114,9 @@ final class BaseDexClassLoaderHookHelper {
                 //DexFile.loadDex(String sourcePathName,String outputPathName,int flag);
                 //  @param sourcePathName Jar or APK file with "classes.dex".  (May expand this to include "raw DEX" in the future.)
                 //  @param outputPathName File that will hold the optimized form of the DEX data.
-                elementObj = elementConstructor.newInstance(DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0), apkFile);
+                //  @param flags Enable optional features.  (Currently none defined.)
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                elementObj = elementConstructor.newInstance(dexFile, apkFile);
             } else if (Build.VERSION.SDK_INT >= 18) {
                 //18<=API<=25 (4.3<=API<=7.1.1)
                 //7.构造插件Element
@@ -119,7 +125,8 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                elementObj = elementConstructor.newInstance(apkFile, false, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                elementObj = elementConstructor.newInstance(apkFile, false, apkFile, dexFile);
             } else if (Build.VERSION.SDK_INT == 17) {
                 //API=17  (API=4.2)
                 //7.构造插件Element
@@ -128,7 +135,8 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                elementObj = elementConstructor.newInstance(apkFile, apkFile, DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                elementObj = elementConstructor.newInstance(apkFile, apkFile, dexFile);
             } else {
                 //15~16
                 //7.构造插件Element
@@ -137,13 +145,20 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                elementObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0));
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                elementObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), dexFile);
             }
 
 
             Object[] pluginElementArray = new Object[]{elementObj};
 
             // 把原始的elements复制进去
+            //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
+            //* @param      src      the source array.
+            //* @param      srcPos   starting position in the source array.
+            //* @param      dest     the destination array.
+            //* @param      destPos  starting position in the destination data.
+            //* @param      length   the number of array elements to be copied.
             System.arraycopy(dexElements, 0, newElements, 0, dexElements.length);
 
             // 插件的那个element复制进去
@@ -151,6 +166,13 @@ final class BaseDexClassLoaderHookHelper {
 
             // 替换
             dexElementArrayField.set(dexPathList, newElements);
+
+            // 简要总结一下这种方式的原理:
+            // 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的CLassLoader加载所有的类;
+            // 我们的思路是告诉宿主ClassLoader我们在哪,让其帮助完成类加载的过程.
+            // 宿主程序的ClassLoader最终继承自BaseDexClassLoader，BaseDexClassLoader通过DexPathList进行类的查找过程;
+            // 而这个查找通过遍历一个dexElements的数组完成;
+            // 我们通过把插件dex添加进这个数组就让宿主ClassLoader获取了加载插件类的能力.
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
