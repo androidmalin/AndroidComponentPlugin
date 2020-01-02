@@ -104,8 +104,9 @@ final class BaseDexClassLoaderHookHelper {
                 //26<=API<=29 (8.0<=API<=10.0)
                 //7.构造插件Element
                 // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
-                //这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
-                Constructor<?> elementConstructor = elementClazz.getConstructor(DexFile.class, File.class);
+                // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
+                // 注意getConstructor vs getDeclaredConstructor 的区别
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(DexFile.class, File.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -121,7 +122,7 @@ final class BaseDexClassLoaderHookHelper {
                 //18<=API<=25 (4.3<=API<=7.1.1)
                 //7.构造插件Element
                 // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
-                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, boolean.class, File.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, boolean.class, File.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -131,7 +132,7 @@ final class BaseDexClassLoaderHookHelper {
                 //API=17  (API=4.2)
                 //7.构造插件Element
                 // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
-                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, File.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, File.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
@@ -141,7 +142,7 @@ final class BaseDexClassLoaderHookHelper {
                 //15~16
                 //7.构造插件Element
                 // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
-                Constructor<?> elementConstructor = elementClazz.getConstructor(File.class, ZipFile.class, DexFile.class);
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, ZipFile.class, DexFile.class);
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
