@@ -49,13 +49,13 @@ final class BaseDexClassLoaderHookHelper {
      * 在插件apk和宿主中包含了相同的Jar包;解决方法,插件编译时使用compileOnly依赖和宿主相同的依赖.
      * https://blog.csdn.net/berber78/article/details/41721877
      *
-     * @param classLoader 表示宿主的LoadedApk在Application类中有一个成员变量mLoadedApk,而这个变量是从ContextImpl中获取的;
-     *                    ContextImpl重写了getClassLoader方法,
-     *                    因此我们在Context环境中直接getClassLoader()获取到的就是宿主程序唯一的ClassLoader.
-     * @param apkFile     apkFile
-     * @param optDexFile  optDexFile
+     * @param baseDexClassLoader 表示宿主的LoadedApk在Application类中有一个成员变量mLoadedApk,而这个变量是从ContextImpl中获取的;
+     *                           ContextImpl重写了getClassLoader方法,
+     *                           因此我们在Context环境中直接getClassLoader()获取到的就是宿主程序唯一的ClassLoader.
+     * @param apkFile            apkFile
+     * @param optDexFile         optDexFile
      */
-    static void patchClassLoader(ClassLoader classLoader, File apkFile, File optDexFile) {
+    static void patchClassLoader(ClassLoader baseDexClassLoader, File apkFile, File optDexFile) {
 
         // -->PathClassLoader
         // -->BaseDexClassLoader
@@ -73,7 +73,7 @@ final class BaseDexClassLoaderHookHelper {
             pathListField.setAccessible(true);
 
             //2.获取DexPathList pathList;
-            Object dexPathList = pathListField.get(classLoader);
+            Object dexPathList = pathListField.get(baseDexClassLoader);
             if (dexPathList == null) return;
 
 
@@ -105,7 +105,9 @@ final class BaseDexClassLoaderHookHelper {
                 //7.构造插件Element
                 // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
                 // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){}
+                // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#637
                 // 注意getConstructor vs getDeclaredConstructor 的区别
+                // public Element(File dir, boolean isDirectory, File zip, DexFile dexFile) {
                 Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(DexFile.class, File.class);
                 elementConstructor.setAccessible(true);
 
@@ -116,7 +118,8 @@ final class BaseDexClassLoaderHookHelper {
                 //  @param sourcePathName Jar or APK file with "classes.dex".  (May expand this to include "raw DEX" in the future.)
                 //  @param outputPathName File that will hold the optimized form of the DEX data.
                 //  @param flags Enable optional features.  (Currently none defined.)
-                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
                 elementObj = elementConstructor.newInstance(dexFile, apkFile);
             } else if (Build.VERSION.SDK_INT >= 18) {
                 //18<=API<=25 (4.3<=API<=7.1.1)
@@ -126,7 +129,7 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
                 elementObj = elementConstructor.newInstance(apkFile, false, apkFile, dexFile);
             } else if (Build.VERSION.SDK_INT == 17) {
                 //API=17  (API=4.2)
@@ -136,7 +139,7 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
                 elementObj = elementConstructor.newInstance(apkFile, apkFile, dexFile);
             } else {
                 //15~16
@@ -146,24 +149,26 @@ final class BaseDexClassLoaderHookHelper {
                 elementConstructor.setAccessible(true);
 
                 //8. 生成Element的实例对象
-                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getAbsolutePath(), 0);
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
                 elementObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), dexFile);
             }
 
 
             Object[] pluginElementArray = new Object[]{elementObj};
 
-            // 把原始的elements复制进去
             //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
             //* @param      src      the source array.
             //* @param      srcPos   starting position in the source array.
             //* @param      dest     the destination array.
             //* @param      destPos  starting position in the destination data.
             //* @param      length   the number of array elements to be copied.
-            System.arraycopy(dexElements, 0, newElements, 0, dexElements.length);
+            //https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
             // 插件的那个element复制进去
-            System.arraycopy(pluginElementArray, 0, newElements, dexElements.length, pluginElementArray.length);
+            System.arraycopy(pluginElementArray, 0, newElements, 0, pluginElementArray.length);
+
+            // 把原始的elements复制进去
+            System.arraycopy(dexElements, 0, newElements, pluginElementArray.length, dexElements.length);
 
             // 替换
             dexElementArrayField.set(dexPathList, newElements);
