@@ -2,6 +2,7 @@ package com.malin.hook;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.StrictMode;
 import android.util.Log;
 
 public class MApplication extends Application {
@@ -30,6 +31,7 @@ public class MApplication extends Application {
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
+        startStrictMode();
         mApplication = this;
         try {
             int reflection = Reflection.unseal();
@@ -86,5 +88,18 @@ public class MApplication extends Application {
 
     public static MApplication getInstance() {
         return mApplication;
+    }
+
+    private void startStrictMode() {
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyDialog()
+                .penaltyLog()
+                .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyDeath()
+                .penaltyLog()
+                .build());
     }
 }

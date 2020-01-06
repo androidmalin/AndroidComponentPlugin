@@ -1,6 +1,5 @@
 package com.malin.hook;
 
-import android.os.Build;
 import android.util.Log;
 
 import java.lang.reflect.Method;
@@ -13,6 +12,14 @@ import static android.os.Build.VERSION.SDK_INT;
  * https://github.com/tiann/FreeReflection
  * http://weishu.me/2018/06/07/free-reflection-above-android-p/
  * http://weishu.me/2019/03/16/another-free-reflection-above-android-p/
+ * <p>
+ * 思路
+ * 首先，我们通过反射 API 拿到 getDeclaredMethod 方法。
+ * getDeclaredMethod 是 public 的，不存在问题；这个通过反射拿到的方法我们称之为元反射方法。
+ * 然后，我们通过刚刚反射拿到元反射方法去反射调用 getDeclardMethod。
+ * 这里我们就实现了以系统身份去反射的目的——反射相关的 API 都是系统类，
+ * 因此我们的元反射方法也是被系统类加载的方法；
+ * 所以我们的元反射方法调用的 getDeclardMethod 会被认为是系统调用的，可以反射任意的方法。
  */
 public class Reflection {
 
@@ -24,10 +31,11 @@ public class Reflection {
     private static Object sVmRuntime;
 
     private static Method setHiddenApiExemptions;
-    private static final int ERROR_EXEMPT_FAILED = -21;
+    private static final int ERROR_EXEMPT_FAILED = -1;
+    private static final int ANDROID_P = 28;
 
     static {
-        if (SDK_INT >= Build.VERSION_CODES.P) {
+        if (SDK_INT >= ANDROID_P) {
             try {
 
                 //1.forName() 方法-->Class
@@ -72,7 +80,7 @@ public class Reflection {
     }
 
     public static int unseal() {
-        if (SDK_INT < 28) {
+        if (SDK_INT < ANDROID_P) {
             // Below Android P, ignore
             return 0;
         }

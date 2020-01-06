@@ -19,7 +19,7 @@ import java.lang.reflect.Field;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
-    private static final String TAG = "AMS_HOOK";
+    private static final String TAG = "MainActivity";
     private Button mBtnHookAmsActivity;
     private Button mBtnHookAmsAppCompatActivity;
     private Button mBtnHookInstrumentationActivity;
@@ -146,10 +146,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_download_plugin_apk: {
-                PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
-                File dexFile = getFileStreamPath("pluginapk-debug.apk");
-                File optDexFile = getFileStreamPath("pluginapk-debug.dex");
-                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
+                        File dexFile = getFileStreamPath("pluginapk-debug.apk");
+                        File optDexFile = getFileStreamPath("pluginapk-debug.dex");
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
+                    }
+                }).start();
                 break;
             }
 

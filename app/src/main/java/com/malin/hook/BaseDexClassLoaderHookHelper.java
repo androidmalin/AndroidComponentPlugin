@@ -72,20 +72,20 @@ final class BaseDexClassLoaderHookHelper {
             Field pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList");
             pathListField.setAccessible(true);
 
-            //2.获取DexPathList pathList;
+            //2.获取DexPathList pathList实例;
             Object dexPathList = pathListField.get(baseDexClassLoader);
             if (dexPathList == null) return;
 
 
             //3. 获取 DexPathList的成员: Element[] dexElements 的Field
-            //private final Element[] dexElements;
+            //private Element[] dexElements;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
-            Field dexElementArrayField = dexPathList.getClass().getDeclaredField("dexElements");
-            dexElementArrayField.setAccessible(true);
+            Field dexElementsField = dexPathList.getClass().getDeclaredField("dexElements");
+            dexElementsField.setAccessible(true);
 
             //4.获取 DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
-            Object[] dexElements = (Object[]) dexElementArrayField.get(dexPathList);
+            Object[] dexElements = (Object[]) dexElementsField.get(dexPathList);
             if (dexElements == null) return;
 
             //5. 获取dexElements数组的类型 (Element)
@@ -95,11 +95,11 @@ final class BaseDexClassLoaderHookHelper {
 
             //6. 创建一个数组, 用来替换原始的数组
             //通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
-            Object[] newElements = (Object[]) Array.newInstance(elementClazz, dexElements.length + 1);
+            Object[] hostAndPluginElements = (Object[]) Array.newInstance(elementClazz, dexElements.length + 1);
 
 
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
-            Object elementObj;
+            Object elementPluginObj;
             if (Build.VERSION.SDK_INT >= 26) {
                 //26<=API<=29 (8.0<=API<=10.0)
                 //7.构造插件Element
@@ -120,7 +120,7 @@ final class BaseDexClassLoaderHookHelper {
                 //  @param flags Enable optional features.  (Currently none defined.)
                 // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
                 DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
-                elementObj = elementConstructor.newInstance(dexFile, apkFile);
+                elementPluginObj = elementConstructor.newInstance(dexFile, apkFile);
             } else if (Build.VERSION.SDK_INT >= 18) {
                 //18<=API<=25 (4.3<=API<=7.1.1)
                 //7.构造插件Element
@@ -130,7 +130,7 @@ final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
-                elementObj = elementConstructor.newInstance(apkFile, false, apkFile, dexFile);
+                elementPluginObj = elementConstructor.newInstance(apkFile, false, apkFile, dexFile);
             } else if (Build.VERSION.SDK_INT == 17) {
                 //API=17  (API=4.2)
                 //7.构造插件Element
@@ -140,9 +140,9 @@ final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
-                elementObj = elementConstructor.newInstance(apkFile, apkFile, dexFile);
+                elementPluginObj = elementConstructor.newInstance(apkFile, apkFile, dexFile);
             } else {
-                //15~16
+                //15~16 (4.0.3=<API=4.1)
                 //7.构造插件Element
                 // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
                 Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, ZipFile.class, DexFile.class);
@@ -150,11 +150,11 @@ final class BaseDexClassLoaderHookHelper {
 
                 //8. 生成Element的实例对象
                 DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
-                elementObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), dexFile);
+                elementPluginObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), dexFile);
             }
 
 
-            Object[] pluginElementArray = new Object[]{elementObj};
+            Object[] pluginElements = new Object[]{elementPluginObj};
 
             //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
             //* @param      src      the source array.
@@ -165,18 +165,18 @@ final class BaseDexClassLoaderHookHelper {
             //https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
             // 插件的那个element复制进去
-            System.arraycopy(pluginElementArray, 0, newElements, 0, pluginElementArray.length);
+            System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.length);
 
-            // 把原始的elements复制进去
-            System.arraycopy(dexElements, 0, newElements, pluginElementArray.length, dexElements.length);
+            // 把宿主的elements复制进去
+            System.arraycopy(dexElements, 0, hostAndPluginElements, pluginElements.length, dexElements.length);
 
             // 替换
-            dexElementArrayField.set(dexPathList, newElements);
+            dexElementsField.set(dexPathList, hostAndPluginElements);
 
             // 简要总结一下这种方式的原理:
             // 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的CLassLoader加载所有的类;
             // 我们的思路是告诉宿主ClassLoader我们在哪,让其帮助完成类加载的过程.
-            // 宿主程序的ClassLoader最终继承自BaseDexClassLoader，BaseDexClassLoader通过DexPathList进行类的查找过程;
+            // 宿主程序的ClassLoader最终继承自BaseDexClassLoader,BaseDexClassLoader通过DexPathList进行类的查找过程;
             // 而这个查找通过遍历一个dexElements的数组完成;
             // 我们通过把插件dex添加进这个数组就让宿主ClassLoader获取了加载插件类的能力.
         } catch (IOException e) {

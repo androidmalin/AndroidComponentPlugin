@@ -1,0 +1,50 @@
+
+android-27
+
+cp /Users/malin/aosp/home/malin/android_source/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/core/java/android/app/IActivityManager.java /Users/malin/malin_review/AMSHook/app/source/android-27
+
+cp /Users/malin/aosp/home/malin/android_source/frameworks/base/core/java/android/app/IActivityManager.aidl /Users/malin/malin_review/AMSHook/app/source/android-27
+
+cp /Users/malin/aosp/home/malin/android_source/frameworks/base/core/java/android/content/pm/IPackageManager.aidl /Users/malin/malin_review/AMSHook/app/source/android-27
+
+cp /Users/malin/aosp/home/malin/android_source/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/core/java/android/content/pm/IPackageManager.java /Users/malin/malin_review/AMSHook/app/source/android-27
+
+
+ //android-27
+        // we use token to identify this activity without having to send the
+        // activity itself back to the activity manager. (matters more with ipc)
+        @Override
+        public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
+                ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+                CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+                int procState, Bundle state, PersistableBundle persistentState,
+                List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+                boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) {
+
+            updateProcessState(procState, false);
+
+            ActivityClientRecord r = new ActivityClientRecord();
+
+            r.token = token;
+            r.ident = ident;
+            r.intent = intent;
+            r.referrer = referrer;
+            r.voiceInteractor = voiceInteractor;
+            r.activityInfo = info;
+            r.compatInfo = compatInfo;
+            r.state = state;
+            r.persistentState = persistentState;
+
+            r.pendingResults = pendingResults;
+            r.pendingIntents = pendingNewIntents;
+
+            r.startsNotResumed = notResumed;
+            r.isForward = isForward;
+
+            r.profilerInfo = profilerInfo;
+
+            r.overrideConfig = overrideConfig;
+            updatePendingConfiguration(curConfig);
+
+            sendMessage(H.LAUNCH_ACTIVITY, r);
+        }
