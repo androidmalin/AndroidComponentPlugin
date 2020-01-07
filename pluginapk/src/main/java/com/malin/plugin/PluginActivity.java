@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-@SuppressLint("SetTextI18n")
+@SuppressLint({"SetTextI18n", "Registered"})
 public class PluginActivity extends Activity {
 
     private static final String TAG = "PluginActivity";

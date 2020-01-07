@@ -163,9 +163,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
-                MApplication.resetPms();
-                HookActivity.hookPackageManager(this, StubActivity.class);
+
+                if (MApplication.getInstance().isHookInstrumentation()) {
+                    //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
+                    MApplication.resetPms();
+                    HookActivity.hookPackageManager(this, StubActivity.class);
+                } else {
+                    startHook(false);
+                }
 
                 //start plugin activity
                 Intent intent = new Intent();
@@ -180,10 +185,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
-                MApplication.resetPms();
-                HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
-
+                if (MApplication.getInstance().isHookInstrumentation()) {
+                    //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
+                    MApplication.resetPms();
+                    HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
+                } else {
+                    startHook(true);
+                }
                 //start plugin activity
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
@@ -216,6 +224,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
     private void testBlackListApi() {
+        if (Build.VERSION.SDK_INT < 29) return;
         try {
             //1.
             //package android.app;

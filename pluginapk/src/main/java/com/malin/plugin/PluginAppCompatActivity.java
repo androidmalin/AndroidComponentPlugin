@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-@SuppressLint("SetTextI18n")
+@SuppressLint({"SetTextI18n", "Registered"})
 public class PluginAppCompatActivity extends AppCompatActivity {
 
     private static final String TAG = "PluginAppCompatActivity";
