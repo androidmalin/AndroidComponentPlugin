@@ -83,6 +83,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mBtnHookInstrumentationActivity.setVisibility(View.GONE);
             mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
         }
+        if (Build.VERSION.SDK_INT < 29) {
+            mBtnTestBlackListApi.setVisibility(View.GONE);
+        }
     }
 
     private void initListener() {
@@ -109,7 +112,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             case R.id.btn_start: {
                 if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startHook(false);
@@ -118,7 +121,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             case R.id.btn_start_appcompat: {
                 if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 startHook(true);

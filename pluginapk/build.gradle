@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
     }
 
     buildTypes {
@@ -26,5 +27,5 @@ dependencies {
     //compileOnly:必须要是compileOnly,不然在android19以下会出现问题
     //java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'androidx.appcompat:appcompat:1.2.0-alpha01'
+    compileOnly rootProject.ext.dependencies["androidx.appcompat"]
 }
