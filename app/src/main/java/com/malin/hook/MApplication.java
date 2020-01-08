@@ -34,9 +34,9 @@ public class MApplication extends Application {
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
+        unseal();
         init();
         startStrictMode();
-        unseal();
         getPM(context);
         handleService(context);
         handleActivity(context);
