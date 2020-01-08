@@ -75,9 +75,10 @@ public class HookService {
         @SuppressWarnings("ConstantConditions")
         @Override
         public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+            //public android.content.ComponentName startService(android.app.IApplicationThread caller, android.content.Intent service, java.lang.String resolvedType, boolean requireForeground, java.lang.String callingPackage, int userId) throws android.os.RemoteException;
             if ("startService".equals(method.getName())) {
                 Intent intent;
-                int index = 0;
+                int index = 1;
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] instanceof Intent) {
                         index = i;

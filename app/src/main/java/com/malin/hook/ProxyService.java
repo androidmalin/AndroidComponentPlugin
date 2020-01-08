@@ -3,6 +3,7 @@ package com.malin.hook;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -24,6 +25,7 @@ public class ProxyService extends Service {
         Log.d(TAG, "onCreate");
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
@@ -57,11 +59,6 @@ public class ProxyService extends Service {
             //1.ActivityThread实例
             Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
 
-            //public ApplicationThread getApplicationThread(){return mAppThread;}
-            Method getActivityThreadMethod = activityThreadClazz.getDeclaredMethod("getApplicationThread");
-            getActivityThreadMethod.setAccessible(true);
-
-
             //public static ActivityThread currentActivityThread() {return sCurrentActivityThread;}
             Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
@@ -72,6 +69,9 @@ public class ProxyService extends Service {
 
 
             //3.applicationThread 实例
+            //public ApplicationThread getApplicationThread(){return mAppThread;}
+            Method getActivityThreadMethod = activityThreadClazz.getDeclaredMethod("getApplicationThread");
+            getActivityThreadMethod.setAccessible(true);
             Object applicationThread = getActivityThreadMethod.invoke(activityThread);
 
 
@@ -81,8 +81,8 @@ public class ProxyService extends Service {
             asBinderMethod.setAccessible(true);
             Object token = asBinderMethod.invoke(applicationThread);
 
-
             Class<?> serviceClazz = Class.forName("android.app.Service");
+            //public final void attach(Context context,ActivityThread thread, String className, IBinder token, Application application, Object activityManager)
             Method attachMethod = serviceClazz.getDeclaredMethod("attach", Context.class, activityThreadClazz, String.class, IBinder.class, Application.class, Object.class);
             attachMethod.setAccessible(true);
 
@@ -91,7 +91,6 @@ public class ProxyService extends Service {
             Object defaultSingleton;
             if (Build.VERSION.SDK_INT >= 26) {
                 Class<?> activityManageClazz = Class.forName("android.app.ActivityManager");
-
                 Field IActivityManagerSingletonField = activityManageClazz.getDeclaredField("IActivityManagerSingleton");
                 IActivityManagerSingletonField.setAccessible(true);
                 defaultSingleton = IActivityManagerSingletonField.get(null);
@@ -110,19 +109,22 @@ public class ProxyService extends Service {
             //6.反射创建TargetService
             targetService = (Service) Class.forName(serviceName).newInstance();
 
+            ComponentName component = intent.getComponent();
+            if (component == null) return START_STICKY;
+
             //反射调用Service的attach()方法
-            attachMethod.invoke(targetService, this, activityThread, intent.getComponent().getClassName(), token, getApplication(), iActivityManagerObj);
+            attachMethod.invoke(targetService, this, activityThread, component.getClassName(), token, getApplication(), iActivityManagerObj);
 
             //调用Service的onCreate()方法
             targetService.onCreate();
+
+            //调用Service的onStartCommand()方法
+            targetService.onStartCommand(intent, flags, startId);
+
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             return START_STICKY;
         }
-
-        //调用Service的onStartCommand()方法
-        targetService.onStartCommand(intent, flags, startId);
-
         return START_STICKY;
     }
 }
