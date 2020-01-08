@@ -80,6 +80,7 @@ public class HookInstrumentation {
          * 使用占坑的Activity来通过AMS的验证.
          * http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/app/Instrumentation.java
          */
+        @SuppressWarnings("unused")
         public ActivityResult execStartActivity(Context who, IBinder contextThread, IBinder token, Activity target, Intent intent, int requestCode) {
 
             List<ResolveInfo> resolveInfoList = null;
@@ -118,6 +119,7 @@ public class HookInstrumentation {
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */
+        @SuppressWarnings("unused")
         public ActivityResult execStartActivity(Context who, IBinder contextThread, IBinder token, Activity target, Intent intent, int requestCode, Bundle options) {
 
             List<ResolveInfo> resolveInfoList = null;
