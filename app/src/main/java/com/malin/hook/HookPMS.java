@@ -73,6 +73,25 @@ public class HookPMS {
         }
     }
 
+
+    public static Object getApplicationPackageManager(Context context) {
+        Object mPM = null;
+        try {
+            //1.获取 ApplicationPackageManager里面的 mPM对象
+            PackageManager packageManager = context.getApplicationContext().getPackageManager();
+            //PackageManager的实现类ApplicationPackageManager中的mPM
+            //private final IPackageManager mPM;
+            Field mPmField = packageManager.getClass().getDeclaredField("mPM");
+            mPmField.setAccessible(true);
+            mPM = mPmField.get(packageManager);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return mPM;
+    }
+
     public static void resetApplicationPackageManager(Context context, Object object) {
         try {
             //1.获取 ApplicationPackageManager里面的 mPM对象
