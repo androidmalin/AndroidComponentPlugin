@@ -72,10 +72,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mBtnHookAmsAppCompatActivity.setVisibility(View.GONE);
             if (MApplication.getInstance().isHookInstrumentationIsAppCompatActivity()) {
                 mBtnHookInstrumentationAppCompatActivity.setVisibility(View.VISIBLE);
-                mBtnHookInstrumentationActivity.setVisibility(View.GONE);
+                mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
+                mBtnStartPluginActivity.setVisibility(View.VISIBLE);
+                mBtnStartPluginAppCompatActivity.setVisibility(View.VISIBLE);
             } else {
                 mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
                 mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
+                mBtnStartPluginActivity.setVisibility(View.VISIBLE);
+                mBtnStartPluginAppCompatActivity.setVisibility(View.GONE);
             }
         } else {
             mBtnHookAmsActivity.setVisibility(View.VISIBLE);
