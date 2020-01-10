@@ -1,8 +1,11 @@
 package com.malin.hook;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +18,8 @@ import androidx.core.os.BuildCompat;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -29,7 +34,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnStartPluginActivity;
     private Button mBtnStartPluginAppCompatActivity;
     private Button mBtnTestBlackListApi;
+    private Button mBtnSendBroadCastToPlugin;
+    private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
+    private static final String PLUGIN_APK = "pluginapk-debug.apk";
+    private static final String RECEIVER_PLUGIN = "receiverPlugin-debug.apk";
+    private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
+    private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
+    private static final String ACTION_PLUGIN2 = "com.malin.receiver.plugin.Receiver2.action";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initView();
         initData();
         initListener();
+        initReceiverPlugin();
     }
 
 
@@ -63,6 +76,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
         mBtnTestBlackListApi = findViewById(R.id.btn_test_hide_black_api);
+        mBtnSendBroadCastToPlugin = findViewById(R.id.btn_send_broadcast_to_plugin);
     }
 
 
@@ -102,6 +116,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnStartPluginActivity.setOnClickListener(this);
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
         mBtnTestBlackListApi.setOnClickListener(this);
+        mBtnSendBroadCastToPlugin.setOnClickListener(this);
     }
 
 
@@ -153,15 +168,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_download_plugin_apk: {
-                new Thread(new Runnable() {
+                Runnable patchClassLoaderRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
-                        File dexFile = getFileStreamPath("pluginapk-debug.apk");
-                        File optDexFile = getFileStreamPath("pluginapk-debug.dex");
+                        PluginUtils.extractAssets(MApplication.getInstance(), PLUGIN_APK);
+                        File dexFile = getFileStreamPath(PLUGIN_APK);
+                        File optDexFile = getFileStreamPath(PLUGIN_APK);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
                     }
-                }).start();
+                };
+                mSingleThreadExecutor.execute(patchClassLoaderRunnable);
                 break;
             }
 
@@ -206,6 +222,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
 
+            case R.id.btn_send_broadcast_to_plugin: {
+                sendBroadcast(new Intent(ACTION_PLUGIN1));
+                sendBroadcast(new Intent(ACTION_PLUGIN2));
+                break;
+            }
             default: {
                 break;
             }
@@ -254,5 +275,37 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    private void initReceiverPlugin() {
+        Runnable receiverPluginRegisterRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PluginUtils.extractAssets(MainActivity.this.getApplicationContext(), RECEIVER_PLUGIN);
+                File testPlugin = getFileStreamPath(RECEIVER_PLUGIN);
+                try {
+                    ReceiverHelper.preLoadReceiver(MainActivity.this.getApplicationContext(), testPlugin);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                // 注册插件收到我们发送的广播之后, 回传的广播
+                registerReceiver(mReceiver, new IntentFilter(PLUGIN_SEND_ACTION));
+            }
+        };
+        mSingleThreadExecutor.execute(receiverPluginRegisterRunnable);
+    }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive 插件插件,我是主程序,握手完成!");
+            Toast.makeText(context, "插件插件,我是主程序,握手完成!", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mReceiver != null) unregisterReceiver(mReceiver);
     }
 }

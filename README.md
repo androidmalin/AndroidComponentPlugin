@@ -1,22 +1,22 @@
 ### Android上简单实现Activity和Service的插件化, 启动未在AndroidManifest.xml中注册的Activity,Service;
 
-| 版本\组件 | Activity | Service |
-| :----: | :----:  | :----: |
-| android15 | ✅ | ✅ |
-| android16 | ✅ | ✅ |
-| android17 | ✅ | ✅ |
-| android18 | ✅ | ✅ |
-| android19 | ✅ | ✅ |
-| android20 | ✅ | ✅ |
-| android21 | ✅ | ✅ |
-| android22 | ✅ | ✅ |
-| android23 | ✅ | ✅ |
-| android24 | ✅ | ✅ |
-| android25 | ✅ | ✅ |
-| android26 | ✅ | ✅ |
-| android27 | ✅ | ✅ |
-| android28 | ✅ | ✅ |
-| android29 | ✅ | ✅ |
+| 版本\组件 | Activity | Service | BroadcastReceiver |
+| :----: | :----:  | :----: | :----: |
+| android15 | ✅ | ✅ | ✅ |
+| android16 | ✅ | ✅ | ✅ |
+| android17 | ✅ | ✅ | ✅ |
+| android18 | ✅ | ✅ | ✅ |
+| android19 | ✅ | ✅ | ✅ |
+| android20 | ✅ | ✅ | ✅ |
+| android21 | ✅ | ✅ | ✅ |
+| android22 | ✅ | ✅ | ✅ |
+| android23 | ✅ | ✅ | ✅ |
+| android24 | ✅ | ✅ | ✅ |
+| android25 | ✅ | ✅ | ✅ |
+| android26 | ✅ | ✅ | ✅ |
+| android27 | ✅ | ✅ | ✅ |
+| android28 | ✅ | ✅ | ✅ |
+| android29 | ✅ | ✅ | ✅ |
 
 ✅表示测试通过.
 

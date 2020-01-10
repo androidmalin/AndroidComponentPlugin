@@ -82,4 +82,12 @@
         android:layout_marginTop="30dp"
         android:text="启动插件APK中AppCompatActivity"
         tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_send_broadcast_to_plugin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="给插件发送广播"
+        tools:ignore="HardcodedText" />
 </LinearLayout>
