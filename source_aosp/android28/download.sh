@@ -12,3 +12,5 @@ wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/ap
 wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/content/pm/IPackageManager.aidl
 wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/app/ApplicationPackageManager.java
 wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/content/pm/PackageParser.java
+wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/content/pm/PackageUserState.java
+wget -c http://androidxref.com/9.0.0_r3/raw/frameworks/base/core/java/android/os/UserHandle.java

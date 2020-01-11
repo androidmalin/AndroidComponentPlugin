@@ -27,15 +27,15 @@ import java.util.Map;
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint({"PrivateApi", "unchecked"})
-public final class ReceiverHelper {
+final class ReceiverHelper {
 
     private static final String TAG = "ReceiverHelper";
 
     private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
     private static List<BroadcastReceiver> sReceiverList = new ArrayList<>();
 
-    public static void preLoadReceiver(Context context, File apk) throws Exception {
-        parserReceivers(context, apk);
+    static void preLoadReceiver(Context context, File apk) throws Exception {
+        parserReceivers(apk);
         ClassLoader cl = null;
         for (ActivityInfo activityInfo : ReceiverHelper.sCache.keySet()) {
             Log.i(TAG, "preload receiver:" + activityInfo.name);
@@ -54,7 +54,7 @@ public final class ReceiverHelper {
         }
     }
 
-    public static void unregisterReceiver(Context context) {
+    static void unregisterReceiver(Context context) {
         if (context == null) return;
         for (BroadcastReceiver broadcastReceiver : sReceiverList) {
             if (broadcastReceiver == null) continue;
@@ -68,7 +68,7 @@ public final class ReceiverHelper {
      * 解析Apk文件中的 <receiver>, 并存储起来
      */
     @SuppressLint("DiscouragedPrivateApi")
-    private static void parserReceivers(Context context, File apkFile) throws Exception {
+    private static void parserReceivers(File apkFile) throws Exception {
         int version = Build.VERSION.SDK_INT;
         if (version < 15) return;
         //1.获取PackageParser的Class对象
@@ -79,8 +79,17 @@ public final class ReceiverHelper {
         //2.获取parsePackage()方法的Method
         //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
         //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-28
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-27
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-26
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-25
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-24
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-23
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-22
         //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
         //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
+        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-18
+        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-17
+        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-16
         //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
         Method parsePackageMethod;
         if (Build.VERSION.SDK_INT >= 20) {
@@ -98,6 +107,9 @@ public final class ReceiverHelper {
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
             //public PackageParser(String archiveSourcePath) {}//api-19
+            //public PackageParser(String archiveSourcePath) {}//api-18
+            //public PackageParser(String archiveSourcePath) {}//api-17
+            //public PackageParser(String archiveSourcePath) {}//api-16
             //public PackageParser(String archiveSourcePath) {}//api-15
             Constructor constructor = packageParserClass.getConstructor(String.class);
             constructor.setAccessible(true);
@@ -106,6 +118,7 @@ public final class ReceiverHelper {
         }
 
         //4.调用parsePackage获取到apk对象对应的Package对象(return information about intent receivers in the package)
+        //Package为PackageParser的内部类;public final static class Package implements Parcelable {}
         Object packageObj;
         if (Build.VERSION.SDK_INT >= 20) {
             //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
@@ -141,8 +154,8 @@ public final class ReceiverHelper {
 
 
         //8.获取PackageParser类中内部类Component
-        //public static abstract class Component<II extends IntentInfo>{}
-        //public static class Component<II extends IntentInfo> {}//api-23
+        //public static abstract class Component<II extends IntentInfo> {}//api-29
+        //public static class Component<II extends IntentInfo> {}//api-15
         Class<?> packageParser$ComponentClass = Class.forName("android.content.pm.PackageParser$Component");
 
         //9.获取 Component类的intents属性的Field
@@ -168,49 +181,55 @@ public final class ReceiverHelper {
         //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=17
         //public static final ActivityInfo generateActivityInfo(Activity a, int flags, boolean stopped,int enabledState, int userId) {}//api=16
         //public static final ActivityInfo generateActivityInfo(Activity a,int flags) {}//api=15
-        Method generateReceiverInfo;
+        Method generateActivityInfoMethod;
         if (Build.VERSION.SDK_INT >= 17) {
             //11.获取PackageUserState的Class对象
             Class<?> packageUserStateClass = Class.forName("android.content.pm.PackageUserState");
 
             //12.生成PackageUserState的实例对象
-            Object defaultUserState = packageUserStateClass.newInstance();
+            Object defaultUserStateObj = packageUserStateClass.newInstance();
 
             //13.获取UserHandle的Class对象
             Class<?> userHandleClass = Class.forName("android.os.UserHandle");
 
             //14.获取UserHandle中的getCallingUserId()方法
-            //public static @UserIdInt int getCallingUserId()
+            //public static @UserIdInt int getCallingUserId(){}//api-29
             Method getCallingUserIdMethod = userHandleClass.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
 
 
             //15.获取getCallingUserId()方法(静态方法)的返回值userId
             Object userIdObj = getCallingUserIdMethod.invoke(null);
-            if (userIdObj == null) return;
+            if (!(userIdObj instanceof Integer)) return;
             int userId = (Integer) userIdObj;
 
 
-            //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}
-            generateReceiverInfo = packageParserClass.getDeclaredMethod(
+            //public static final ActivityInfo generateActivityInfo(Activity a, int flags, PackageUserState state, int userId) {}
+            generateActivityInfoMethod = packageParserClass.getDeclaredMethod(
                     "generateActivityInfo", packageParser$ActivityClass, int.class, packageUserStateClass, int.class);
-            generateReceiverInfo.setAccessible(true);
+            generateActivityInfoMethod.setAccessible(true);
 
             //16.解析出 receiver以及对应的 intentFilter
-            //receivers -->ArrayList<Activity> receivers
-            for (Object receiver : receivers) {
+            //receivers为ArrayList<Activity> receivers
+            for (Object activity : receivers) {
                 //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}
-                ActivityInfo info = (ActivityInfo) generateReceiverInfo.invoke(packageParser, receiver, 0, defaultUserState, userId);
+                ActivityInfo activityInfo = (ActivityInfo) generateActivityInfoMethod.invoke(packageParser, activity, 0, defaultUserStateObj, userId);
 
                 //17.PackageParser$Activity中获取intents字段的值,既public final ArrayList<II> intents;
-                // unchecked的原因是
+                //PackageParser$Activity是PackageParser$Component的子类,intents继承自父类
+                //public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {}
+                //public static abstract class Component<II extends IntentInfo> {
+                //  public final ArrayList<II> intents;
+                //}
+
+                // unchecked的原因是,II extends IntentInfo; 而IntentInfo extends IntentFilter==>所以II extends IntentFilter
                 // public static class IntentInfo extends IntentFilter {}
                 // public static class Component<II extends IntentInfo> {
                 //   public final ArrayList<II> intents;
                 // }
                 @SuppressWarnings("unchecked")
-                List<? extends IntentFilter> filters = (List<? extends IntentFilter>) intentsField.get(receiver);
-                sCache.put(info, filters);
+                List<? extends IntentFilter> intentFilters = (List<? extends IntentFilter>) intentsField.get(activity);
+                sCache.put(activityInfo, intentFilters);
             }
 
         } else if (Build.VERSION.SDK_INT == 16) {
@@ -218,32 +237,36 @@ public final class ReceiverHelper {
             // public static final int getCallingUserId(){}
             Method getCallingUserIdMethod = userIdClass.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
-            int userId = (int) getCallingUserIdMethod.invoke(null);
+
+            Object userIdObj = getCallingUserIdMethod.invoke(null);
+            if (!(userIdObj instanceof Integer)) return;
+            int userId = (Integer) userIdObj;
 
             //public static final ActivityInfo generateActivityInfo(Activity a, int flags, boolean stopped,int enabledState, int userId) {}//api=16
-            generateReceiverInfo = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class, boolean.class, int.class, int.class);
-            generateReceiverInfo.setAccessible(true);
+            generateActivityInfoMethod = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class, boolean.class, int.class, int.class);
+            generateActivityInfoMethod.setAccessible(true);
 
-            //receivers -->ArrayList<Activity> receivers
-            for (Object receiver : receivers) {
+            //receivers为ArrayList<Activity> receivers
+            for (Object activity : receivers) {
                 int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-                ActivityInfo info = (ActivityInfo) generateReceiverInfo.invoke(packageParser, receiver, 0, false, enabledState, userId);
+                ActivityInfo activityInfo = (ActivityInfo) generateActivityInfoMethod.invoke(packageParser, activity, 0, false, enabledState, userId);
 
                 @SuppressWarnings("unchecked")
-                List<? extends IntentFilter> filters = (List<? extends IntentFilter>) intentsField.get(receiver);
-                sCache.put(info, filters);
+                List<? extends IntentFilter> intentFilters = (List<? extends IntentFilter>) intentsField.get(activity);
+                sCache.put(activityInfo, intentFilters);
             }
         } else {
             //public static final ActivityInfo generateActivityInfo(Activity a,int flags) {}//api=15
-            generateReceiverInfo = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class);
-            generateReceiverInfo.setAccessible(true);
+            generateActivityInfoMethod = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class);
+            generateActivityInfoMethod.setAccessible(true);
 
-            //receivers -->ArrayList<Activity> receivers
-            for (Object receiver : receivers) {
-                ActivityInfo info = (ActivityInfo) generateReceiverInfo.invoke(packageParser, receiver, 0);
+            //receivers为ArrayList<Activity> receivers
+            for (Object activity : receivers) {
+                ActivityInfo activityInfo = (ActivityInfo) generateActivityInfoMethod.invoke(packageParser, activity, 0);
+
                 @SuppressWarnings("unchecked")
-                List<? extends IntentFilter> filters = (List<? extends IntentFilter>) intentsField.get(receiver);
-                sCache.put(info, filters);
+                List<? extends IntentFilter> intentFilters = (List<? extends IntentFilter>) intentsField.get(activity);
+                sCache.put(activityInfo, intentFilters);
             }
         }
     }
