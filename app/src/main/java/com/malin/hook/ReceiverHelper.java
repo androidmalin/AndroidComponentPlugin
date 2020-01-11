@@ -14,6 +14,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public final class ReceiverHelper {
     private static final String TAG = "ReceiverHelper";
 
     private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
+    private static List<BroadcastReceiver> sReceiverList = new ArrayList<>();
 
     public static void preLoadReceiver(Context context, File apk) throws Exception {
         parserReceivers(context, apk);
@@ -47,8 +49,19 @@ public final class ReceiverHelper {
             for (IntentFilter intentFilter : intentFilters) {
                 BroadcastReceiver receiver = (BroadcastReceiver) cl.loadClass(activityInfo.name).newInstance();
                 context.registerReceiver(receiver, intentFilter);
+                sReceiverList.add(receiver);
             }
         }
+    }
+
+    public static void unregisterReceiver(Context context) {
+        if (context == null) return;
+        for (BroadcastReceiver broadcastReceiver : sReceiverList) {
+            if (broadcastReceiver == null) continue;
+            context.unregisterReceiver(broadcastReceiver);
+        }
+        sCache.clear();
+        sReceiverList.clear();
     }
 
     /**

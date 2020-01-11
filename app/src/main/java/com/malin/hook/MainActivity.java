@@ -286,7 +286,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 // /data/data/com.malin.hook/files/receiverPlugin-debug.apk
                 File testPlugin = getFileStreamPath(RECEIVER_PLUGIN);
                 try {
-                    ReceiverHelper.preLoadReceiver(MainActivity.this.getApplicationContext(), testPlugin);
+                    ReceiverHelper.preLoadReceiver(MainActivity.this, testPlugin);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
@@ -309,5 +309,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onDestroy() {
         super.onDestroy();
         if (mReceiver != null) unregisterReceiver(mReceiver);
+        ReceiverHelper.unregisterReceiver(MainActivity.this);
     }
 }
