@@ -101,8 +101,7 @@ public final class ReceiverHelper {
             //public PackageParser(String archiveSourcePath) {}//api-15
             Constructor constructor = packageParserClass.getConstructor(String.class);
             constructor.setAccessible(true);
-            String apkFileName = apkFile.getName();
-            String archiveSourcePath = context.getFileStreamPath(apkFileName).getCanonicalPath();
+            String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = constructor.newInstance(archiveSourcePath);
         }
 
@@ -114,8 +113,7 @@ public final class ReceiverHelper {
             packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_RECEIVERS);
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
-            String apkFileName = apkFile.getName();
-            String destCodePath = context.getFileStreamPath(apkFileName).getCanonicalPath();
+            String destCodePath = apkFile.getCanonicalPath();
             DisplayMetrics displayMetrics = new DisplayMetrics();
 
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
@@ -142,16 +140,16 @@ public final class ReceiverHelper {
         Class<?> packageParser$ActivityClass = Class.forName("android.content.pm.PackageParser$Activity");
 
 
-        //13.获取PackageParser类中内部类Component
+        //8.获取PackageParser类中内部类Component
         //public static abstract class Component<II extends IntentInfo>{}
         //public static class Component<II extends IntentInfo> {}//api-23
         Class<?> packageParser$ComponentClass = Class.forName("android.content.pm.PackageParser$Component");
 
-        //14.获取 Component类的intents属性的Field
+        //9.获取 Component类的intents属性的Field
         //public final ArrayList<II> intents;
         Field intentsField = packageParser$ComponentClass.getDeclaredField("intents");
 
-        //15.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo()
+        //10.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo()
 
         //handle 1.api17-29
         //handle 2.api16
@@ -172,22 +170,22 @@ public final class ReceiverHelper {
         //public static final ActivityInfo generateActivityInfo(Activity a,int flags) {}//api=15
         Method generateReceiverInfo;
         if (Build.VERSION.SDK_INT >= 17) {
-            //8.获取PackageUserState的Class对象
+            //11.获取PackageUserState的Class对象
             Class<?> packageUserStateClass = Class.forName("android.content.pm.PackageUserState");
 
             //12.生成PackageUserState的实例对象
             Object defaultUserState = packageUserStateClass.newInstance();
 
-            //9.获取UserHandle的Class对象
+            //13.获取UserHandle的Class对象
             Class<?> userHandleClass = Class.forName("android.os.UserHandle");
 
-            //10.获取UserHandle中的getCallingUserId()方法
+            //14.获取UserHandle中的getCallingUserId()方法
             //public static @UserIdInt int getCallingUserId()
             Method getCallingUserIdMethod = userHandleClass.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
 
 
-            //11.获取getCallingUserId()方法(静态方法)的返回值userId
+            //15.获取getCallingUserId()方法(静态方法)的返回值userId
             Object userIdObj = getCallingUserIdMethod.invoke(null);
             if (userIdObj == null) return;
             int userId = (Integer) userIdObj;

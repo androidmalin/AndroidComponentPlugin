@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.os.BuildCompat;
 
 import java.io.File;
@@ -51,19 +50,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initData();
         initListener();
         initReceiverPlugin();
-    }
-
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState");
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        Log.d(TAG, "onRestoreInstanceState");
     }
 
     private void initView() {
@@ -126,7 +112,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         switch (id) {
 
             case R.id.btn_test_hide_black_api: {
-                testBlackListApi();
+                boolean success = testBlackListApi();
+                Toast.makeText(this, success ? "success" : "fail", Toast.LENGTH_SHORT).show();
                 break;
             }
             case R.id.btn_start: {
@@ -251,8 +238,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * System.err  W  java.lang.NoSuchFieldException: INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
-    private void testBlackListApi() {
-        if (Build.VERSION.SDK_INT < 29) return;
+    private boolean testBlackListApi() {
+        boolean success = true;
+        if (Build.VERSION.SDK_INT < 29) return true;
         try {
             //1.
             //package android.app;
@@ -270,11 +258,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.d(TAG, "get blacklist api :" + check_flag);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+            success = false;
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+            success = false;
         } catch (IllegalAccessException e) {
+            success = false;
             e.printStackTrace();
         }
+        return success;
     }
 
     private void initReceiverPlugin() {
