@@ -282,6 +282,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
             @Override
             public void run() {
                 PluginUtils.extractAssets(MainActivity.this.getApplicationContext(), RECEIVER_PLUGIN);
+
+                // /data/data/com.malin.hook/files/receiverPlugin-debug.apk
                 File testPlugin = getFileStreamPath(RECEIVER_PLUGIN);
                 try {
                     ReceiverHelper.preLoadReceiver(MainActivity.this.getApplicationContext(), testPlugin);

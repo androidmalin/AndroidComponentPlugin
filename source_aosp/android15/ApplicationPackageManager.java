@@ -440,7 +440,7 @@ final class ApplicationPackageManager extends PackageManager {
             return mPM.queryIntentActivities(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                flag s);
+                flags);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
