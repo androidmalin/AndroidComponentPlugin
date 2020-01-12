@@ -37,6 +37,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private static final String PLUGIN_APK = "pluginapk-debug.apk";
+    private static final String PLUGIN_DEX = "pluginapk-debug.dex";
     private static final String RECEIVER_PLUGIN = "receiverPlugin-debug.apk";
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
@@ -160,7 +161,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     public void run() {
                         PluginUtils.extractAssets(MApplication.getInstance(), PLUGIN_APK);
                         File dexFile = getFileStreamPath(PLUGIN_APK);
-                        File optDexFile = getFileStreamPath(PLUGIN_APK);
+                        File optDexFile = getFileStreamPath(PLUGIN_DEX);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
                     }
                 };
