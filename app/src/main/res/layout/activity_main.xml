@@ -11,7 +11,7 @@
         android:id="@+id/btn_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="10dp"
         android:text="Hook AMS 启动未注册的普通Activity"
         tools:ignore="HardcodedText" />
 
@@ -28,7 +28,7 @@
         android:id="@+id/btn_test_hide_black_api"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="测试反射调用黑名单API"
         tools:ignore="HardcodedText" />
 
@@ -36,7 +36,7 @@
         android:id="@+id/btn_start_instrumentation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="Hook Instrumentation 启动未注册的普通Activity"
         tools:ignore="HardcodedText" />
 
@@ -45,7 +45,7 @@
         android:id="@+id/btn_start_instrumentation_appCompat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="Hook Instrumentation 启动未注册的AppCompatActivity"
         tools:ignore="HardcodedText" />
 
@@ -53,7 +53,7 @@
         android:id="@+id/btn_service"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="启动未注册的Service"
         tools:ignore="HardcodedText" />
 
@@ -61,7 +61,7 @@
         android:id="@+id/btn_download_plugin_apk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="下载插件APK"
         tools:ignore="HardcodedText" />
 
@@ -70,7 +70,7 @@
         android:id="@+id/btn_start_plugin_apk_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="启动插件APK中普通Activity"
         tools:ignore="HardcodedText" />
 
@@ -79,7 +79,7 @@
         android:id="@+id/btn_start_plugin_apk_appcompat_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="启动插件APK中AppCompatActivity"
         tools:ignore="HardcodedText" />
 
@@ -87,7 +87,23 @@
         android:id="@+id/btn_send_broadcast_to_plugin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:text="给插件发送广播"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_insert_provider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="使用插件中的ContentProvider插入数据"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_query_provider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="使用插件中的ContentProvider查询"
         tools:ignore="HardcodedText" />
 </LinearLayout>

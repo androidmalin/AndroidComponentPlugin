@@ -17,11 +17,23 @@ public class PluginUtils {
 
     private static File sBaseDir;
 
+    public interface CopyCallback {
+        void onSuccess();
+
+        void onFail();
+    }
 
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
      */
     public static void extractAssets(Context context, String sourceName) {
+        extractAssets(context, sourceName, null);
+    }
+
+    /**
+     * 把Assets里面得文件复制到 /data/data/files 目录下
+     */
+    public static void extractAssets(Context context, String sourceName, CopyCallback copyCallback) {
         AssetManager am = context.getAssets();
         InputStream is = null;
         FileOutputStream fos = null;
@@ -35,13 +47,18 @@ public class PluginUtils {
                 fos.write(buffer, 0, count);
             }
             fos.flush();
+            if (copyCallback != null) {
+                copyCallback.onSuccess();
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            if (copyCallback != null) {
+                copyCallback.onFail();
+            }
         } finally {
             closeSilently(is);
             closeSilently(fos);
         }
-
     }
 
     /**

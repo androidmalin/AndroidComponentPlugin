@@ -5,5 +5,5 @@ echo "apk will install to "${first_device}
 adb -s ${first_device} uninstall ${packageName} >/dev/null
 echo "uninstall ${packageName} from "${first_device}
 echo "install ${packageName} to "${first_device}
-gradle -q app:installDebug -x lint --parallel --offline --continue &&
+./gradlew -q app:installDebug -x lint --parallel --offline --continue &&
 adb -s ${first_device} shell am start ${packageName}/.MainActivity

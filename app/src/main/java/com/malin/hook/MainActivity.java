@@ -3,9 +3,13 @@ package com.malin.hook;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +38,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnStartPluginAppCompatActivity;
     private Button mBtnTestBlackListApi;
     private Button mBtnSendBroadCastToPlugin;
+    private Button mBtnInsertData;
+    private Button mBtnQueryData;
     private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private static final String PLUGIN_APK = "pluginapk-debug.apk";
@@ -42,6 +48,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
     private static final String ACTION_PLUGIN2 = "com.malin.receiver.plugin.Receiver2.action";
+    private static Uri URI = Uri.parse("content://com.malin.plugin.contentprovider.PluginContentProvider");
+    private static int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
         mBtnTestBlackListApi = findViewById(R.id.btn_test_hide_black_api);
         mBtnSendBroadCastToPlugin = findViewById(R.id.btn_send_broadcast_to_plugin);
+        mBtnInsertData = findViewById(R.id.btn_insert_provider);
+        mBtnQueryData = findViewById(R.id.btn_query_provider);
     }
 
 
@@ -104,6 +114,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
         mBtnTestBlackListApi.setOnClickListener(this);
         mBtnSendBroadCastToPlugin.setOnClickListener(this);
+        mBtnInsertData.setOnClickListener(this);
+        mBtnQueryData.setOnClickListener(this);
     }
 
 
@@ -215,6 +227,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 sendBroadcast(new Intent(ACTION_PLUGIN2));
                 break;
             }
+
+            case R.id.btn_insert_provider: {
+                contentProviderInsertData();
+                break;
+            }
+
+            case R.id.btn_query_provider: {
+                contentProviderQueryData();
+                break;
+            }
             default: {
                 break;
             }
@@ -297,6 +319,62 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Toast.makeText(context, "插件插件,我是主程序,握手完成!", Toast.LENGTH_SHORT).show();
         }
     };
+
+
+    private void contentProviderInsertData() {
+        Runnable insertDataRunnable = new Runnable() {
+            @Override
+            public void run() {
+                boolean success = true;
+                String value = null;
+                try {
+                    value = "name" + count++;
+                    ContentValues values = new ContentValues();
+                    values.put("name", value);
+                    getContentResolver().insert(URI, values);
+                } catch (Throwable throwable) {
+                    success = false;
+                    throwable.printStackTrace();
+                }
+                final boolean finalSuccess = success;
+                final String finalValue = value;
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, finalSuccess ? "插入成功:" + finalValue : "插入失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        };
+        mSingleThreadExecutor.execute(insertDataRunnable);
+    }
+
+    private void contentProviderQueryData() {
+        Runnable queryDataRunnable = new Runnable() {
+            @Override
+            public void run() {
+                ContentResolver contentResolver = getContentResolver();
+                if (contentResolver == null) return;
+                Cursor cursor = getContentResolver().query(URI, null, null, null, null);
+                if (cursor == null) return;
+                final StringBuilder sb = new StringBuilder("column: ");
+                while (cursor.moveToNext()) {
+                    int count = cursor.getColumnCount();
+                    for (int i = 0; i < count; i++) {
+                        sb.append(cursor.getString(i)).append(", ");
+                    }
+                }
+                cursor.close();
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "query:" + sb.toString(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        };
+        mSingleThreadExecutor.execute(queryDataRunnable);
+    }
 
     @Override
     protected void onDestroy() {

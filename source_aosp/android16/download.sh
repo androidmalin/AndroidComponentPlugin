@@ -11,3 +11,4 @@ wget -c http://androidxref.com/4.1.2/raw/frameworks/base/core/java/android/conte
 # http://androidxref.com/4.1.2/raw/frameworks/base/core/java/android/os/UserHandle.java
 wget -c http://androidxref.com/4.1.2/raw/frameworks/base/core/java/android/os/UserId.java
 wget -c http://androidxref.com/4.1.2/raw/frameworks/base/core/java/android/content/pm/PackageManager.java
+wget -c http://androidxref.com/4.1.2/raw/frameworks/base/core/java/android/app/ActivityThread.java
