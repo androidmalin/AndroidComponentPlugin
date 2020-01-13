@@ -1,26 +1,34 @@
-### Android上简单实现Activity和Service的插件化, 启动未在AndroidManifest.xml中注册的Activity,Service;
+### Android上简单实现Activity，Service，BroadcastReceiver，ContentProvider的插件化
 
-| 版本\组件 | Activity | Service | BroadcastReceiver |
-| :----: | :----:  | :----: | :----: |
-| android15 | ✅ | ✅ | ✅ |
-| android16 | ✅ | ✅ | ✅ |
-| android17 | ✅ | ✅ | ✅ |
-| android18 | ✅ | ✅ | ✅ |
-| android19 | ✅ | ✅ | ✅ |
-| android20 | ✅ | ✅ | ✅ |
-| android21 | ✅ | ✅ | ✅ |
-| android22 | ✅ | ✅ | ✅ |
-| android23 | ✅ | ✅ | ✅ |
-| android24 | ✅ | ✅ | ✅ |
-| android25 | ✅ | ✅ | ✅ |
-| android26 | ✅ | ✅ | ✅ |
-| android27 | ✅ | ✅ | ✅ |
-| android28 | ✅ | ✅ | ✅ |
-| android29 | ✅ | ✅ | ✅ |
+### 说明:
+从开始学习插件化，到简单地实现了四大组件的插件化，断断续续地持续了近10个月的时间，收获很大。学习了反射，泛型，动态代理，静态代理，AIDL，ClassLoader等等的知识。
+
+代码主要参考维术插件化系列博客。在此基础上做了大量的版本适配(android15-android29)。
+[维术插件化系列博客](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)和[示例代码](https://github.com/tiann/understand-plugin-framework)，写的特别好，值得反复学习，在此特别感谢。
+
+实例代码测试情况如下：
+
+| 版本\组件 | Activity | Service | BroadcastReceiver | ContentProvider |
+| :----: | :----:  | :----: | :----: | :----: |
+| android15 | ✅ | ✅ | ✅ | ✅ |
+| android16 | ✅ | ✅ | ✅ | ✅ |
+| android17 | ✅ | ✅ | ✅ | ✅ |
+| android18 | ✅ | ✅ | ✅ | ✅ |
+| android19 | ✅ | ✅ | ✅ | ✅ |
+| android20 | ✅ | ✅ | ✅ | ✅ |
+| android21 | ✅ | ✅ | ✅ | ✅ |
+| android22 | ✅ | ✅ | ✅ | ✅ |
+| android23 | ✅ | ✅ | ✅ | ✅ |
+| android24 | ✅ | ✅ | ✅ | ✅ |
+| android25 | ✅ | ✅ | ✅ | ✅ |
+| android26 | ✅ | ✅ | ✅ | ✅ |
+| android27 | ✅ | ✅ | ✅ | ✅ |
+| android28 | ✅ | ✅ | ✅ | ✅ |
+| android29 | ✅ | ✅ | ✅ | ✅ |
 
 ✅表示测试通过.
 
-适配了Android4-10,四大组件中的Activity和Service的插件化; 要彻底搞清楚代码,需要提前掌握的知识点如下:
+适配了Android4-10，四大组件中的Activity和Service的插件化; 要彻底搞清楚代码，需要提前掌握的知识点如下:
 0. [反射的使用1](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
 1. [反射的使用2](https://www.geeksforgeeks.org/reflection-in-java/)
 2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
@@ -32,13 +40,13 @@
 
 
 ### 问题思考
-1. 如何确保我们启动的未注册的Activity,有正常的Activity的生命周期?
+1. 如何确保我们启动的未注册的Activity，有正常的Activity的生命周期?
 
 [源码探索系列29---插件化基础之启动插件的Activity](http://sanjay-f.github.io/2016/04/01/%E6%BA%90%E7%A0%81%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%9729---%E6%8F%92%E4%BB%B6%E5%8C%96%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%90%AF%E5%8A%A8%E6%8F%92%E4%BB%B6%E7%9A%84Activity/)
 
-2. 从整体宏观的角度看,我们到底做了什么?
+2. 从整体宏观的角度看，我们到底做了什么?
 
-3. 对PackageManager的hook,为什么要hook两个地方
+3. 对PackageManager的hook，为什么要hook两个地方
 
 [hook技术(三)对AMS&PMS进行Hook](https://blog.csdn.net/wangwei708846696/article/details/79525467)
 
@@ -50,7 +58,7 @@ public PackageManager getPackageManager() {
     }
     IPackageManager pm = ActivityThread.getPackageManager();
     if (pm != null) {
-        return (mPackageManager = new ApplicationPackageManager(this, pm));
+        return (mPackageManager = new ApplicationPackageManager(this， pm));
     }
     return null;
 }
@@ -77,7 +85,14 @@ public PackageManager getPackageManager() {
 1. [Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
 2. [Android：学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
 3. [大白话说Java反射：入门、使用、原理](https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html)
-4. [Android 插件化原理解析——Hook机制之AMS&PMS](http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/)
-5. [Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](http://www.520monkey.com/archives/867)
-6. [Android插件化的兼容性（中）：Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
-7. [Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
+4. [Hook机制之动态代理](http://weishu.me/2016/01/28/understand-plugin-framework-proxy-hook/)
+5. [Android插件化原理解析——Hook机制之Binder Hook](http://weishu.me/2016/02/16/understand-plugin-framework-binder-hook/)
+6. [Android 插件化原理解析——Activity生命周期管理](http://weishu.me/2016/03/21/understand-plugin-framework-activity-management/)
+7. [Android 插件化原理解析——插件加载机制](http://weishu.me/2016/04/05/understand-plugin-framework-classloader/)
+8. [Android插件化原理解析——广播的管理](http://weishu.me/2016/04/12/understand-plugin-framework-receiver/)
+9. [Android 插件化原理解析——Service的插件化](http://weishu.me/2016/05/11/understand-plugin-framework-service/)
+10. [Android插件化原理解析——ContentProvider的插件化](http://weishu.me/2016/07/12/understand-plugin-framework-content-provider/)
+11. [Android 插件化原理解析——Hook机制之AMS&PMS](http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/)
+12. [Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](http://www.520monkey.com/archives/867)
+13. [Android插件化的兼容性（中）：Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
+14. [Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
