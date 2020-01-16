@@ -11,9 +11,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
-            android:name="com.malin.plugin.contentprovider.PluginContentProvider"
-            android:authorities="com.malin.plugin.contentprovider.PluginContentProvider"
+            android:name=".PluginProvider"
+            android:authorities="com.malin.auth.xx"
             android:exported="true" />
     </application>
 </manifest>

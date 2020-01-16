@@ -48,8 +48,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
     private static final String ACTION_PLUGIN2 = "com.malin.receiver.plugin.Receiver2.action";
-    private static Uri URI = Uri.parse("content://com.malin.plugin.contentprovider.PluginContentProvider");
-    private static int count = 0;
+    private int USER_ID = 3;
+    private int JOB_ID = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -325,25 +325,27 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Runnable insertDataRunnable = new Runnable() {
             @Override
             public void run() {
-                boolean success = true;
-                String value = null;
-                try {
-                    value = "name" + count++;
-                    ContentValues values = new ContentValues();
-                    values.put("name", value);
-                    getContentResolver().insert(URI, values);
-                } catch (Throwable throwable) {
-                    success = false;
-                    throwable.printStackTrace();
+                //对user表进行操作
+                // 设置URI
+                Uri uri_user = Uri.parse("content://com.malin.auth.xx/user");
+
+                // 插入表中数据
+                ContentValues values = new ContentValues();
+                values.put("_id", USER_ID);
+                values.put("name", "宿主 add jake" + USER_ID);
+                USER_ID++;
+
+                // 通过ContentResolver 根据URI 向ContentProvider中插入数据
+                ContentResolver resolver = getContentResolver();
+                resolver.insert(uri_user, values);
+
+                // 通过ContentResolver 向ContentProvider中查询数据
+                Cursor cursor = resolver.query(uri_user, new String[]{"_id", "name"}, null, null, null);
+                if (cursor == null) return;
+                while (cursor.moveToNext()) {
+                    Log.d(TAG, "query book:" + cursor.getInt(0) + " " + cursor.getString(1));
                 }
-                final boolean finalSuccess = success;
-                final String finalValue = value;
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, finalSuccess ? "插入成功:" + finalValue : "插入失败", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                cursor.close();
             }
         };
         mSingleThreadExecutor.execute(insertDataRunnable);
@@ -353,24 +355,27 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Runnable queryDataRunnable = new Runnable() {
             @Override
             public void run() {
-                ContentResolver contentResolver = getContentResolver();
-                if (contentResolver == null) return;
-                Cursor cursor = getContentResolver().query(URI, null, null, null, null);
-                if (cursor == null) return;
-                final StringBuilder sb = new StringBuilder("column: ");
-                while (cursor.moveToNext()) {
-                    int count = cursor.getColumnCount();
-                    for (int i = 0; i < count; i++) {
-                        sb.append(cursor.getString(i)).append(", ");
-                    }
+                //对job表进行操作
+                // 和上述类似,只是URI需要更改,从而匹配不同的URI CODE,从而找到不同的数据资源
+                Uri uri_job = Uri.parse("content://com.malin.auth.xx/job");
+
+                // 插入表中数据
+                ContentValues values2 = new ContentValues();
+                values2.put("_id", JOB_ID);
+                values2.put("job", "宿主 add job" + JOB_ID);
+                JOB_ID++;
+
+                // 通过ContentResolver 根据URI 向ContentProvider中插入数据
+                ContentResolver resolver2 = getContentResolver();
+                resolver2.insert(uri_job, values2);
+
+                // 通过ContentResolver 向ContentProvider中查询数据
+                Cursor cursor2 = resolver2.query(uri_job, new String[]{"_id", "job"}, null, null, null);
+                if (cursor2 == null) return;
+                while (cursor2.moveToNext()) {
+                    Log.d(TAG, "query job:" + cursor2.getInt(0) + " " + cursor2.getString(1));
                 }
-                cursor.close();
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "query:" + sb.toString(), Toast.LENGTH_LONG).show();
-                    }
-                });
+                cursor2.close();
             }
         };
         mSingleThreadExecutor.execute(queryDataRunnable);
