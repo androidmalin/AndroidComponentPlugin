@@ -3,8 +3,10 @@ package com.malin.hook;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.os.Build;
+import android.os.PatternMatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -15,8 +17,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 目前的bug是:
+ * 当target>=26时, java.lang.SecurityException: Failed to find provider com.malin.auth.xx for user 0; expected to find a valid ContentProvider for this authority
+ * target>=26;崩溃的问题;调试方法
+ * 在ComponentResolver类的ProviderInfo queryProvider(String authority, int flags, int userId) {}方法增加断点;
+ * 在模拟器上运行,给system_server进程断点;查看发现;调用方法queryProvider时全局变量mProvidersByAuthority中没有插件的Authority;
+ * 方法返回值为null;在外层调用处,进行了版本判断,target>=26;就异常了;
+ * mProvidersByAuthority变量的赋值在系统进程中;目前没有解决办法了;
+ */
 @SuppressLint("PrivateApi")
 class ProviderHelper {
 
@@ -32,13 +44,16 @@ class ProviderHelper {
             //1.get ProviderInfo
             List<ProviderInfo> providerInfoList = parseProviders(apkFile);
             if (providerInfoList == null) {
-                Log.e(TAG, "providerInfoList==null");
+                Log.d(TAG, "providerInfoList==null");
                 return;
             }
 
+            int i = 0;
             //2.set packageName
             for (ProviderInfo providerInfo : providerInfoList) {
                 providerInfo.applicationInfo.packageName = context.getPackageName();
+                printProviderInfo(providerInfo, i);
+                i++;
             }
             Log.d(TAG, providerInfoList.toString());
 
@@ -146,7 +161,7 @@ class ProviderHelper {
             List<?> providers = (List<?>) providersField.get(packageObj);
 
             if (providers == null) {
-                Log.e(TAG, "providers == null");
+                Log.d(TAG, "providers == null");
                 return null;
             }
 
@@ -253,5 +268,29 @@ class ProviderHelper {
         return null;
     }
 
+    private static void printProviderInfo(ProviderInfo providerInfo, int i) {
+        String name = providerInfo.name;
+        String authority = providerInfo.authority;
+        String readPermission = providerInfo.readPermission;
+        String writePermission = providerInfo.writePermission;
+        boolean grantUriPermissions = providerInfo.grantUriPermissions;
+        boolean multiprocess = providerInfo.multiprocess;
+        int initOrder = providerInfo.initOrder;
+        PatternMatcher[] uriPermissionPatterns = providerInfo.uriPermissionPatterns;
+        PathPermission[] pathPermissions = providerInfo.pathPermissions;
+        Log.d(TAG, i + "==============");
+        Log.d(TAG, "name:" + name);
+        Log.d(TAG, "authority:" + authority);
+        Log.d(TAG, "readPermission:" + readPermission);
+        Log.d(TAG, "writePermission:" + writePermission);
+        Log.d(TAG, "grantUriPermissions:" + grantUriPermissions);
+        Log.d(TAG, "multiprocess:" + multiprocess);
+        Log.d(TAG, "initOrder:" + initOrder);
+        Log.d(TAG, "uriPermissionPatterns:" + Arrays.toString(uriPermissionPatterns));
+        Log.d(TAG, "pathPermissions:" + Arrays.toString(pathPermissions));
+        Log.d(TAG, "applicationInfo.packageName:" + providerInfo.applicationInfo.packageName);
+        Log.d(TAG, "applicationInfo.name:" + providerInfo.applicationInfo.name);
+        Log.d(TAG, i + "==============");
+    }
 
 }
