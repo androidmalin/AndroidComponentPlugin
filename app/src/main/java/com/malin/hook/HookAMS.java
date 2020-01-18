@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 @SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
 public class HookAMS {
 
-    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
+    static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
         if (Build.VERSION.SDK_INT <= 18) {
             HookActivity.hookPackageManager(context, subActivityClass);
         }

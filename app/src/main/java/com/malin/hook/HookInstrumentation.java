@@ -21,11 +21,11 @@ import java.util.List;
  * 代码参考 android 进阶解密第十五章
  */
 @SuppressLint("PrivateApi")
-public class HookInstrumentation {
+class HookInstrumentation {
 
     private static final String TARGET_INTENT_NAME = "target_intent_name";
 
-    public static void hookInstrumentation(Context context, String stubActivityClassName) {
+    static void hookInstrumentation(Context context, String stubActivityClassName) {
 
         try {
             //1.ContextImpl-->mMainThread
@@ -67,7 +67,7 @@ public class HookInstrumentation {
         private PackageManager mPackageManager;
         private String mStubActivityClassName;
 
-        public InstrumentationProxy(Instrumentation instrumentation, PackageManager packageManager, String stubActivityClassName) {
+        InstrumentationProxy(Instrumentation instrumentation, PackageManager packageManager, String stubActivityClassName) {
             mInstrumentation = instrumentation;
             mPackageManager = packageManager;
             mStubActivityClassName = stubActivityClassName;
@@ -91,7 +91,13 @@ public class HookInstrumentation {
                 //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/app/ApplicationPackageManager.java#queryIntentActivities
                 //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/IPackageManager.aidl
                 //http://androidxref.com/4.0.3_r1/xref/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
-                resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
+                int flags;
+                if (Build.VERSION.SDK_INT >= 23) {
+                    flags = PackageManager.MATCH_ALL;
+                } else {
+                    flags = 0x00020000;
+                }
+                resolveInfoList = mPackageManager.queryIntentActivities(intent, flags);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
@@ -139,7 +145,13 @@ public class HookInstrumentation {
                 //http://androidxref.com/4.2_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 //http://androidxref.com/4.1.2/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
                 //http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/content/pm/PackageManager.java#queryIntentActivities
-                resolveInfoList = mPackageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
+                int flags;
+                if (Build.VERSION.SDK_INT >= 23) {
+                    flags = PackageManager.MATCH_ALL;
+                } else {
+                    flags = 0x00020000;
+                }
+                resolveInfoList = mPackageManager.queryIntentActivities(intent, flags);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }

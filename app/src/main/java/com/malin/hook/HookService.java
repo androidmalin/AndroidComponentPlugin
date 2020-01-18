@@ -16,9 +16,9 @@ import java.lang.reflect.Proxy;
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint("PrivateApi")
-public class HookService {
+class HookService {
 
-    public static void hookAMSForService(Context context, Class<?> proxyServiceClass) {
+    static void hookAMSForService(Context context) {
         try {
             Object IActivityManagerSingletonObj;
             //1.IActivityManagerSingleton
@@ -47,7 +47,7 @@ public class HookService {
             Object proxy = Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class<?>[]{iActivityManagerClass},
-                    new IActivityManagerProxy(context, iActivityManagerObj, proxyServiceClass)
+                    new IActivityManagerProxy(context, iActivityManagerObj, ProxyService.class)
             );
 
             //4.重新设置新值
@@ -66,7 +66,7 @@ public class HookService {
         private Object mActivityManager;
         private Class<?> mStubServiceClass;
 
-        public IActivityManagerProxy(Context context, Object activityManager, Class<?> proxyServiceClass) {
+        IActivityManagerProxy(Context context, Object activityManager, Class<?> proxyServiceClass) {
             mContext = context;
             mActivityManager = activityManager;
             mStubServiceClass = proxyServiceClass;

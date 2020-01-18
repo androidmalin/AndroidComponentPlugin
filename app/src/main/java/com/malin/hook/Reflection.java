@@ -21,7 +21,7 @@ import static android.os.Build.VERSION.SDK_INT;
  * 因此我们的元反射方法也是被系统类加载的方法；
  * 所以我们的元反射方法调用的 getDeclardMethod 会被认为是系统调用的，可以反射任意的方法。
  */
-public class Reflection {
+class Reflection {
 
     private static final String TAG = "Reflection";
 
@@ -79,7 +79,7 @@ public class Reflection {
         }
     }
 
-    public static int unseal() {
+    static int unseal() {
         if (SDK_INT < ANDROID_P) {
             // Below Android P, ignore
             return 0;

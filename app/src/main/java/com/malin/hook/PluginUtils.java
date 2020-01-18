@@ -13,7 +13,7 @@ import java.io.InputStream;
  * @author weishu
  * 16/3/29
  */
-public class PluginUtils {
+class PluginUtils {
 
     private static File sBaseDir;
 
@@ -26,14 +26,14 @@ public class PluginUtils {
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
      */
-    public static void extractAssets(Context context, String sourceName) {
+    static void extractAssets(Context context, String sourceName) {
         extractAssets(context, sourceName, null);
     }
 
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
      */
-    public static void extractAssets(Context context, String sourceName, CopyCallback copyCallback) {
+    static void extractAssets(Context context, String sourceName, CopyCallback copyCallback) {
         AssetManager am = context.getAssets();
         InputStream is = null;
         FileOutputStream fos = null;
@@ -64,14 +64,14 @@ public class PluginUtils {
     /**
      * 待加载插件经过opt优化之后存放odex得路径
      */
-    public static File getPluginOptDexDir(String packageName) {
+    static File getPluginOptDexDir(String packageName) {
         return enforceDirExists(new File(getPluginBaseDir(packageName), "odex"));
     }
 
     /**
      * 插件得lib库路径, 这个demo里面没有用
      */
-    public static File getPluginLibDir(String packageName) {
+    static File getPluginLibDir(String packageName) {
         return enforceDirExists(new File(getPluginBaseDir(packageName), "lib"));
     }
 

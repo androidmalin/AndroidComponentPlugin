@@ -6,17 +6,17 @@ import java.io.File;
 
 import dalvik.system.DexClassLoader;
 
-public class CustomClassLoader extends DexClassLoader {
+class CustomClassLoader extends DexClassLoader {
     private static final String TAG = CustomClassLoader.class.getSimpleName();
 
-    public CustomClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
+    private CustomClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
         super(dexPath, optimizedDirectory, libraryPath, parent);
     }
 
     /**
      * 便利方法: 获取插件的ClassLoader, 能够加载指定的插件中的类
      */
-    public static CustomClassLoader getPluginClassLoader(File plugin, String packageName) {
+    static CustomClassLoader getPluginClassLoader(File plugin, String packageName) {
         //String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent
         Log.d(TAG, "dexPath:" + plugin.getPath());
         Log.d(TAG, "optimizedDirectory:" + PluginUtils.getPluginOptDexDir(packageName).getPath());

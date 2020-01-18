@@ -108,6 +108,7 @@ final class BaseDexClassLoaderHookHelper {
                 // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#637
                 // 注意getConstructor vs getDeclaredConstructor 的区别
                 // public Element(File dir, boolean isDirectory, File zip, DexFile dexFile) {
+                @SuppressWarnings("deprecation")
                 Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(DexFile.class, File.class);
                 elementConstructor.setAccessible(true);
 
@@ -119,6 +120,7 @@ final class BaseDexClassLoaderHookHelper {
                 //  @param outputPathName File that will hold the optimized form of the DEX data.
                 //  @param flags Enable optional features.  (Currently none defined.)
                 // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
+                @SuppressWarnings("deprecation")
                 DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
                 elementPluginObj = elementConstructor.newInstance(dexFile, apkFile);
             } else if (Build.VERSION.SDK_INT >= 18) {

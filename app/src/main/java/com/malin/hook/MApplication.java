@@ -115,7 +115,7 @@ public class MApplication extends Application {
 
     private void unseal() {
         int reflection = Reflection.unseal();
-        //Log.d(TAG, reflection == 0 ? "hide api 解除成功" : "hide api 解除失败");
+        Log.d(TAG, reflection == 0 ? "hide api 解除成功" : "hide api 解除失败");
     }
 
     private void handleActivity(Context context) {
@@ -136,7 +136,7 @@ public class MApplication extends Application {
     }
 
     private void handleService(Context context) {
-        HookService.hookAMSForService(context, ProxyService.class);
+        HookService.hookAMSForService(context);
     }
 
 

@@ -9,10 +9,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
-public class HookPMS {
+class HookPMS {
 
 
-    public static Object getPackageManager() {
+    static Object getPackageManager() {
         Object sPackageManager = null;
         try {
             //1.获取ActivityThread的值
@@ -43,7 +43,7 @@ public class HookPMS {
     }
 
 
-    public static void resetPackageManager(Object object) {
+    static void resetPackageManager(Object object) {
         Object sPackageManager;
         try {
             //1.获取ActivityThread的值
@@ -74,7 +74,7 @@ public class HookPMS {
     }
 
 
-    public static Object getApplicationPackageManager(Context context) {
+    static Object getApplicationPackageManager(Context context) {
         Object mPM = null;
         try {
             //1.获取 ApplicationPackageManager里面的 mPM对象
@@ -92,7 +92,7 @@ public class HookPMS {
         return mPM;
     }
 
-    public static void resetApplicationPackageManager(Context context, Object object) {
+    static void resetApplicationPackageManager(Context context, Object object) {
         try {
             //1.获取 ApplicationPackageManager里面的 mPM对象
             PackageManager packageManager = context.getPackageManager();

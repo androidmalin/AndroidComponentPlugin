@@ -23,9 +23,9 @@ import java.util.Map;
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint({"PrivateApi", "unchecked"})
-public final class ReceiverHelper21 {
+public final class ReceiverHelper23 {
 
-    private static final String TAG = "ReceiverHelper21";
+    private static final String TAG = "ReceiverHelper23";
 
     private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
 
@@ -33,9 +33,9 @@ public final class ReceiverHelper21 {
         parserReceivers(apk);
 
         ClassLoader cl = null;
-        for (ActivityInfo activityInfo : ReceiverHelper21.sCache.keySet()) {
+        for (ActivityInfo activityInfo : ReceiverHelper23.sCache.keySet()) {
             Log.i(TAG, "preload receiver:" + activityInfo.name);
-            List<? extends IntentFilter> intentFilters = ReceiverHelper21.sCache.get(activityInfo);
+            List<? extends IntentFilter> intentFilters = ReceiverHelper23.sCache.get(activityInfo);
             if (cl == null) {
                 cl = CustomClassLoader.getPluginClassLoader(apk, activityInfo.packageName);
             }
