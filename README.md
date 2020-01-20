@@ -29,6 +29,7 @@
 ✅表示测试通过.
 
 适配了Android4-10，四大组件中的Activity和Service的插件化; 要彻底搞清楚代码，需要提前掌握的知识点如下:
+
 0. [反射的使用1](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
 1. [反射的使用2](https://www.geeksforgeeks.org/reflection-in-java/)
 2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
