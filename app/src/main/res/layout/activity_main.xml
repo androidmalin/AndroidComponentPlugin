@@ -7,6 +7,15 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:hint="hook binder"
+        android:inputType="text"
+        tools:ignore="HardcodedText" />
+
     <Button
         android:id="@+id/btn_start"
         android:layout_width="wrap_content"

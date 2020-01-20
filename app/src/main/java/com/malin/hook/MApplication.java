@@ -50,6 +50,15 @@ public class MApplication extends Application {
         handleService(context);
         handleActivity(context);
         handleContentProvider(context);
+        hookClipboard();
+    }
+
+    private void hookClipboard() {
+        try {
+            BinderHookHelper.hookClipboardService();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleContentProvider(final Context context) {
@@ -166,6 +175,7 @@ public class MApplication extends Application {
     }
 
     private void startStrictMode() {
+        if (!BuildConfig.DEBUG || Build.VERSION.SDK_INT <= 15) return;
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyDialog()
