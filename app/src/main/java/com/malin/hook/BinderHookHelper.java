@@ -17,6 +17,8 @@ import java.util.Map;
  * @author weishu
  * malin modify add note
  * test android15-android29 通过
+ * http://weishu.me/2016/02/16/understand-plugin-framework-binder-hook/
+ * http://www.520monkey.com/archives/861
  */
 @SuppressLint("PrivateApi")
 class BinderHookHelper {
