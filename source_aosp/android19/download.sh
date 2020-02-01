@@ -8,3 +8,4 @@ wget -c http://androidxref.com/4.4_r1/raw/frameworks/base/core/java/android/cont
 wget -c http://androidxref.com/4.4_r1/raw/frameworks/base/core/java/android/content/pm/PackageUserState.java
 wget -c http://androidxref.com/4.4_r1/raw/frameworks/base/core/java/android/os/UserHandle.java
 wget -c http://androidxref.com/4.4_r1/raw/frameworks/base/core/java/android/app/ActivityThread.java
+wget -c http://androidxref.com/4.4_r1/raw/frameworks/base/services/java/com/android/server/am/ActivityManagerService.java

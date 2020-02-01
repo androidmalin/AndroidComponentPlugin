@@ -12,3 +12,4 @@ wget -c http://androidxref.com/4.0.3_r1/raw/frameworks/base/core/java/android/co
 wget -c http://androidxref.com/4.0.3_r1/raw/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
 wget -c http://androidxref.com/4.0.3_r1/raw/frameworks/base/core/java/android/content/pm/PackageParser.java
 wget -c http://androidxref.com/4.0.3_r1/raw/frameworks/base/core/java/android/app/ActivityThread.java
+wget -c http://androidxref.com/4.0.3_r1/raw/frameworks/base/services/java/com/android/server/am/ActivityManagerService.java

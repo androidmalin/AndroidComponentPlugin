@@ -12,3 +12,4 @@ wget -c http://androidxref.com/6.0.1_r10/raw/frameworks/base/core/java/android/a
 wget -c http://androidxref.com/6.0.1_r10/raw/frameworks/base/core/java/android/content/pm/IPackageManager.aidl
 wget -c http://androidxref.com/6.0.1_r10/raw/frameworks/base/core/java/android/app/ApplicationPackageManager.java
 wget -c http://androidxref.com/6.0.1_r10/raw/frameworks/base/core/java/android/os/UserHandle.java
+wget -c http://androidxref.com/6.0.1_r10/raw/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
