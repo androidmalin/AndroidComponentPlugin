@@ -2,7 +2,7 @@ ext {
     android = [
             applicationId    : "com.malin.hook",
             compileSdkVersion: 29,
-            buildToolsVersion: "29.0.2",
+            buildToolsVersion: "29.0.3",
             minSdkVersion    : 15,
             targetSdkVersion : 25,
             versionCode      : 1,
@@ -10,7 +10,7 @@ ext {
     ]
 
     versions = [
-            appcompat: "1.2.0-alpha01",
+            appcompat: "1.2.0-alpha02",
     ]
 
     dependencies = [
