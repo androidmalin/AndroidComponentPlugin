@@ -111,10 +111,10 @@ final class ReceiverHelper {
             //public PackageParser(String archiveSourcePath) {}//api-17
             //public PackageParser(String archiveSourcePath) {}//api-16
             //public PackageParser(String archiveSourcePath) {}//api-15
-            Constructor constructor = packageParserClass.getConstructor(String.class);
-            constructor.setAccessible(true);
+            Constructor packageParserConstructor = packageParserClass.getConstructor(String.class);
+            packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
-            packageParser = constructor.newInstance(archiveSourcePath);
+            packageParser = packageParserConstructor.newInstance(archiveSourcePath);
         }
 
         //4.调用parsePackage获取到apk对象对应的Package对象(return information about intent receivers in the package)
@@ -141,6 +141,7 @@ final class ReceiverHelper {
         // 接下来要做的就是根据这个List<Activity> 获取到Receiver对应的 ActivityInfo (依然是把receiver信息用activity处理了)
         //public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
         Field receiversField = packageObj.getClass().getDeclaredField("receivers");
+        receiversField.setAccessible(true);
 
         //6.获取Package实例中receivers字段的值,为ArrayList<Activity> receivers
         List<?> receivers = (List<?>) receiversField.get(packageObj);
@@ -161,6 +162,7 @@ final class ReceiverHelper {
         //9.获取 Component类的intents属性的Field
         //public final ArrayList<II> intents;
         Field intentsField = packageParser$ComponentClass.getDeclaredField("intents");
+        intentsField.setAccessible(true);
 
         //10.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo()
 
@@ -216,17 +218,17 @@ final class ReceiverHelper {
                 ActivityInfo activityInfo = (ActivityInfo) generateActivityInfoMethod.invoke(packageParser, activity, 0, defaultUserStateObj, userId);
 
                 //17.PackageParser$Activity中获取intents字段的值,既public final ArrayList<II> intents;
-                //PackageParser$Activity是PackageParser$Component的子类,intents继承自父类
+                //PackageParser$Activity是PackageParser$Component的子类,PackageParser$Activity中的intents成员变量继承自父类
                 //public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {}
                 //public static abstract class Component<II extends IntentInfo> {
                 //  public final ArrayList<II> intents;
                 //}
 
                 // unchecked的原因是,II extends IntentInfo; 而IntentInfo extends IntentFilter==>所以II extends IntentFilter
-                // public static class IntentInfo extends IntentFilter {}
                 // public static class Component<II extends IntentInfo> {
                 //   public final ArrayList<II> intents;
                 // }
+                // public static class IntentInfo extends IntentFilter {}
                 @SuppressWarnings("unchecked")
                 List<? extends IntentFilter> intentFilters = (List<? extends IntentFilter>) intentsField.get(activity);
                 sCache.put(activityInfo, intentFilters);

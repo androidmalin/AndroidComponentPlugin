@@ -24,14 +24,14 @@ class PluginUtils {
     }
 
     /**
-     * 把Assets里面得文件复制到 /data/data/files 目录下
+     * 把Assets里面的文件复制到 /data/data/files 目录下
      */
     static void extractAssets(Context context, String sourceName) {
         extractAssets(context, sourceName, null);
     }
 
     /**
-     * 把Assets里面得文件复制到 /data/data/files 目录下
+     * 把Assets里面的文件复制到 /data/data/files 目录下
      */
     static void extractAssets(Context context, String sourceName, CopyCallback copyCallback) {
         AssetManager am = context.getAssets();
@@ -62,14 +62,14 @@ class PluginUtils {
     }
 
     /**
-     * 待加载插件经过opt优化之后存放odex得路径
+     * 待加载插件经过opt优化之后存放odex的路径
      */
     static File getPluginOptDexDir(String packageName) {
         return enforceDirExists(new File(getPluginBaseDir(packageName), "odex"));
     }
 
     /**
-     * 插件得lib库路径, 这个demo里面没有用
+     * 插件的lib库路径, 这个demo里面没有用
      */
     static File getPluginLibDir(String packageName) {
         return enforceDirExists(new File(getPluginBaseDir(packageName), "lib"));
@@ -86,7 +86,7 @@ class PluginUtils {
 
 
     /**
-     * 需要加载得插件得基本目录 /data/data/<package>/files/plugin/
+     * 需要加载的插件的基本目录 /data/data/<package>/files/plugin/
      */
     private static File getPluginBaseDir(String packageName) {
         if (sBaseDir == null) {
