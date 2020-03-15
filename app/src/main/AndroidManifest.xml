@@ -12,7 +12,9 @@
         android:testOnly="false"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,10 +28,7 @@
             android:name=".StubAppCompatActivity"
             android:theme="@style/AppCompatTheme" />
 
-        <!--代理Service-->
-        <service
-            android:name=".ProxyService"
-            android:process=":daemon" />
+        <service android:name=".PluginProxyService" />
     </application>
 
 </manifest>

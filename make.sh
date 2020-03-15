@@ -10,3 +10,7 @@ cp pluginBroadcastReceiver/build/outputs/apk/debug/pluginBroadcastReceiver-debug
 rm -rf app/src/main/assets/pluginContentProvider-debug.apk
 ./gradlew -q pluginContentProvider:assembleDebug -x lint --parallel --offline --continue &&
 cp pluginContentProvider/build/outputs/apk/debug/pluginContentProvider-debug.apk app/src/main/assets/
+
+rm -rf app/src/main/assets/pluginService-debug.apk
+./gradlew -q pluginService:assembleDebug -x lint --parallel --offline --continue &&
+cp pluginService/build/outputs/apk/debug/pluginService-debug.apk app/src/main/assets/

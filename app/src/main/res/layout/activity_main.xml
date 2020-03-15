@@ -1,118 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:hint="hook binder"
-        android:inputType="text"
-        tools:ignore="HardcodedText" />
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="Hook AMS 启动未注册的普通Activity"
-        tools:ignore="HardcodedText" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:hint="长按复制,粘贴时,被复制的内容被替换了"
+            android:inputType="text"
+            tools:ignore="HardcodedText" />
 
-
-    <Button
-        android:id="@+id/btn_start_appcompat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hook AMS 启动未注册的AppCompatActivity"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="Hook AMS 启动未注册的普通Activity"
+            tools:ignore="HardcodedText" />
 
 
-    <Button
-        android:id="@+id/btn_test_hide_black_api"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="测试反射调用黑名单API"
-        tools:ignore="HardcodedText" />
-
-    <Button
-        android:id="@+id/btn_start_instrumentation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Hook Instrumentation 启动未注册的普通Activity"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start_appcompat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hook AMS 启动未注册的AppCompatActivity"
+            tools:ignore="HardcodedText" />
 
 
-    <Button
-        android:id="@+id/btn_start_instrumentation_appCompat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Hook Instrumentation 启动未注册的AppCompatActivity"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_test_hide_black_api"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="测试反射调用黑名单API"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btn_service"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="启动未注册的Service"
-        tools:ignore="HardcodedText" />
-
-    <Button
-        android:id="@+id/btn_download_plugin_apk"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="下载插件APK"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start_instrumentation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Hook Instrumentation 启动未注册的普通Activity"
+            tools:ignore="HardcodedText" />
 
 
-    <Button
-        android:id="@+id/btn_start_plugin_apk_activity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="启动插件APK中普通Activity"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start_instrumentation_appCompat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Hook Instrumentation 启动未注册的AppCompatActivity"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_start_plugin_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="启动插件中的Service"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_stop_plugin_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="停止插件中的Service"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_download_plugin_apk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="下载插件APK"
+            tools:ignore="HardcodedText" />
 
 
-    <Button
-        android:id="@+id/btn_start_plugin_apk_appcompat_activity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="启动插件APK中AppCompatActivity"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start_plugin_apk_activity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="启动插件APK中普通Activity"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btn_send_broadcast_to_plugin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="给插件发送广播"
-        tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btn_insert_provider"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="使用插件中的ContentProvider插入数据"
-        tools:ignore="HardcodedText" />
+        <Button
+            android:id="@+id/btn_start_plugin_apk_appcompat_activity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="启动插件APK中AppCompatActivity"
+            tools:ignore="HardcodedText" />
 
-    <Button
-        android:id="@+id/btn_query_provider"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="使用插件中的ContentProvider查询"
-        tools:ignore="HardcodedText" />
-</LinearLayout>
+        <Button
+            android:id="@+id/btn_send_broadcast_to_plugin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="给插件发送广播"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_insert_provider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="使用插件中的ContentProvider插入数据"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_query_provider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="使用插件中的ContentProvider查询"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
+</ScrollView>

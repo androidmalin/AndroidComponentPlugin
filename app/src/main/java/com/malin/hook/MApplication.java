@@ -144,8 +144,86 @@ public class MApplication extends Application {
         msPackageManager = HookPMS.getPackageManager();
     }
 
-    private void handleService(Context context) {
-        HookService.hookAMSForService(context);
+
+    /**
+     * 安装service插件,处理service插件
+     */
+    private void handleService(final Context context) {
+        try {
+            HookAMSForServicePlugin.hookActivityManagerNative();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        Runnable providerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                final String PLUGIN_APK = "pluginService-debug.apk";
+                final String PLUGIN_DEX = "pluginService-debug.odex";
+                final File apkFile = getFileStreamPath(PLUGIN_APK);
+                final File odexFile = getFileStreamPath(PLUGIN_DEX);
+                if (!apkFile.exists()) {
+                    Log.e(TAG, "pluginService extractAssets");
+                    if (Build.VERSION.SDK_INT >= 18) {
+                        PluginUtils.extractAssets(context, "pluginService-debug.apk");
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
+                        try {
+                            ServiceManager.getInstance().preLoadServices(apkFile);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    } else {
+                        //15=<Build.VERSION.SDK_INT<=17
+                        //static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
+                        //public static ActivityThread currentActivityThread() {return sThreadLocal.get();}
+                        //currentActivityThread()方法需要在UI线程中调用
+                        PluginUtils.extractAssets(context, PLUGIN_APK, new PluginUtils.CopyCallback() {
+                            @Override
+                            public void onSuccess() {
+                                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            ServiceManager.getInstance().preLoadServices(apkFile);
+                                        } catch (Throwable throwable) {
+                                            throwable.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFail() {
+
+                            }
+                        });
+                    }
+                } else {
+                    Log.e(TAG, "pluginService extractAssets not!!");
+                    if (Build.VERSION.SDK_INT >= 18) {
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
+                        try {
+                            ServiceManager.getInstance().preLoadServices(apkFile);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    } else {
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    ServiceManager.getInstance().preLoadServices(apkFile);
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        mSingleThreadExecutor.execute(providerRunnable);
     }
 
 
