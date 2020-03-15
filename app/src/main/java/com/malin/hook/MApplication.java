@@ -65,8 +65,8 @@ public class MApplication extends Application {
         Runnable providerRunnable = new Runnable() {
             @Override
             public void run() {
-                final String PLUGIN_APK = "pluginProvider-debug.apk";
-                final String PLUGIN_DEX = "pluginProvider-debug.dex";
+                final String PLUGIN_APK = "pluginContentProvider-debug.apk";
+                final String PLUGIN_DEX = "pluginContentProvider-debug.dex";
                 final File apkFile = getFileStreamPath(PLUGIN_APK);
                 final File dexFile = getFileStreamPath(PLUGIN_DEX);
                 if (!apkFile.exists()) {

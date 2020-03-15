@@ -1,4 +1,4 @@
 include ':app'
-include ':pluginapk'
-include ':receiverPlugin'
-include ':pluginProvider'
+include ':pluginActivity'
+include ':pluginBroadcastReceiver'
+include ':pluginContentProvider'
