@@ -48,7 +48,7 @@ public final class ProcessUtil {
      *
      * @return APP主进程的Name
      */
-    private static String getProcessNameViaManager(Context context) {
+    public static String getProcessNameViaManager(Context context) {
         int myPid = android.os.Process.myPid();
         if (myPid <= 0) return null;
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
