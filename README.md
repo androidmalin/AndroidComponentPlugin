@@ -1,43 +1,42 @@
 ### Android上简单实现Activity，Service，BroadcastReceiver，ContentProvider的插件化
 
 ### 说明:
-从开始学习插件化，到简单地实现了四大组件的插件化，断断续续地持续了近10个月的时间，收获很大。学习了反射，泛型，动态代理，静态代理，AIDL，ClassLoader等等的知识。
+从开始学习插件化，到简单地实现了四大组件的插件化，断断续续地持续了近10个月的时间，收获很大。学习了反射，泛型，动态代理，静态代理，AIDL，binder，ClassLoader等等的知识。
 
 代码主要参考维术插件化系列博客。在此基础上做了大量的版本适配(android15-android29)。
 [维术插件化系列博客](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)和[示例代码](https://github.com/tiann/understand-plugin-framework)，写的特别好，值得反复学习，在此特别感谢。
 
-实例代码测试情况如下：
+示例代码测试情况如下:
 
 | 版本\组件 | Activity | Service | BroadcastReceiver | ContentProvider |
 | :----: | :----:  | :----: | :----: | :----: |
-| android15 | ✅ | ✅ | ✅ | ✅ |
-| android16 | ✅ | ✅ | ✅ | ✅ |
-| android17 | ✅ | ✅ | ✅ | ✅ |
-| android18 | ✅ | ✅ | ✅ | ✅ |
-| android19 | ✅ | ✅ | ✅ | ✅ |
-| android20 | ✅ | ✅ | ✅ | ✅ |
-| android21 | ✅ | ✅ | ✅ | ✅ |
-| android22 | ✅ | ✅ | ✅ | ✅ |
-| android23 | ✅ | ✅ | ✅ | ✅ |
-| android24 | ✅ | ✅ | ✅ | ✅ |
-| android25 | ✅ | ✅ | ✅ | ✅ |
-| android26 | ✅ | ✅ | ✅ | ✅ |
-| android27 | ✅ | ✅ | ✅ | ✅ |
-| android28 | ✅ | ✅ | ✅ | ✅ |
 | android29 | ✅ | ✅ | ✅ | ✅ |
+| android28 | ✅ | ✅ | ✅ | ✅ |
+| android27 | ✅ | ✅ | ✅ | ✅ |
+| android26 | ✅ | ✅ | ✅ | ✅ |
+| android25 | ✅ | ✅ | ✅ | ✅ |
+| android24 | ✅ | ✅ | ✅ | ✅ |
+| android23 | ✅ | ✅ | ✅ | ✅ |
+| android22 | ✅ | ✅ | ✅ | ✅ |
+| android21 | ✅ | ✅ | ✅ | ✅ |
+| android20 | ✅ | ✅ | ✅ | ✅ |
+| android19 | ✅ | ✅ | ✅ | ✅ |
+| android18 | ✅ | ✅ | ✅ | ✅ |
+| android17 | ✅ | ✅ | ✅ | ✅ |
+| android16 | ✅ | ✅ | ✅ | ✅ |
+| android15 | ✅ | ✅ | ✅ | ✅ |
 
 ✅表示测试通过.
 
-适配了Android4-10，四大组件中的Activity和Service的插件化; 要彻底搞清楚代码，需要提前掌握的知识点如下:
+适配了Android4-10，四大组件中的Activity和Service的插件化；要彻底搞清楚代码，需要提前掌握的知识点如下:
 
 0. [反射的使用1](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
 1. [反射的使用2](https://www.geeksforgeeks.org/reflection-in-java/)
 2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
 3. [动态代理](https://blog.csdn.net/u011784767/article/details/78281384)
 4. [AIDL通信](https://blog.csdn.net/luoyanglizi/article/details/51980630)
-5. [Activity启动流程以及其中涉及到的两次跨进程通信](https://blog.csdn.net/jiangwei0910410003/article/details/52549333)
+5. [Activity启动流程以及其中涉及到的两次跨进程通信](http://www.520monkey.com/archives/867)
 6. [Handler消息处理机制](https://blog.csdn.net/guolin_blog/article/details/9991569)
-7. [Activity启动拦截](https://blog.csdn.net/jiangwei0910410003/article/details/52550147)
 
 
 ### 问题思考
@@ -65,7 +64,7 @@ public PackageManager getPackageManager() {
 }
 ```
 
-由于系统的执行肯定在我们代码之前，所以系统先生成了一个pm，这个是原生的pm然后保存在ApplicationPackageManager中，
+由于系统的执行肯定在我们代码之前，所以系统先生成了一个pm，这个是原生的pm，然后保存在ApplicationPackageManager中，
 使得以后使用ContextImp.getPackageManager()都返回这个IPackageManager 对象。
 就算我们后来替换了ActivityThread.getPackageManager()，但是也不影响mPackageManager 里面之前包装好的。
 所以我们还需要改变mPackageManager 里面的原来的pm对象。
@@ -73,7 +72,7 @@ public PackageManager getPackageManager() {
 4. Hook AMS和Hook Instrumentation两种方式的区别?
 
 5. [为什么偶尔出现pre-verified异常?](https://github.com/wequick/Small/wiki/Android-FAQ)
-这个问题属于dex热修复范畴。首先出现这个问题的充分条件：
+这个问题属于dex热修复范畴。首先出现这个问题的充分条件:
     (1) 一个“独善其身”的A.dex（所有的类引用都在本dex内，没有跨dex调用）
     (2) 另一个B.dex包含(1)中的某个类XiaoMing
     (3) 一个类加载器同时加载了(1)跟(2)，查找时(2)优先于(1)
@@ -83,9 +82,9 @@ public PackageManager getPackageManager() {
 
 
 ### 参考文章列表
-1. [Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
-2. [Android：学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
-3. [大白话说Java反射：入门、使用、原理](https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html)
+1. [Android:学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
+2. [Android:学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
+3. [大白话说Java反射:入门、使用、原理](https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html)
 4. [Hook机制之动态代理](http://weishu.me/2016/01/28/understand-plugin-framework-proxy-hook/)
 5. [Android插件化原理解析——Hook机制之Binder Hook](http://weishu.me/2016/02/16/understand-plugin-framework-binder-hook/)
 6. [Android 插件化原理解析——Activity生命周期管理](http://weishu.me/2016/03/21/understand-plugin-framework-activity-management/)
@@ -95,5 +94,5 @@ public PackageManager getPackageManager() {
 10. [Android插件化原理解析——ContentProvider的插件化](http://weishu.me/2016/07/12/understand-plugin-framework-content-provider/)
 11. [Android 插件化原理解析——Hook机制之AMS&PMS](http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/)
 12. [Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](http://www.520monkey.com/archives/867)
-13. [Android插件化的兼容性（中）：Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
+13. [Android插件化的兼容性（中）:Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
 14. [Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
