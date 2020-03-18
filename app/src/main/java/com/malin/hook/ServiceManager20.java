@@ -8,9 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.io.File;
@@ -24,14 +22,15 @@ import java.util.Map;
 /**
  * 插件化ServiceManager
  * come from weishu
- * modify by malin 适配 android15~android29,android R
+ * modify by malin
+ * 适用于 android >=20
  */
 @SuppressLint("PrivateApi")
-public final class ServiceManager {
+public final class ServiceManager20 {
 
     private static final String TAG = "ServiceManager";
 
-    private static volatile ServiceManager sInstance;
+    private static volatile ServiceManager20 sInstance;
 
     // 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
     private volatile Map<String, Service> mServiceMap = new HashMap<>();
@@ -39,11 +38,11 @@ public final class ServiceManager {
     // 存储插件的Service信息
     private volatile Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
 
-    public synchronized static ServiceManager getInstance() {
+    public synchronized static ServiceManager20 getInstance() {
         if (sInstance == null) {
-            synchronized (ServiceManager.class) {
+            synchronized (ServiceManager20.class) {
                 if (sInstance == null) {
-                    sInstance = new ServiceManager();
+                    sInstance = new ServiceManager20();
                 }
             }
         }
@@ -259,128 +258,54 @@ public final class ServiceManager {
      * @param apkFile 插件对应的apk文件
      * @throws Throwable 解析出错或者反射调用出错, 均会抛出异常
      */
-    @SuppressWarnings({"JavaReflectionMemberAccess", "ConstantConditions"})
+    @SuppressWarnings("JavaReflectionMemberAccess")
     void preLoadServices(File apkFile) throws Throwable {
-        int version = Build.VERSION.SDK_INT;
-        if (version < 15) return;
-        //1.获取PackageParser的Class对象
-        //package android.content.pm
-        //public class PackageParser
+        //1.生成PackageParser对象
         Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
+        Object packageParser = packageParserClazz.newInstance();
 
-        //2.获取parsePackage()方法的Method
-        Method parsePackageMethod;
-        if (Build.VERSION.SDK_INT >= 20) {
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-            parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
-        } else {
-            // 15<=Build.VERSION.SDK_INT <=19
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-            parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
-        }
+        //2.调用parsePackage获取到插件apkFile对应的Package对象
+        //public Package parsePackage(File packageFile, int flags) {}
+        Method parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
         parsePackageMethod.setAccessible(true);
+        //PackageParser$Package,Package为PackageParser的静态内部类
+        //public final static class Package {}
+        Object packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_SERVICES);
+        if (packageObj == null) throw new NullPointerException("packageObj==null");
 
-        //3.生成PackageParser对象实例
-        Object packageParser;
-        if (Build.VERSION.SDK_INT >= 20) {
-            packageParser = packageParserClazz.newInstance();
-        } else {
-            // 15<=Build.VERSION.SDK_INT <=19
-            Constructor packageParserConstructor = packageParserClazz.getConstructor(String.class);
-            packageParserConstructor.setAccessible(true);
-            String archiveSourcePath = apkFile.getCanonicalPath();
-            packageParser = packageParserConstructor.newInstance(archiveSourcePath);
-        }
-
-        //4.调用parsePackage获取到apk对象对应的Package对象(return information about intent receivers in the package)
-        //Package为PackageParser的内部类;public final static class Package implements Parcelable {}
-        Object packageObj;
-        if (Build.VERSION.SDK_INT >= 20) {
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
-            packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_SERVICES);
-        } else {
-            // 15<=Build.VERSION.SDK_INT <=19
-            String destCodePath = apkFile.getCanonicalPath();
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
-            packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_SERVICES);
-        }
-
-        if (packageObj == null) return;
-
-        //5.读取Package对象里面的services字段
+        //3.读取Package对象里面的services字段
         //public final ArrayList<Service> services = new ArrayList<Service>(0);
         Field servicesField = packageObj.getClass().getDeclaredField("services");
         servicesField.setAccessible(true);
-
-        //6.get services
         List<?> services = (List<?>) servicesField.get(packageObj);
         if (services == null) throw new NullPointerException("services==null");
 
-        //7.接下来要做的就是根据这个List<Service> 获取到Service对应的ServiceInfo
+        //4.接下来要做的就是根据这个List<Service> 获取到Service对应的ServiceInfo
         // 调用generateServiceInfo 方法, 把PackageParser$Service转换成ServiceInfo
         //public final static class Service extends Component<ServiceIntentInfo> {}
         Class<?> packageParser$ServiceClazz = Class.forName("android.content.pm.PackageParser$Service");
 
-        Method generateServiceInfo;
-        if (Build.VERSION.SDK_INT >= 17) {
-            // get defaultUserState
-            Class<?> packageUserStateClazz = Class.forName("android.content.pm.PackageUserState");
-            Object defaultUserState = packageUserStateClazz.newInstance();
+        //5.get defaultUserState
+        Class<?> packageUserStateClazz = Class.forName("android.content.pm.PackageUserState");
+        Object defaultUserState = packageUserStateClazz.newInstance();
 
-            // get userId
-            Class<?> userHandlerClazz = Class.forName("android.os.UserHandle");
-            //public static final int getCallingUserId() {}
-            Method getCallingUserIdMethod = userHandlerClazz.getDeclaredMethod("getCallingUserId");
-            getCallingUserIdMethod.setAccessible(true);
-            Object userIdObj = getCallingUserIdMethod.invoke(null);
-            if (!(userIdObj instanceof Integer)) return;
-            int userId = (Integer) userIdObj;
+        //6. get userId
+        Class<?> userHandlerClazz = Class.forName("android.os.UserHandle");
+        //public static final int getCallingUserId() {}
+        Method getCallingUserIdMethod = userHandlerClazz.getDeclaredMethod("getCallingUserId");
+        getCallingUserIdMethod.setAccessible(true);
+        int userId = (Integer) getCallingUserIdMethod.invoke(null);
 
-            //8. call generateServiceInfo方法
-            // public static final ServiceInfo generateServiceInfo(android.content.pm.PackageParser.Service s, int flags, android.content.pm.PackageUserState state, int userId) {
-            generateServiceInfo = packageParserClazz.getDeclaredMethod("generateServiceInfo", packageParser$ServiceClazz, int.class, packageUserStateClazz, int.class);
-            generateServiceInfo.setAccessible(true);
+        //7. call generateServiceInfo方法
+        // public static final ServiceInfo generateServiceInfo(android.content.pm.PackageParser.Service s, int flags, android.content.pm.PackageUserState state, int userId) {
+        Method generateServiceInfo = packageParserClazz.getDeclaredMethod("generateServiceInfo", packageParser$ServiceClazz, int.class, packageUserStateClazz, int.class);
+        generateServiceInfo.setAccessible(true);
 
-            //9. 解析出intent对应的Service组件
-            for (Object service : services) {
-                ServiceInfo info = (ServiceInfo) generateServiceInfo.invoke(packageParser, service, 0, defaultUserState, userId);
-                if (info == null) continue;
-                mServiceInfoMap.put(new ComponentName(info.packageName, info.name), info);
-            }
-        } else if (Build.VERSION.SDK_INT == 16) {
-            Class<?> userIdClass = Class.forName("android.os.UserId");
-            // public static final int getCallingUserId(){}
-            Method getCallingUserIdMethod = userIdClass.getDeclaredMethod("getCallingUserId");
-            getCallingUserIdMethod.setAccessible(true);
-
-            Object userIdObj = getCallingUserIdMethod.invoke(null);
-            if (!(userIdObj instanceof Integer)) return;
-            int userId = (Integer) userIdObj;
-
-            //public static final ServiceInfo generateServiceInfo(Service s, int flags, boolean stopped,int enabledState, int userId) {}//api=16
-            generateServiceInfo = packageParserClazz.getDeclaredMethod("generateServiceInfo", packageParser$ServiceClazz, int.class, boolean.class, int.class, int.class);
-            generateServiceInfo.setAccessible(true);
-
-            for (Object service : services) {
-                int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-                ServiceInfo info = (ServiceInfo) generateServiceInfo.invoke(packageParser, service, 0, false, enabledState, userId);
-                if (info == null) continue;
-                mServiceInfoMap.put(new ComponentName(info.packageName, info.name), info);
-            }
-        } else {
-            //public static final ServiceInfo generateServiceInfo(Service s, int flags){}//api=15
-            generateServiceInfo = packageParserClazz.getDeclaredMethod("generateServiceInfo", packageParser$ServiceClazz, int.class);
-            generateServiceInfo.setAccessible(true);
-
-            for (Object service : services) {
-                ServiceInfo info = (ServiceInfo) generateServiceInfo.invoke(packageParser, service, 0);
-                if (info == null) continue;
-                mServiceInfoMap.put(new ComponentName(info.packageName, info.name), info);
-            }
+        //8. 解析出intent对应的Service组件
+        for (Object service : services) {
+            ServiceInfo info = (ServiceInfo) generateServiceInfo.invoke(packageParser, service, 0, defaultUserState, userId);
+            if (info == null) continue;
+            mServiceInfoMap.put(new ComponentName(info.packageName, info.name), info);
         }
     }
 }
