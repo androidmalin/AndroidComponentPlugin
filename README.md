@@ -3,28 +3,28 @@
 ### 说明:
 从开始学习插件化，到简单地实现了四大组件的插件化，断断续续地持续了近10个月的时间，收获很大。学习了反射，泛型，动态代理，静态代理，AIDL，binder，ClassLoader等等的知识。
 
-代码主要参考维术插件化系列博客。在此基础上做了大量的版本适配(android15-android29)。
+代码主要参考维术插件化系列博客。在此基础上做了大量的版本适配(android4.0 ~ android10,android R)。
 [维术插件化系列博客](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)和[示例代码](https://github.com/tiann/understand-plugin-framework)，写的特别好，值得反复学习，在此特别感谢。
 
 示例代码测试情况如下:
 
-| 版本\组件 | Activity | Service | BroadcastReceiver | ContentProvider |
-| :----: | :----:  | :----: | :----: | :----: |
-| android29 | ✅ | ✅ | ✅ | ✅ |
-| android28 | ✅ | ✅ | ✅ | ✅ |
-| android27 | ✅ | ✅ | ✅ | ✅ |
-| android26 | ✅ | ✅ | ✅ | ✅ |
-| android25 | ✅ | ✅ | ✅ | ✅ |
-| android24 | ✅ | ✅ | ✅ | ✅ |
-| android23 | ✅ | ✅ | ✅ | ✅ |
-| android22 | ✅ | ✅ | ✅ | ✅ |
-| android21 | ✅ | ✅ | ✅ | ✅ |
-| android20 | ✅ | ✅ | ✅ | ✅ |
-| android19 | ✅ | ✅ | ✅ | ✅ |
-| android18 | ✅ | ✅ | ✅ | ✅ |
-| android17 | ✅ | ✅ | ✅ | ✅ |
-| android16 | ✅ | ✅ | ✅ | ✅ |
-| android15 | ✅ | ✅ | ✅ | ✅ |
+| 版本\组件 | api | Activity | Service | BroadcastReceiver | ContentProvider |
+| :----: | :----: | :----: | :----: | :----: | :----: |
+| androidR | R | ✅ | ✅ | ✅ | ✅ |
+| android29 | 10.0 | ✅ | ✅ | ✅ | ✅ |
+| android28 | 9.0 | ✅ | ✅ | ✅ | ✅ |
+| android27 | 8.1 | ✅ | ✅ | ✅ | ✅ |
+| android26 | 8.0 | ✅ | ✅ | ✅ | ✅ |
+| android25 | 7.1.1 | ✅ | ✅ | ✅ | ✅ |
+| android24 | 7.0 | ✅ | ✅ | ✅ | ✅ |
+| android23 | 6.0 | ✅ | ✅ | ✅ | ✅ |
+| android22 | 5.1 | ✅ | ✅ | ✅ | ✅ |
+| android21 | 21 | ✅ | ✅ | ✅ | ✅ |
+| android19 | 4.4 | ✅ | ✅ | ✅ | ✅ |
+| android18 | 4.3 | ✅ | ✅ | ✅ | ✅ |
+| android17 | 4.2 | ✅ | ✅ | ✅ | ✅ |
+| android16 | 4.1 | ✅ | ✅ | ✅ | ✅ |
+| android15 | 4.0.3 | ✅ | ✅ | ✅ | ✅ |
 
 ✅表示测试通过.
 
