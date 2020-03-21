@@ -24,6 +24,9 @@ import java.util.Map;
  * com from wei shu
  * http://weishu.me/2016/04/12/understand-plugin-framework-receiver/
  * androidmalin 增加各个版本的适配(api15-api29),增加代码注释...
+ * <p>
+ * 动态注册的receiver ActivityManagerService是知道的,广播的分发也是AMS完成,
+ * host要监听(插件中动态注册的广播),也是委托AMS完成;因此不需要进行任何处理.
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint({"PrivateApi", "unchecked"})
@@ -36,18 +39,18 @@ final class ReceiverHelper {
 
     static void preLoadReceiver(Context context, File apk) throws Exception {
         parserReceivers(apk);
-        ClassLoader cl = null;
+        ClassLoader classLoader = null;
         for (ActivityInfo activityInfo : ReceiverHelper.sCache.keySet()) {
             Log.i(TAG, "preload receiver:" + activityInfo.name);
             List<? extends IntentFilter> intentFilters = ReceiverHelper.sCache.get(activityInfo);
-            if (cl == null) {
-                cl = CustomClassLoader.getPluginClassLoader(apk, activityInfo.packageName);
+            if (classLoader == null) {
+                classLoader = CustomClassLoader.getPluginClassLoader(apk, activityInfo.packageName);
             }
 
             if (intentFilters == null) continue;
             // 把解析出来的每一个静态Receiver都注册为动态的
             for (IntentFilter intentFilter : intentFilters) {
-                BroadcastReceiver receiver = (BroadcastReceiver) cl.loadClass(activityInfo.name).newInstance();
+                BroadcastReceiver receiver = (BroadcastReceiver) classLoader.loadClass(activityInfo.name).newInstance();
                 context.registerReceiver(receiver, intentFilter);
                 sReceiverList.add(receiver);
             }
@@ -74,7 +77,7 @@ final class ReceiverHelper {
         //1.获取PackageParser的Class对象
         //package android.content.pm
         //public class PackageParser
-        Class<?> packageParserClass = Class.forName("android.content.pm.PackageParser");
+        Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
 
         //2.获取parsePackage()方法的Method
         //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
@@ -93,17 +96,17 @@ final class ReceiverHelper {
         //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
         Method parsePackageMethod;
         if (Build.VERSION.SDK_INT >= 20) {
-            parsePackageMethod = packageParserClass.getDeclaredMethod("parsePackage", File.class, int.class);
+            parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
-            parsePackageMethod = packageParserClass.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
+            parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
         }
         parsePackageMethod.setAccessible(true);
 
         //3.生成PackageParser对象实例
         Object packageParser;
         if (Build.VERSION.SDK_INT >= 20) {
-            packageParser = packageParserClass.newInstance();
+            packageParser = packageParserClazz.newInstance();
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
             //public PackageParser(String archiveSourcePath) {}//api-19
@@ -111,7 +114,7 @@ final class ReceiverHelper {
             //public PackageParser(String archiveSourcePath) {}//api-17
             //public PackageParser(String archiveSourcePath) {}//api-16
             //public PackageParser(String archiveSourcePath) {}//api-15
-            Constructor packageParserConstructor = packageParserClass.getConstructor(String.class);
+            Constructor packageParserConstructor = packageParserClazz.getConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = packageParserConstructor.newInstance(archiveSourcePath);
@@ -151,17 +154,17 @@ final class ReceiverHelper {
 
         //7.获取PackageParser类的内部类Activity的Class对象
         // public final static class Activity extends Component<ActivityIntentInfo> {}
-        Class<?> packageParser$ActivityClass = Class.forName("android.content.pm.PackageParser$Activity");
+        Class<?> packageParser$ActivityClazz = Class.forName("android.content.pm.PackageParser$Activity");
 
 
         //8.获取PackageParser类中内部类Component
         //public static abstract class Component<II extends IntentInfo> {}//api-29
         //public static class Component<II extends IntentInfo> {}//api-15
-        Class<?> packageParser$ComponentClass = Class.forName("android.content.pm.PackageParser$Component");
+        Class<?> packageParser$ComponentClazz = Class.forName("android.content.pm.PackageParser$Component");
 
         //9.获取 Component类的intents属性的Field
         //public final ArrayList<II> intents;
-        Field intentsField = packageParser$ComponentClass.getDeclaredField("intents");
+        Field intentsField = packageParser$ComponentClazz.getDeclaredField("intents");
         intentsField.setAccessible(true);
 
         //10.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo()
@@ -186,17 +189,17 @@ final class ReceiverHelper {
         Method generateActivityInfoMethod;
         if (Build.VERSION.SDK_INT >= 17) {
             //11.获取PackageUserState的Class对象
-            Class<?> packageUserStateClass = Class.forName("android.content.pm.PackageUserState");
+            Class<?> packageUserStateClazz = Class.forName("android.content.pm.PackageUserState");
 
             //12.生成PackageUserState的实例对象
-            Object defaultUserStateObj = packageUserStateClass.newInstance();
+            Object defaultUserStateObj = packageUserStateClazz.newInstance();
 
             //13.获取UserHandle的Class对象
-            Class<?> userHandleClass = Class.forName("android.os.UserHandle");
+            Class<?> userHandleClazz = Class.forName("android.os.UserHandle");
 
             //14.获取UserHandle中的getCallingUserId()方法
             //public static @UserIdInt int getCallingUserId(){}//api-29
-            Method getCallingUserIdMethod = userHandleClass.getDeclaredMethod("getCallingUserId");
+            Method getCallingUserIdMethod = userHandleClazz.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
 
 
@@ -207,8 +210,8 @@ final class ReceiverHelper {
 
 
             //public static final ActivityInfo generateActivityInfo(Activity a, int flags, PackageUserState state, int userId) {}
-            generateActivityInfoMethod = packageParserClass.getDeclaredMethod(
-                    "generateActivityInfo", packageParser$ActivityClass, int.class, packageUserStateClass, int.class);
+            generateActivityInfoMethod = packageParserClazz.getDeclaredMethod(
+                    "generateActivityInfo", packageParser$ActivityClazz, int.class, packageUserStateClazz, int.class);
             generateActivityInfoMethod.setAccessible(true);
 
             //16.解析出 receiver以及对应的 intentFilter
@@ -235,9 +238,9 @@ final class ReceiverHelper {
             }
 
         } else if (Build.VERSION.SDK_INT == 16) {
-            Class<?> userIdClass = Class.forName("android.os.UserId");
+            Class<?> userIdClazz = Class.forName("android.os.UserId");
             // public static final int getCallingUserId(){}
-            Method getCallingUserIdMethod = userIdClass.getDeclaredMethod("getCallingUserId");
+            Method getCallingUserIdMethod = userIdClazz.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
 
             Object userIdObj = getCallingUserIdMethod.invoke(null);
@@ -245,7 +248,7 @@ final class ReceiverHelper {
             int userId = (Integer) userIdObj;
 
             //public static final ActivityInfo generateActivityInfo(Activity a, int flags, boolean stopped,int enabledState, int userId) {}//api=16
-            generateActivityInfoMethod = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class, boolean.class, int.class, int.class);
+            generateActivityInfoMethod = packageParserClazz.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClazz, int.class, boolean.class, int.class, int.class);
             generateActivityInfoMethod.setAccessible(true);
 
             //receivers为ArrayList<Activity> receivers
@@ -259,7 +262,7 @@ final class ReceiverHelper {
             }
         } else {
             //public static final ActivityInfo generateActivityInfo(Activity a,int flags) {}//api=15
-            generateActivityInfoMethod = packageParserClass.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClass, int.class);
+            generateActivityInfoMethod = packageParserClazz.getDeclaredMethod("generateActivityInfo", packageParser$ActivityClazz, int.class);
             generateActivityInfoMethod.setAccessible(true);
 
             //receivers为ArrayList<Activity> receivers
