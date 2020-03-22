@@ -23,7 +23,7 @@ import java.util.Map;
  * ReceiverHelper
  * com from wei shu
  * http://weishu.me/2016/04/12/understand-plugin-framework-receiver/
- * androidmalin 增加各个版本的适配(api15-api29),增加代码注释...
+ * androidmalin 增加各个版本的适配(api15-api29,apiR),增加代码注释...
  * <p>
  * 动态注册的receiver ActivityManagerService是知道的,广播的分发也是AMS完成,
  * host要监听(插件中动态注册的广播),也是委托AMS完成;因此不需要进行任何处理.
@@ -37,14 +37,14 @@ final class ReceiverHelper {
     private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
     private static List<BroadcastReceiver> sReceiverList = new ArrayList<>();
 
-    static void preLoadReceiver(Context context, File apk) throws Exception {
-        parserReceivers(apk);
+    static void preLoadReceiver(Context context, File apkFile) throws Exception {
+        parserReceivers(apkFile);
         ClassLoader classLoader = null;
         for (ActivityInfo activityInfo : ReceiverHelper.sCache.keySet()) {
             Log.i(TAG, "preload receiver:" + activityInfo.name);
             List<? extends IntentFilter> intentFilters = ReceiverHelper.sCache.get(activityInfo);
             if (classLoader == null) {
-                classLoader = CustomClassLoader.getPluginClassLoader(apk, activityInfo.packageName);
+                classLoader = CustomClassLoader.getPluginClassLoader(apkFile, activityInfo.packageName);
             }
 
             if (intentFilters == null) continue;
@@ -114,7 +114,7 @@ final class ReceiverHelper {
             //public PackageParser(String archiveSourcePath) {}//api-17
             //public PackageParser(String archiveSourcePath) {}//api-16
             //public PackageParser(String archiveSourcePath) {}//api-15
-            Constructor packageParserConstructor = packageParserClazz.getConstructor(String.class);
+            Constructor packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = packageParserConstructor.newInstance(archiveSourcePath);
@@ -131,26 +131,35 @@ final class ReceiverHelper {
             // 15<=Build.VERSION.SDK_INT <=19
             String destCodePath = apkFile.getCanonicalPath();
             DisplayMetrics displayMetrics = new DisplayMetrics();
+            displayMetrics.setToDefaults();//参考api=29时 PackageParser的默认构造函数中的表达式
 
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
             packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_RECEIVERS);
         }
 
+        //Package:为PackageParser的静态内部类
+        //public class PackageParser {
+        //       public final static class Package implements Parcelable {
+        //           public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
+        //       }
+        //       public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
+        //
+        //       }
+        // }
         if (packageObj == null) return;
 
         //5.获取Package中的receivers字段Field
-        // 读取Package对象里面的receivers字段,注意这是一个 List<Activity> (没错,底层把<receiver>当作<activity>处理)
-        // 接下来要做的就是根据这个List<Activity> 获取到Receiver对应的 ActivityInfo (依然是把receiver信息用activity处理了)
         //public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
         Field receiversField = packageObj.getClass().getDeclaredField("receivers");
         receiversField.setAccessible(true);
 
-        //6.获取Package实例中receivers字段的值,为ArrayList<Activity> receivers
+        //6.获取Package对象里面的receivers字段的值,注意这是一个 ArrayList<Activity> (没错,底层把<receiver>当作<Activity>处理)
         List<?> receivers = (List<?>) receiversField.get(packageObj);
         if (receivers == null) return;
 
-        // 调用android.content.pm.PackageParser$Activity#generateActivityInfo()方法, 把PackageParser#Activity 转换成ActivityInfo
+        // 接下来要做的就是根据这个ArrayList<Activity> 获取到Receiver对应的 ActivityInfo (依然是把receiver信息用Activity处理了)
+        // 调用 ActivityInfo PackageParser#generateActivityInfo(Activity a,int flags,PackageUserState state,int userId){}方法, 把PackageParser#Activity 转换成ActivityInfo
 
         //7.获取PackageParser类的内部类Activity的Class对象
         // public final static class Activity extends Component<ActivityIntentInfo> {}
@@ -167,7 +176,7 @@ final class ReceiverHelper {
         Field intentsField = packageParser$ComponentClazz.getDeclaredField("intents");
         intentsField.setAccessible(true);
 
-        //10.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo()
+        //10.调用 public static final ActivityInfo android.content.pm.PackageParser#generateActivityInfo(){}
 
         //handle 1.api17-29
         //handle 2.api16
@@ -218,16 +227,27 @@ final class ReceiverHelper {
             //receivers为ArrayList<Activity> receivers
             for (Object activity : receivers) {
                 //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}
+                //ActivityInfo:
+                //Information you can retrieve about a particular application activity or receiver.
+                //This corresponds to information collected from the AndroidManifest.xm's <activity/> ,<receiver/> tags.
                 ActivityInfo activityInfo = (ActivityInfo) generateActivityInfoMethod.invoke(packageParser, activity, 0, defaultUserStateObj, userId);
 
                 //17.PackageParser$Activity中获取intents字段的值,既public final ArrayList<II> intents;
-                //PackageParser$Activity是PackageParser$Component的子类,PackageParser$Activity中的intents成员变量继承自父类
-                //public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {}
-                //public static abstract class Component<II extends IntentInfo> {
-                //  public final ArrayList<II> intents;
-                //}
+                //PackageParser$Activity是PackageParser$Component的子类,PackageParser$Activity中的intents成员变量继承自父类PackageParser$Component
 
-                // unchecked的原因是,II extends IntentInfo; 而IntentInfo extends IntentFilter==>所以II extends IntentFilter
+                //public class PackageParser {
+                //       public final static class Package implements Parcelable {
+                //              public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
+                //       }
+                //       public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
+                //
+                //       }
+                //        public static abstract class Component<II extends IntentInfo> {
+                //               public final ArrayList<II> intents;
+                //       }
+                // }
+
+                // unchecked的原因是,II extends IntentInfo; 而IntentInfo extends IntentFilter==>所以II 是 IntentFilter 的子类
                 // public static class Component<II extends IntentInfo> {
                 //   public final ArrayList<II> intents;
                 // }
