@@ -30,24 +30,20 @@ public final class ServiceManager20 {
 
     private static final String TAG = "ServiceManager";
 
-    private static volatile ServiceManager20 sInstance;
-
     // 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
     private volatile Map<String, Service> mServiceMap = new HashMap<>();
 
     // 存储插件的Service信息
     private volatile Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
 
-    public synchronized static ServiceManager20 getInstance() {
-        if (sInstance == null) {
-            synchronized (ServiceManager20.class) {
-                if (sInstance == null) {
-                    sInstance = new ServiceManager20();
-                }
-            }
-        }
-        return sInstance;
+    private static class Holder {
+        private static final ServiceManager20 instance = new ServiceManager20();
     }
+
+    static ServiceManager20 getInstance() {
+        return ServiceManager20.Holder.instance;
+    }
+
 
     /**
      * 启动某个插件Service; 如果Service还没有启动, 那么会创建新的插件Service

@@ -31,23 +31,18 @@ public final class ServiceManager {
 
     private static final String TAG = "ServiceManager";
 
-    private static volatile ServiceManager sInstance;
-
     // 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
     private volatile Map<String, Service> mServiceMap = new HashMap<>();
 
     // 存储插件的Service信息
     private volatile Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
 
-    public synchronized static ServiceManager getInstance() {
-        if (sInstance == null) {
-            synchronized (ServiceManager.class) {
-                if (sInstance == null) {
-                    sInstance = new ServiceManager();
-                }
-            }
-        }
-        return sInstance;
+    private static class Holder {
+        private static final ServiceManager instance = new ServiceManager();
+    }
+
+    static ServiceManager getInstance() {
+        return Holder.instance;
     }
 
     /**
@@ -97,7 +92,7 @@ public final class ServiceManager {
      * @param targetIntent targetIntent
      * @return int
      */
-    public int stopService(Intent targetIntent) {
+    int stopService(Intent targetIntent) {
         ServiceInfo serviceInfo = selectPluginService(targetIntent);
         if (serviceInfo == null) {
             Log.w(TAG, "can not found service: " + targetIntent.getComponent());
@@ -259,7 +254,7 @@ public final class ServiceManager {
      * @param apkFile 插件对应的apk文件
      * @throws Throwable 解析出错或者反射调用出错, 均会抛出异常
      */
-    @SuppressWarnings({"JavaReflectionMemberAccess", "ConstantConditions"})
+    @SuppressWarnings({"JavaReflectionMemberAccess"})
     void preLoadServices(File apkFile) throws Throwable {
         int version = Build.VERSION.SDK_INT;
         if (version < 15) return;
