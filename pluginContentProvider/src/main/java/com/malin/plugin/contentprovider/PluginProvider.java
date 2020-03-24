@@ -136,7 +136,7 @@ public class PluginProvider extends ContentProvider {
 
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        return getTableName(uri);
     }
 
     /**
