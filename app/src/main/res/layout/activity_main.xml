@@ -21,6 +21,14 @@
             tools:ignore="HardcodedText" />
 
         <Button
+            android:id="@+id/btn_test_hide_black_api"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="测试反射调用黑名单API"
+            tools:ignore="HardcodedText" />
+
+        <Button
             android:id="@+id/btn_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,14 +44,6 @@
             android:text="Hook AMS 启动未注册的AppCompatActivity"
             tools:ignore="HardcodedText" />
 
-
-        <Button
-            android:id="@+id/btn_test_hide_black_api"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="测试反射调用黑名单API"
-            tools:ignore="HardcodedText" />
 
         <Button
             android:id="@+id/btn_start_instrumentation"
@@ -63,31 +63,6 @@
             tools:ignore="HardcodedText" />
 
         <Button
-            android:id="@+id/btn_start_plugin_service"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="启动插件中的Service"
-            tools:ignore="HardcodedText" />
-
-        <Button
-            android:id="@+id/btn_stop_plugin_service"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="停止插件中的Service"
-            tools:ignore="HardcodedText" />
-
-        <Button
-            android:id="@+id/btn_download_plugin_apk"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="下载插件APK"
-            tools:ignore="HardcodedText" />
-
-
-        <Button
             android:id="@+id/btn_start_plugin_apk_activity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -103,6 +78,23 @@
             android:layout_marginTop="10dp"
             android:text="启动插件APK中AppCompatActivity"
             tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_start_plugin_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="启动插件中的Service"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_stop_plugin_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="停止插件中的Service"
+            tools:ignore="HardcodedText" />
+
 
         <Button
             android:id="@+id/btn_send_broadcast_to_plugin"

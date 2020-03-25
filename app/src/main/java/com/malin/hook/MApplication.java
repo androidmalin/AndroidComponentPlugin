@@ -30,7 +30,7 @@ public class MApplication extends Application {
      * true:Hook Instrumentation
      * false:Hook AMS and PMS
      */
-    private final boolean mHookInstrumentation = true;
+    private final boolean mHookInstrumentation = false;
 
     /**
      * Hook Instrumentation的方式下,是否启动appcompatActivity类型的Activity.
@@ -49,6 +49,7 @@ public class MApplication extends Application {
         getPM(context);
         handleService(context);
         handleActivity(context);
+        installActivity();
         handleContentProvider(context);
         hookClipboard();
     }
@@ -137,6 +138,21 @@ public class MApplication extends Application {
         } else {
             mIActivityManagerObj = HookAMS.getIActivityManagerObj();
         }
+    }
+
+    private void installActivity() {
+        final String PLUGIN_APK = "pluginActivity-debug.apk";
+        final String PLUGIN_DEX = "pluginActivity-debug.dex";
+        Runnable patchClassLoaderRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PluginUtils.extractAssets(MApplication.getInstance(), PLUGIN_APK);
+                File dexFile = getFileStreamPath(PLUGIN_APK);
+                File optDexFile = getFileStreamPath(PLUGIN_DEX);
+                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
+            }
+        };
+        mSingleThreadExecutor.execute(patchClassLoaderRunnable);
     }
 
     private void getPM(Context context) {

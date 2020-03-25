@@ -34,7 +34,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnHookInstrumentationAppCompatActivity;
     private Button mBtnStartPluginService;
     private Button mBtnStopPluginService;
-    private Button mBtnDownloadPlugin;
     private Button mBtnStartPluginActivity;
     private Button mBtnStartPluginAppCompatActivity;
     private Button mBtnTestBlackListApi;
@@ -43,8 +42,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnQueryData;
     private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
-    private static final String PLUGIN_APK = "pluginActivity-debug.apk";
-    private static final String PLUGIN_DEX = "pluginActivity-debug.dex";
     private static final String RECEIVER_PLUGIN = "pluginBroadcastReceiver-debug.apk";
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
@@ -69,7 +66,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookInstrumentationAppCompatActivity = findViewById(R.id.btn_start_instrumentation_appCompat);
         mBtnStartPluginService = findViewById(R.id.btn_start_plugin_service);
         mBtnStopPluginService = findViewById(R.id.btn_stop_plugin_service);
-        mBtnDownloadPlugin = findViewById(R.id.btn_download_plugin_apk);
         mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
         mBtnTestBlackListApi = findViewById(R.id.btn_test_hide_black_api);
@@ -112,7 +108,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtnHookInstrumentationAppCompatActivity.setOnClickListener(this);
         mBtnStartPluginService.setOnClickListener(this);
         mBtnStopPluginService.setOnClickListener(this);
-        mBtnDownloadPlugin.setOnClickListener(this);
         mBtnStartPluginActivity.setOnClickListener(this);
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
         mBtnTestBlackListApi.setOnClickListener(this);
@@ -172,20 +167,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             case R.id.btn_stop_plugin_service: {
                 stopService(new Intent().setComponent(new ComponentName("com.malin.service.plugin", "com.malin.service.plugin.TargetService1")));
-                break;
-            }
-
-            case R.id.btn_download_plugin_apk: {
-                Runnable patchClassLoaderRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        PluginUtils.extractAssets(MApplication.getInstance(), PLUGIN_APK);
-                        File dexFile = getFileStreamPath(PLUGIN_APK);
-                        File optDexFile = getFileStreamPath(PLUGIN_DEX);
-                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
-                    }
-                };
-                mSingleThreadExecutor.execute(patchClassLoaderRunnable);
                 break;
             }
 
