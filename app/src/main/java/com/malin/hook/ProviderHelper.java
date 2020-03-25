@@ -58,8 +58,8 @@ class ProviderHelper {
             Log.d(TAG, providerInfoList.toString());
 
             //3.get currentActivityThread
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
-            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
+            Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
             Object currentActivityThread = currentActivityThreadMethod.invoke(null);
 
@@ -74,7 +74,7 @@ class ProviderHelper {
             //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-23
             //...
             //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-15
-            Method installContentProvidersMethod = activityThreadClass.getDeclaredMethod("installContentProviders", Context.class, List.class);
+            Method installContentProvidersMethod = activityThreadClazz.getDeclaredMethod("installContentProviders", Context.class, List.class);
             installContentProvidersMethod.setAccessible(true);
             installContentProvidersMethod.invoke(currentActivityThread, context, providerInfoList);
         } catch (ClassNotFoundException e) {
@@ -103,7 +103,7 @@ class ProviderHelper {
             //1.获取PackageParser的Class对象
             //package android.content.pm
             //public class PackageParser
-            Class<?> packageParserClass = Class.forName("android.content.pm.PackageParser");
+            Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
 
             //2.获取parsePackage()方法的Method
             //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
@@ -114,21 +114,21 @@ class ProviderHelper {
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
             Method parsePackageMethod;
             if (Build.VERSION.SDK_INT >= 20) {
-                parsePackageMethod = packageParserClass.getDeclaredMethod("parsePackage", File.class, int.class);
+                parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
             } else {
                 // 15<=Build.VERSION.SDK_INT <=19
-                parsePackageMethod = packageParserClass.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
+                parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
             }
             parsePackageMethod.setAccessible(true);
 
             //3.生成PackageParser对象实例
             Object packageParser;
             if (Build.VERSION.SDK_INT >= 20) {
-                packageParser = packageParserClass.newInstance();
+                packageParser = packageParserClazz.newInstance();
             } else {
                 // 15<=Build.VERSION.SDK_INT <=19
                 //public PackageParser(String archiveSourcePath) {}//api-19
-                Constructor constructor = packageParserClass.getConstructor(String.class);
+                Constructor constructor = packageParserClazz.getDeclaredConstructor(String.class);
                 constructor.setAccessible(true);
                 String archiveSourcePath = apkFile.getCanonicalPath();
                 packageParser = constructor.newInstance(archiveSourcePath);
@@ -140,15 +140,16 @@ class ProviderHelper {
             if (Build.VERSION.SDK_INT >= 20) {
                 //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
                 //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
-                packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_RECEIVERS);
+                packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_PROVIDERS);
             } else {
                 // 15<=Build.VERSION.SDK_INT <=19
                 String destCodePath = apkFile.getCanonicalPath();
                 DisplayMetrics displayMetrics = new DisplayMetrics();
+                displayMetrics.setToDefaults();
 
                 //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
                 //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
-                packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_RECEIVERS);
+                packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_PROVIDERS);
             }
 
             if (packageObj == null) return null;
@@ -166,7 +167,7 @@ class ProviderHelper {
             }
 
 
-            Class<?> packageParser$ProviderClass = Class.forName("android.content.pm.PackageParser$Provider");
+            Class<?> packageParser$ProviderClazz = Class.forName("android.content.pm.PackageParser$Provider");
 
 
             //5.call generateProviderInfo()
@@ -179,11 +180,11 @@ class ProviderHelper {
             Method generateProviderInfo;
             if (Build.VERSION.SDK_INT >= 17) {
                 // 调用generateProviderInfo 方法, 把PackageParser.Provider转换成ProviderInfo
-                Class<?> packageUserStateClass = Class.forName("android.content.pm.PackageUserState");
-                Class<?> userHandler = Class.forName("android.os.UserHandle");
+                Class<?> packageUserStateClazz = Class.forName("android.content.pm.PackageUserState");
+                Class<?> userHandlerClazz = Class.forName("android.os.UserHandle");
 
                 //public static final int getCallingUserId(){}
-                Method getCallingUserIdMethod = userHandler.getDeclaredMethod("getCallingUserId");
+                Method getCallingUserIdMethod = userHandlerClazz.getDeclaredMethod("getCallingUserId");
                 getCallingUserIdMethod.setAccessible(true);
 
                 Object userIdObj = getCallingUserIdMethod.invoke(null);
@@ -191,7 +192,7 @@ class ProviderHelper {
                 int userId = (Integer) userIdObj;
 
                 //public PackageUserState() {}//api-23默认构造方法
-                Object defaultUserState = packageUserStateClass.newInstance();
+                Object defaultUserState = packageUserStateClazz.newInstance();
                 // 需要调用 android.content.pm.PackageParser#generateProviderInfo
 
 
@@ -200,8 +201,8 @@ class ProviderHelper {
                 //public static final ProviderInfo generateProviderInfo(Provider p, int flags, PackageUserState state, int userId) {}//api-17
                 //public static final ProviderInfo generateProviderInfo(Provider p, int flags, boolean stopped,int enabledState, int userId) {}//api-16
                 //public static final ProviderInfo generateProviderInfo(Provider p,int flags) {}//api-15
-                generateProviderInfo = packageParserClass.getDeclaredMethod(
-                        "generateProviderInfo", packageParser$ProviderClass, int.class, packageUserStateClass, int.class);
+                generateProviderInfo = packageParserClazz.getDeclaredMethod(
+                        "generateProviderInfo", packageParser$ProviderClazz, int.class, packageUserStateClazz, int.class);
                 generateProviderInfo.setAccessible(true);
 
                 List<ProviderInfo> ret = new ArrayList<>();
@@ -213,9 +214,9 @@ class ProviderHelper {
                 return ret;
             } else if (Build.VERSION.SDK_INT == 16) {
 
-                Class<?> userIdClass = Class.forName("android.os.UserId");
+                Class<?> userIdClazz = Class.forName("android.os.UserId");
                 // public static final int getCallingUserId(){}
-                Method getCallingUserIdMethod = userIdClass.getDeclaredMethod("getCallingUserId");
+                Method getCallingUserIdMethod = userIdClazz.getDeclaredMethod("getCallingUserId");
                 getCallingUserIdMethod.setAccessible(true);
 
                 Object userIdObj = getCallingUserIdMethod.invoke(null);
@@ -223,8 +224,8 @@ class ProviderHelper {
                 int userId = (Integer) userIdObj;
 
                 //public static final ProviderInfo generateProviderInfo(Provider p, int flags, boolean stopped,int enabledState, int userId) {}//api-16
-                generateProviderInfo = packageParserClass.getDeclaredMethod(
-                        "generateProviderInfo", packageParser$ProviderClass, int.class, boolean.class, int.class, int.class);
+                generateProviderInfo = packageParserClazz.getDeclaredMethod(
+                        "generateProviderInfo", packageParser$ProviderClazz, int.class, boolean.class, int.class, int.class);
                 generateProviderInfo.setAccessible(true);
 
                 List<ProviderInfo> ret = new ArrayList<>();
@@ -239,7 +240,7 @@ class ProviderHelper {
                 //Build.VERSION.SDK_INT==15
 
                 //public static final ProviderInfo generateProviderInfo(Provider p,int flags) {}//api-15
-                generateProviderInfo = packageParserClass.getDeclaredMethod("generateProviderInfo", packageParser$ProviderClass, int.class);
+                generateProviderInfo = packageParserClazz.getDeclaredMethod("generateProviderInfo", packageParser$ProviderClazz, int.class);
                 generateProviderInfo.setAccessible(true);
 
                 List<ProviderInfo> ret = new ArrayList<>();
