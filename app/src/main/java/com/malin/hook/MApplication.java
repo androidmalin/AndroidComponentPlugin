@@ -30,7 +30,7 @@ public class MApplication extends Application {
      * true:Hook Instrumentation
      * false:Hook AMS and PMS
      */
-    private final boolean mHookInstrumentation = false;
+    private final boolean mHookInstrumentation = true;
 
     /**
      * Hook Instrumentation的方式下,是否启动appcompatActivity类型的Activity.

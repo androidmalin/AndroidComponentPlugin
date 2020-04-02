@@ -1,4 +1,7 @@
 ext {
+    // android 11
+    // compileSdkVersion: 'android-R',
+    // targetSdkVersion : 'R',
     android = [
             applicationId    : "com.malin.hook",
             compileSdkVersion: 29,

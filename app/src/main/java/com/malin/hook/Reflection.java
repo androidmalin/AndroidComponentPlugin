@@ -13,6 +13,10 @@ import static android.os.Build.VERSION.SDK_INT;
  * http://weishu.me/2018/06/07/free-reflection-above-android-p/
  * http://weishu.me/2019/03/16/another-free-reflection-above-android-p/
  * <p>
+ * android 11 not work target R
+ * https://www.xda-developers.com/android-11-harden-hidden-api-restriction-meta-reflection/
+ * https://developer.android.com/preview/setup-sdk#update-build
+ * <p>
  * 思路
  * 首先，我们通过反射 API 拿到 getDeclaredMethod 方法。
  * getDeclaredMethod 是 public 的，不存在问题；这个通过反射拿到的方法我们称之为元反射方法。
