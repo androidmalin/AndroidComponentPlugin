@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.malin.plugin.contentprovider">
 
-    <application tools:ignore="GoogleAppIndexingWarning">
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
         <activity android:name=".PluginContentProviderActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -15,6 +15,7 @@
         <provider
             android:name=".PluginProvider"
             android:authorities="com.malin.auth.xx"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
     </application>
 </manifest>

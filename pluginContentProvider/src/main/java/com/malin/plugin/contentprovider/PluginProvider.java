@@ -157,7 +157,7 @@ public class PluginProvider extends ContentProvider {
         return tableName;
     }
 
-    private class DBHelper extends SQLiteOpenHelper {
+    private static class DBHelper extends SQLiteOpenHelper {
 
         // 数据库名
         private static final String DATABASE_NAME = "plugin_provider.db";

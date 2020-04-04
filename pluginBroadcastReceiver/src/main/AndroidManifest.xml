@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.malin.receiver.plugin">
 
-    <application tools:ignore="GoogleAppIndexingWarning,HardcodedDebugMode">
+    <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,HardcodedDebugMode,MissingApplicationIcon">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -11,12 +11,16 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".Receiver1">
+        <receiver
+            android:name=".Receiver1"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.malin.receiver.plugin.Receiver1.action" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receiver2">
+        <receiver
+            android:name=".Receiver2"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.malin.receiver.plugin.Receiver2.action" />
             </intent-filter>
