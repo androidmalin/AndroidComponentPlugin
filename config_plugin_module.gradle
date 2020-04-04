@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+apply from: rootProject.getRootDir().getAbsolutePath() + "/config.gradle"
+
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+android {
+
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    defaultConfig {
+        if (archivesBaseName == "pluginActivity") {
+            resourcePrefix "pluginActivity"
+            applicationId "com.malin.plugin"
+        } else if (archivesBaseName == "pluginBroadcastReceiver") {
+            resourcePrefix "pluginBroadcastReceiver"
+            applicationId "com.malin.receiver.plugin"
+        } else if (archivesBaseName == "pluginContentProvider") {
+            resourcePrefix "pluginContentProvider"
+            applicationId "com.malin.plugin.contentprovider"
+        } else if (archivesBaseName == "pluginService") {
+            resourcePrefix "pluginService"
+            applicationId "com.malin.service.plugin"
+        }
+        resConfigs "zh", "en"
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+        buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${archivesBaseName}-${variant.name}-${defaultConfig.versionName}.apk"
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            crunchPngs false
+        }
+        release {
+            debuggable false
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            crunchPngs true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+}
