@@ -66,8 +66,8 @@ public class MApplication extends Application {
         Runnable providerRunnable = new Runnable() {
             @Override
             public void run() {
-                final String PLUGIN_APK = "pluginContentProvider-debug.apk";
-                final String PLUGIN_DEX = "pluginContentProvider-debug.dex";
+                final String PLUGIN_APK = "pluginContentProvider-debug-1.0.apk";
+                final String PLUGIN_DEX = "pluginContentProvider-debug-1.0.dex";
                 final File apkFile = getFileStreamPath(PLUGIN_APK);
                 final File dexFile = getFileStreamPath(PLUGIN_DEX);
                 if (!apkFile.exists()) {
@@ -141,8 +141,8 @@ public class MApplication extends Application {
     }
 
     private void installActivity() {
-        final String PLUGIN_APK = "pluginActivity-debug.apk";
-        final String PLUGIN_DEX = "pluginActivity-debug.dex";
+        final String PLUGIN_APK = "pluginActivity-debug-1.0.apk";
+        final String PLUGIN_DEX = "pluginActivity-debug-1.0.dex";
         Runnable patchClassLoaderRunnable = new Runnable() {
             @Override
             public void run() {
@@ -173,14 +173,14 @@ public class MApplication extends Application {
         Runnable providerRunnable = new Runnable() {
             @Override
             public void run() {
-                final String PLUGIN_APK = "pluginService-debug.apk";
-                final String PLUGIN_DEX = "pluginService-debug.odex";
+                final String PLUGIN_APK = "pluginService-debug-1.0.apk";
+                final String PLUGIN_DEX = "pluginService-debug-1.0.odex";
                 final File apkFile = getFileStreamPath(PLUGIN_APK);
                 final File odexFile = getFileStreamPath(PLUGIN_DEX);
                 if (!apkFile.exists()) {
                     Log.e(TAG, "pluginService extractAssets");
                     if (Build.VERSION.SDK_INT >= 18) {
-                        PluginUtils.extractAssets(context, "pluginService-debug.apk");
+                        PluginUtils.extractAssets(context, "pluginService-debug-1.0.apk");
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         try {
                             ServiceManager.getInstance().preLoadServices(apkFile);

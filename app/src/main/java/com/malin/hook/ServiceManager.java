@@ -184,7 +184,7 @@ public final class ServiceManager {
 
         //android10出现的异常解决办法,通过异常，寻找出错的地方
         //TODO:插件APK的路径
-        String path = MApplication.getInstance().getFileStreamPath("pluginService-debug.apk").getPath();
+        String path = MApplication.getInstance().getFileStreamPath("pluginService-debug-1.0.apk").getPath();
         serviceInfo.applicationInfo.sourceDir = path;
         serviceInfo.applicationInfo.publicSourceDir = path;
         serviceInfo.applicationInfo.nativeLibraryDir = MApplication.getInstance().getApplicationInfo().nativeLibraryDir;

@@ -42,7 +42,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnQueryData;
     private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
-    private static final String RECEIVER_PLUGIN = "pluginBroadcastReceiver-debug.apk";
+    private static final String RECEIVER_PLUGIN = "pluginBroadcastReceiver-debug-1.0.apk";
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
     private static final String ACTION_PLUGIN2 = "com.malin.receiver.plugin.Receiver2.action";
@@ -287,7 +287,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             public void run() {
                 PluginUtils.extractAssets(MainActivity.this.getApplicationContext(), RECEIVER_PLUGIN);
 
-                // /data/data/com.malin.hook/files/pluginBroadcastReceiver-debug.apk
+                // /data/data/com.malin.hook/files/pluginBroadcastReceiver-debug-1.0.apk
                 File testPlugin = getFileStreamPath(RECEIVER_PLUGIN);
                 try {
                     ReceiverHelper.preLoadReceiver(MainActivity.this, testPlugin);

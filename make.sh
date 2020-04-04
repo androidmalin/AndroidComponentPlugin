@@ -1,16 +1,14 @@
 #!/bin/bash
-rm -rf app/src/main/assets/pluginActivity-debug.apk
-./gradlew -q pluginActivity:assembleDebug -x lint --parallel --offline --continue &&
-cp pluginActivity/build/outputs/apk/debug/pluginActivity-debug.apk app/src/main/assets/
+./gradlew clean
+rm -rf app/src/main/assets/*.apk
+./gradlew -q pluginActivity:assembleDebug
+cp pluginActivity/build/outputs/apk/debug/pluginActivity-debug-1.0.apk app/src/main/assets/
 
-rm -rf app/src/main/assets/pluginBroadcastReceiver-debug.apk
-./gradlew -q pluginBroadcastReceiver:assembleDebug -x lint --parallel --offline --continue &&
-cp pluginBroadcastReceiver/build/outputs/apk/debug/pluginBroadcastReceiver-debug.apk app/src/main/assets/
+./gradlew -q pluginBroadcastReceiver:assembleDebug
+cp pluginBroadcastReceiver/build/outputs/apk/debug/pluginBroadcastReceiver-debug-1.0.apk app/src/main/assets/
 
-rm -rf app/src/main/assets/pluginContentProvider-debug.apk
-./gradlew -q pluginContentProvider:assembleDebug -x lint --parallel --offline --continue &&
-cp pluginContentProvider/build/outputs/apk/debug/pluginContentProvider-debug.apk app/src/main/assets/
+./gradlew -q pluginContentProvider:assembleDebug
+cp pluginContentProvider/build/outputs/apk/debug/pluginContentProvider-debug-1.0.apk app/src/main/assets/
 
-rm -rf app/src/main/assets/pluginService-debug.apk
-./gradlew -q pluginService:assembleDebug -x lint --parallel --offline --continue &&
-cp pluginService/build/outputs/apk/debug/pluginService-debug.apk app/src/main/assets/
+./gradlew -q pluginService:assembleDebug
+cp pluginService/build/outputs/apk/debug/pluginService-debug-1.0.apk app/src/main/assets/

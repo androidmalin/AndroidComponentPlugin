@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 /**
  * fixApplicationInfo
  * come from DroidPlugin
- * String path = MApplication.getInstance().getFileStreamPath("pluginContentProvider-debug.apk").getPath();
+ * String path = MApplication.getInstance().getFileStreamPath("pluginContentProvider-debug-1.0.apk").getPath();
  * ApplicationInfoUtil.fixApplicationInfo(providerInfo.applicationInfo, path);
  * if (TextUtils.isEmpty(providerInfo.processName)) {
  * providerInfo.processName = providerInfo.packageName;
