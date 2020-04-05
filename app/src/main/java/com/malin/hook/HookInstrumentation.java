@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 
+import androidx.annotation.Keep;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -25,6 +27,7 @@ class HookInstrumentation {
 
     private static final String TARGET_INTENT_NAME = "target_intent_name";
 
+    @Keep
     static void hookInstrumentation(Context context, String stubActivityClassName) {
 
         try {
@@ -59,6 +62,7 @@ class HookInstrumentation {
         }
     }
 
+    @Keep
     @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     private static class InstrumentationProxy extends Instrumentation {
@@ -125,6 +129,7 @@ class HookInstrumentation {
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */
+        @Keep
         @SuppressWarnings("unused")
         public ActivityResult execStartActivity(Context who, IBinder contextThread, IBinder token, Activity target, Intent intent, int requestCode, Bundle options) {
 
@@ -178,6 +183,7 @@ class HookInstrumentation {
          * Instrumentation的newActivity方法,用类加载器来创建Activity实例
          * 还原目标Activity.
          */
+        @Keep
         @Override
         public Activity newActivity(ClassLoader cl, String className, Intent intent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
             if (Build.VERSION.SDK_INT >= 28) {
