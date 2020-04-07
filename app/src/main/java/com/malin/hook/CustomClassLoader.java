@@ -9,7 +9,7 @@ import dalvik.system.DexClassLoader;
 class CustomClassLoader extends DexClassLoader {
     private static final String TAG = CustomClassLoader.class.getSimpleName();
 
-    public CustomClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
+    CustomClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
         super(dexPath, optimizedDirectory, libraryPath, parent);
     }
 

@@ -66,14 +66,12 @@ public class MApplication extends Application {
         Runnable providerRunnable = new Runnable() {
             @Override
             public void run() {
-                final String PLUGIN_APK = "pluginContentProvider-debug-1.0.apk";
-                final String PLUGIN_DEX = "pluginContentProvider-debug-1.0.dex";
-                final File apkFile = getFileStreamPath(PLUGIN_APK);
-                final File dexFile = getFileStreamPath(PLUGIN_DEX);
+                final File apkFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_PROVIDER_APK);
+                final File dexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_PROVIDER_DEX);
                 if (!apkFile.exists()) {
                     Log.e(TAG, "extractAssets");
                     if (Build.VERSION.SDK_INT >= 18) {
-                        PluginUtils.extractAssets(context, PLUGIN_APK);
+                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_PROVIDER_APK);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, dexFile);
                         ProviderHelper.installProviders(context, apkFile);
                     } else {
@@ -81,7 +79,7 @@ public class MApplication extends Application {
                         //static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
                         //public static ActivityThread currentActivityThread() {return sThreadLocal.get();}
                         //currentActivityThread()方法需要在UI线程中调用
-                        PluginUtils.extractAssets(context, PLUGIN_APK, new PluginUtils.CopyCallback() {
+                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_PROVIDER_APK, new PluginUtils.CopyCallback() {
                             @Override
                             public void onSuccess() {
                                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, dexFile);
@@ -141,14 +139,12 @@ public class MApplication extends Application {
     }
 
     private void installActivity() {
-        final String PLUGIN_APK = "pluginActivity-debug-1.0.apk";
-        final String PLUGIN_DEX = "pluginActivity-debug-1.0.dex";
         Runnable patchClassLoaderRunnable = new Runnable() {
             @Override
             public void run() {
-                PluginUtils.extractAssets(MApplication.getInstance(), PLUGIN_APK);
-                File dexFile = getFileStreamPath(PLUGIN_APK);
-                File optDexFile = getFileStreamPath(PLUGIN_DEX);
+                PluginUtils.extractAssets(MApplication.getInstance(), PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
+                File dexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
+                File optDexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_DEX);
                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
             }
         };
@@ -173,14 +169,12 @@ public class MApplication extends Application {
         Runnable providerRunnable = new Runnable() {
             @Override
             public void run() {
-                final String PLUGIN_APK = "pluginService-debug-1.0.apk";
-                final String PLUGIN_DEX = "pluginService-debug-1.0.odex";
-                final File apkFile = getFileStreamPath(PLUGIN_APK);
-                final File odexFile = getFileStreamPath(PLUGIN_DEX);
+                final File apkFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_SERVICE_APK);
+                final File odexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_SERVICE_DEX);
                 if (!apkFile.exists()) {
                     Log.e(TAG, "pluginService extractAssets");
                     if (Build.VERSION.SDK_INT >= 18) {
-                        PluginUtils.extractAssets(context, "pluginService-debug-1.0.apk");
+                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         try {
                             ServiceManager.getInstance().preLoadServices(apkFile);
@@ -192,7 +186,7 @@ public class MApplication extends Application {
                         //static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
                         //public static ActivityThread currentActivityThread() {return sThreadLocal.get();}
                         //currentActivityThread()方法需要在UI线程中调用
-                        PluginUtils.extractAssets(context, PLUGIN_APK, new PluginUtils.CopyCallback() {
+                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK, new PluginUtils.CopyCallback() {
                             @Override
                             public void onSuccess() {
                                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
