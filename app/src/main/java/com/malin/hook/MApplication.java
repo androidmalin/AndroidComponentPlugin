@@ -119,6 +119,7 @@ public class MApplication extends Application {
 
     private void init() {
         mApplication = this;
+        BaseDexClassLoaderReporter.setReporterHook();
     }
 
     private void unseal() {
