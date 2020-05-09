@@ -17,39 +17,15 @@ android {
         }
     }
 
-    //signing.properties在根目录
-    def keystorePropertiesFile = rootProject.file("signing.properties")
-    def keystoreProperties = new Properties()
-    if (keystorePropertiesFile != null && keystorePropertiesFile.canRead()) {
-        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    } else {
-        println "==>请在根目录创建signing.properties文件"
-        return
-    }
-
     signingConfigs {
         release {
             v1SigningEnabled true
             v2SigningEnabled true
-            if (keystorePropertiesFile != null && keystorePropertiesFile.canRead()) {
-                String kAlias = keystoreProperties["KEY_ALIAS"]
-                String kPwd = keystoreProperties["KEY_PASSWORD"]
-                String sFile = keystoreProperties['STORE_FILE']
-                String sPwd = keystoreProperties["STORE_PASSWORD"]
-                if (kAlias != null && kPwd != null && sFile != null && sPwd != null) {
-                    keyAlias keystoreProperties["KEY_ALIAS"]
-                    keyPassword keystoreProperties["KEY_PASSWORD"]
-                    //注意下面的file()，否则无法使用
-                    storeFile file(keystoreProperties['STORE_FILE'])
-                    storePassword keystoreProperties["STORE_PASSWORD"]
-                } else {
-                    println "==>请检查signing.properties文件中的四个属性是否为空"
-                    return
-                }
-            } else {
-                println "请在根目录创建signing.properties文件"
-                return
-            }
+            keyAlias "plugin"
+            keyPassword "plugin"
+            //keytool -importkeystore -srckeystore test.jks -destkeystore test2.jks -deststoretype pkcs12
+            storeFile file("../plugin.jks")
+            storePassword "plugin"
         }
         debug {
             v1SigningEnabled true
@@ -58,17 +34,7 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/DEPENDENCIES.txt'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/dependencies.txt'
-        exclude 'META-INF/LGPL2.1'
-        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/*'
         exclude 'META-INF/CERT.SF'
         exclude 'META-INF/CERT.RSA'
         exclude 'META-INF/MANIFEST.MF'
