@@ -41,10 +41,11 @@ public class LoadedApkClassLoaderHookHelper23 {
     public static void hookLoadedApkInActivityThread(File apkFile) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException, InstantiationException, NullPointerException {
 
+        //一:获取mPackages对象 final ArrayMap<String,WeakReference<LoadedApk>> mPackages = new ArrayMap<String,WeakReference<LoadedApk>>();
         // 1.先获取到当前的ActivityThread对象
         Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
 
-        //2.静态方法 public static ActivityThread currentActivityThread()
+        //2.静态方法 public static ActivityThread currentActivityThread(){}
         Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
         currentActivityThreadMethod.setAccessible(true);
 
@@ -60,6 +61,10 @@ public class LoadedApkClassLoaderHookHelper23 {
         //final ArrayMap<String,WeakReference<LoadedApk>> mPackages = new ArrayMap<String,WeakReference<LoadedApk>>();
         Map mPackages = (Map) mPackagesField.get(currentActivityThread);
         if (mPackages == null) throw new NullPointerException("mPackages == null");
+
+        //二:获取LoadAPK
+        //通过调用方法 public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,CompatibilityInfo compatInfo) {...}
+        //需要构造两个参数, ApplicationInfo ai和CompatibilityInfo compatInfo
 
         //6. 获取CompatibilityInfo的Class对象
         //android.content.res.CompatibilityInfo
@@ -87,7 +92,7 @@ public class LoadedApkClassLoaderHookHelper23 {
         //10.获取插件的ApplicationInfo实例对象
         ApplicationInfo applicationInfo = generateApplicationInfo(apkFile);
 
-        //方才为了获取ApplicationInfo我们费了好大一番精力;
+        //刚才为了获取ApplicationInfo我们费了好大一番精力;
         //回顾一下我们的初衷:
         //我们最终的目的是调用getPackageInfoNoCheck得到LoadedApk的信息,并替换其中的mClassLoader,
         //然后把LoadedApk的信息添加到ActivityThread的mPackages缓存中;
@@ -121,11 +126,11 @@ public class LoadedApkClassLoaderHookHelper23 {
         sLoadedApk.put(applicationInfo.packageName, loadedApk);
 
         //17.将创建的WeakReference(loadedApk)存进mPackages中
-        WeakReference weakReference = new WeakReference(loadedApk);
+        WeakReference weakReferenceLoadApk = new WeakReference(loadedApk);
 
         //ActivityThread类中mPackages成员
         //final ArrayMap<String,WeakReference<LoadedApk>> mPackages = new ArrayMap<String,WeakReference<LoadedApk>>();
-        mPackages.put(applicationInfo.packageName, weakReference);
+        mPackages.put(applicationInfo.packageName, weakReferenceLoadApk);
 
         //到这里,我们已经成功地把插件的信息放入ActivityThread中的mPackages成员中,这样我们插件中的类能够成功地被加载;因此插件中的Activity实例能被成功第创建
         //由于整个流程较为复杂,我们简单梳理一下:
@@ -141,7 +146,7 @@ public class LoadedApkClassLoaderHookHelper23 {
 
         //上面还不能正确实现我们的目的:
         // 我们的插件并没有安装在系统上,因此系统肯定认为插件没有安装.
-        // 所以,我们还要欺骗一下PMS,让系统觉得插件已经安装在系统上了;至于如何欺骗 PMS
+        // 所以,我们还要欺骗一下PMS,让系统觉得插件已经安装在系统上了;
 
         // 到这里,我们已经能够成功地加载简单的独立的存在于外部文件系统中的apk了.
         // 这是一种极其复杂的Activity管理方案,我们仅仅写一个用来理解的demo就Hook了相当多的东西,在Framework层来回牵扯;
@@ -150,6 +155,7 @@ public class LoadedApkClassLoaderHookHelper23 {
     }
 
     /**
+     * ApplicationInfo:这个类就是AndroidManifest.xml里面的这个标签下面的信息
      * 此方法仅仅适用于 API 23
      * 这个方法的最终目的是调用
      * android.content.pm.PackageParser#generateActivityInfo(android.content.pm.PackageParser.Activity,int,android.content.pm.PackageUserState,int)
@@ -158,26 +164,24 @@ public class LoadedApkClassLoaderHookHelper23 {
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
 
         // 1.找出需要反射的核心类: android.content.pm.PackageParser
-        Class<?> packageParserClass = Class.forName("android.content.pm.PackageParser");
+        Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
 
         // 我们的终极目标:
         // android.content.pm.PackageParser#generateApplicationInfo(android.content.pm.PackageParser.Package,int,android.content.pm.PackageUserState)
-        // 要调用这个方法,需要做很多准备工作; 考验反射技术的时候到了 - -!
-        // 下面,我们开始这场Hack之旅吧!
+        // 要调用这个方法,需要做很多准备工作
 
-        // 首先拿到我们得终极目标: generateApplicationInfo方法
-        // public static ApplicationInfo generateApplicationInfo(Package p,int flags,PackageUserState state) {}
+        // 首先准备 generateApplicationInfo方法的三个参数
 
         //2.获取内部类Package的class对象
         //public final static class Package
-        Class<?> packageParser$PackageClass = Class.forName("android.content.pm.PackageParser$Package");
+        Class<?> packageParser$PackageClazz = Class.forName("android.content.pm.PackageParser$Package");
 
         //3.获取PackageUserState的class对象
-        Class<?> packageUserStateClass = Class.forName("android.content.pm.PackageUserState");
+        Class<?> packageUserStateClazz = Class.forName("android.content.pm.PackageUserState");
 
         //4.获取generateApplicationInfo()方法
         //public static ApplicationInfo generateApplicationInfo(Package p,int flags,PackageUserState state) {
-        Method generateApplicationInfoMethod = packageParserClass.getDeclaredMethod("generateApplicationInfo", packageParser$PackageClass, int.class, packageUserStateClass);
+        Method generateApplicationInfoMethod = packageParserClazz.getDeclaredMethod("generateApplicationInfo", packageParser$PackageClazz, int.class, packageUserStateClazz);
 
         // 接下来构建需要得参数
 
@@ -187,12 +191,13 @@ public class LoadedApkClassLoaderHookHelper23 {
         // 这个方法返回的就是一个Package类型的实例,因此我们调用这个方法即可
         // 首先,我们得创建出一个Package对象出来供这个方法调用
         // 而这个需要得对象可以通过 android.content.pm.PackageParser#parsePackage 这个方法返回得 Package对象得字段获取得到
+
         //5.创建出一个PackageParser对象供使用
-        Object packageParser = packageParserClass.newInstance();
+        Object packageParser = packageParserClazz.newInstance();
 
         //6.调用 PackageParser.parsePackage 解析apk的信息
-        //public Package parsePackage(File packageFile,int flags)
-        Method parsePackageMethod = packageParserClass.getDeclaredMethod("parsePackage", File.class, int.class);
+        //public Package parsePackage(File packageFile,int flags){}
+        Method parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
         parsePackageMethod.setAccessible(true);
 
         //7.反射调用parsePackage()方法,获取android.content.pm.PackageParser.Package 对象
@@ -201,12 +206,14 @@ public class LoadedApkClassLoaderHookHelper23 {
 
         //PackageUserState,代表不同用户中包的信息.由于Android是一个多任务多用户系统,因此不同的用户同一个包可能有不同的状态;
         // 这里我们只需要获取包的信息,因此直接使用默认的即可
-        //8. 第三个参数 mDefaultPackageUserState 我们直接使用默认构造函数构造一个出来即可
+
+        //8.第三个参数 mDefaultPackageUserState 我们直接使用默认构造函数构造一个出来即可
         //PackageUserState,代表不同用户中包的信息
-        Object defaultPackageUserState = packageUserStateClass.newInstance();
+        Object defaultPackageUserState = packageUserStateClazz.newInstance();
 
         // 至此,generateApplicationInfo的参数我们已经全部构造完成,直接调用此方法即可得到我们需要的applicationInfo对象
-        //9. 反射调用generateApplicationInfo()方法,获取插件的ApplicationInfo实例对象
+
+        //9.反射调用generateApplicationInfo()方法,获取插件的ApplicationInfo实例对象
         //public static ApplicationInfo generateApplicationInfo(Package p,int flags,PackageUserState state) {}
         ApplicationInfo applicationInfo = (ApplicationInfo) generateApplicationInfoMethod.invoke(packageParser, packageObj, 0, defaultPackageUserState);
         if (applicationInfo == null) throw new NullPointerException("applicationInfo == null");
