@@ -18,12 +18,12 @@ import static android.os.Build.VERSION.SDK_INT;
  * https://developer.android.com/preview/setup-sdk#update-build
  * <p>
  * 思路
- * 首先，我们通过反射 API 拿到 getDeclaredMethod 方法。
- * getDeclaredMethod 是 public 的，不存在问题；这个通过反射拿到的方法我们称之为元反射方法。
- * 然后，我们通过刚刚反射拿到元反射方法去反射调用 getDeclardMethod。
- * 这里我们就实现了以系统身份去反射的目的——反射相关的 API 都是系统类，
- * 因此我们的元反射方法也是被系统类加载的方法；
- * 所以我们的元反射方法调用的 getDeclardMethod 会被认为是系统调用的，可以反射任意的方法。
+ * 首先,我们通过反射 API 拿到 getDeclaredMethod 方法.
+ * getDeclaredMethod 是 public 的,不存在问题;这个通过反射拿到的方法我们称之为元反射方法.
+ * 然后,我们通过刚刚反射拿到元反射方法去反射调用 getDeclardMethod.
+ * 这里我们就实现了以系统身份去反射的目的——反射相关的 API 都是系统类,
+ * 因此我们的元反射方法也是被系统类加载的方法;
+ * 所以我们的元反射方法调用的 getDeclardMethod 会被认为是系统调用的,可以反射任意的方法.
  */
 class Reflection {
 
@@ -44,12 +44,12 @@ class Reflection {
 
                 //1.forName() 方法-->Class
                 //package java.lang.Class
-                //public static Class<?> forName(String className)
+                //public static Class<?> forName(String className){}
                 Method forNameMethod = Class.class.getDeclaredMethod("forName", String.class);
 
                 //2.getDeclaredMethod() 方法-->Method
                 //package java.lang.Class
-                // public Method getDeclaredMethod(String name, Class<?>... parameterTypes)
+                // public Method getDeclaredMethod(String name, Class<?>... parameterTypes){}
                 Method getDeclaredMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
 
                 //3.生成 VMRuntime class对象
@@ -68,9 +68,9 @@ class Reflection {
                 //public native void setHiddenApiExemptions(String[] signaturePrefixes);
 
                 //signaturePrefixes:
-                // 签名前缀列表。
-                //列表中的每个项目都是黑名单API的类型签名上的前缀匹配。
-                //所有匹配的API均被视为已列入白名单：允许访问，且无日志记录。
+                // 签名前缀列表.
+                //列表中的每个项目都是黑名单API的类型签名上的前缀匹配.
+                //所有匹配的API均被视为已列入白名单：允许访问,且无日志记录.
                 setHiddenApiExemptions = (Method) getDeclaredMethod.invoke(vmRuntimeClass, "setHiddenApiExemptions", new Class[]{String[].class});
 
                 if (getRuntime != null) {
@@ -109,7 +109,7 @@ class Reflection {
 
     /**
      * make specific methods exempted from hidden API check.
-     * 使特定方法免于隐藏API检查。
+     * 使特定方法免于隐藏API检查.
      *
      * @param methods the method signature prefix, such as "Ldalvik/system", "Landroid" or even "L"
      * @return true if success
