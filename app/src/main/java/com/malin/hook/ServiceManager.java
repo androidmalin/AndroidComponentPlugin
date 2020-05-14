@@ -31,11 +31,17 @@ public final class ServiceManager {
 
     private static final String TAG = "ServiceManager";
 
-    // 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
-    private volatile Map<String, Service> mServiceMap = new HashMap<>();
+    /**
+     * 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
+     */
+    private final Map<String, Service> mServiceMap = new HashMap<>();
 
-    // 存储插件的Service信息
-    private volatile Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
+    /**
+     * 存储插件的Service信息
+     */
+    private final Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
+
+    private File mPluginFile;
 
     private static class Holder {
         private static final ServiceManager instance = new ServiceManager();
@@ -58,7 +64,7 @@ public final class ServiceManager {
         ServiceInfo serviceInfo = selectPluginService(targetIntent);
 
         if (serviceInfo == null) {
-            Log.w(TAG, "can not found service : " + targetIntent.getComponent());
+            Log.e(TAG, "can not found service : " + targetIntent.getComponent());
             return;
         }
         try {
@@ -95,7 +101,7 @@ public final class ServiceManager {
     int stopService(Intent targetIntent) {
         ServiceInfo serviceInfo = selectPluginService(targetIntent);
         if (serviceInfo == null) {
-            Log.w(TAG, "can not found service: " + targetIntent.getComponent());
+            Log.e(TAG, "can not found service: " + targetIntent.getComponent());
             return 0;
         }
         String processName3 = ProcessUtil.getProcessNameViaManager(MApplication.getInstance());
@@ -105,7 +111,7 @@ public final class ServiceManager {
 
         Service service = mServiceMap.get(serviceInfo.name);
         if (service == null) {
-            Log.w(TAG, "can not runnning, are you stopped it multi-times?");
+            Log.w(TAG, "can not running, are you stopped it multi-times?");
             return 0;
         }
         service.onDestroy();
@@ -164,12 +170,19 @@ public final class ServiceManager {
         //0.
         IBinder token = new Binder();
 
-        //1.创建CreateServiceData对象, 用来传递给ActivityThread的handleCreateService 当作参数
+        //1.创建CreateServiceData对象, 用来传递给ActivityThread的handleCreateService方法当作参数
         //ActivityThread的内部类CreateServiceData static final class CreateServiceData {}
         Class<?> createServiceDataClazz = Class.forName("android.app.ActivityThread$CreateServiceData");
         Constructor<?> createServiceDataConstructor = createServiceDataClazz.getDeclaredConstructor();
         createServiceDataConstructor.setAccessible(true);
         Object createServiceData = createServiceDataConstructor.newInstance();
+
+        //static final class CreateServiceData {
+        //        IBinder token;
+        //        ServiceInfo info;
+        //        CompatibilityInfo compatInfo;
+        //        Intent intent;
+        //}
 
         //2.给我们创建的createServiceData对象的token字段赋值, ActivityThread的handleCreateService用这个作为key存储Service
         Field tokenField = createServiceDataClazz.getDeclaredField("token");
@@ -178,13 +191,12 @@ public final class ServiceManager {
 
         //3.给serviceInfo.applicationInfo增加必须的属性.
         // 之前android.content.pm.PackageParser#generateServiceInfo(){}方法,得到的ServiceInfo中 serviceInfo.applicationInfo属性没有值;
-        // TODO:思考一下,是不是跟flag参数有关,目前传递的是flag=0;
         //这个修改是为了loadClass的时候, LoadedApk会是主程序的ClassLoader, 我们选择Hook BaseDexClassLoader的方式加载插件
         serviceInfo.applicationInfo.packageName = MApplication.getInstance().getPackageName();
 
-        //android10出现的异常解决办法,通过异常，寻找出错的地方
-        //TODO:插件APK的路径
-        String path = MApplication.getInstance().getFileStreamPath("pluginService-debug-1.0.apk").getPath();
+        //android10出现的异常解决办法,通过异常,寻找出错的地方
+        //插件APK的路径
+        String path = mPluginFile != null ? mPluginFile.getPath() : "";
         serviceInfo.applicationInfo.sourceDir = path;
         serviceInfo.applicationInfo.publicSourceDir = path;
         serviceInfo.applicationInfo.nativeLibraryDir = MApplication.getInstance().getApplicationInfo().nativeLibraryDir;
@@ -229,8 +241,9 @@ public final class ServiceManager {
         //final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
         Field mServicesField = activityThreadClazz.getDeclaredField("mServices");
         mServicesField.setAccessible(true);
-        Map mServices = (Map) mServicesField.get(currentActivityThread);
+        Map<?, ?> mServices = (Map<?, ?>) mServicesField.get(currentActivityThread);
         if (mServices == null) throw new NullPointerException("mServices==null");
+
         //8.获取我们新创建出来的Service对象
         Service service = (Service) mServices.get(token);
 
@@ -256,6 +269,7 @@ public final class ServiceManager {
      */
     @SuppressWarnings({"JavaReflectionMemberAccess"})
     void preLoadServices(File apkFile) throws Throwable {
+        mPluginFile = apkFile;
         int version = Build.VERSION.SDK_INT;
         if (version < 15) return;
         //1.获取PackageParser的Class对象
@@ -281,7 +295,7 @@ public final class ServiceManager {
             packageParser = packageParserClazz.newInstance();
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
-            Constructor packageParserConstructor = packageParserClazz.getConstructor(String.class);
+            Constructor<?> packageParserConstructor = packageParserClazz.getConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = packageParserConstructor.newInstance(archiveSourcePath);
@@ -298,6 +312,7 @@ public final class ServiceManager {
             // 15<=Build.VERSION.SDK_INT <=19
             String destCodePath = apkFile.getCanonicalPath();
             DisplayMetrics displayMetrics = new DisplayMetrics();
+            displayMetrics.setToDefaults();
 
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
             //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
@@ -347,9 +362,9 @@ public final class ServiceManager {
                 mServiceInfoMap.put(new ComponentName(info.packageName, info.name), info);
             }
         } else if (Build.VERSION.SDK_INT == 16) {
-            Class<?> userIdClass = Class.forName("android.os.UserId");
+            Class<?> userIdClazz = Class.forName("android.os.UserId");
             // public static final int getCallingUserId(){}
-            Method getCallingUserIdMethod = userIdClass.getDeclaredMethod("getCallingUserId");
+            Method getCallingUserIdMethod = userIdClazz.getDeclaredMethod("getCallingUserId");
             getCallingUserIdMethod.setAccessible(true);
 
             Object userIdObj = getCallingUserIdMethod.invoke(null);
