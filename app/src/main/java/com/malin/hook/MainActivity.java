@@ -17,8 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.core.os.BuildCompat;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +38,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtnSendBroadCastToPlugin;
     private Button mBtnInsertData;
     private Button mBtnQueryData;
-    private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
     private static final String PLUGIN_SEND_ACTION = "com.malin.receiver.plugin.receiver1.SEND_ACTION";
     private static final String ACTION_PLUGIN1 = "com.malin.receiver.plugin.Receiver1.action";
@@ -127,7 +125,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start: {
-                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
                     Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -136,7 +134,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
                     Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -170,7 +168,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -192,7 +190,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && (Build.VERSION.SDK_INT >= 29 || BuildCompat.isAtLeastQ())) {
+                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
                     Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -263,9 +261,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
             // @hide
             //public static final int INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
             Field field = activityManagerClazz.getField("INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS");
-
             //3.get value
-            int check_flag = (int) field.get(null);
+            Object object = field.get(null);
+            if (object == null) {
+                return false;
+            }
+            int check_flag = (int) object;
             Log.d(TAG, "get blacklist api :" + check_flag);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -300,7 +301,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mSingleThreadExecutor.execute(receiverPluginRegisterRunnable);
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private static final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive 插件插件,我是主程序,握手完成!");
@@ -372,7 +373,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiver != null) unregisterReceiver(mReceiver);
+        unregisterReceiver(mReceiver);
         ReceiverHelper.unregisterReceiver(MainActivity.this);
     }
 }
