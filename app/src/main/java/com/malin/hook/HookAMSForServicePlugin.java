@@ -27,7 +27,7 @@ class HookAMSForServicePlugin {
      * 进而骗过AMS
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
-    static void hookActivityManagerNative() throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
+    static void hookActivityManager() throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
         Field iActivityManagerSingletonFiled;
         if (Build.VERSION.SDK_INT >= 26) {
             Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
@@ -59,7 +59,7 @@ class HookAMSForServicePlugin {
     private static class IActivityManagerHandler implements InvocationHandler {
         private static final String TAG = "IActivityManagerHandler";
 
-        private Object mIActivityManagerBase;
+        private final Object mIActivityManagerBase;
 
         IActivityManagerHandler(Object base) {
             mIActivityManagerBase = base;

@@ -81,9 +81,9 @@ class HookPMS {
             PackageManager packageManager = context.getPackageManager();
             //PackageManager的实现类ApplicationPackageManager中的mPM
             //private final IPackageManager mPM;
-            Field mPmField = packageManager.getClass().getDeclaredField("mPM");
-            mPmField.setAccessible(true);
-            mPM = mPmField.get(packageManager);
+            Field mPMField = packageManager.getClass().getDeclaredField("mPM");
+            mPMField.setAccessible(true);
+            mPM = mPMField.get(packageManager);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {

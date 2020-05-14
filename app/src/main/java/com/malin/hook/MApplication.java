@@ -37,21 +37,39 @@ public class MApplication extends Application {
      */
     private final boolean mHookInstrumentation_is_appcompatActivity = true;
 
-    private ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
         unseal();
-        init();
+        initApplication();
         startStrictMode();
-        getPM(context);
+        setClassLoaderReporter();
+        getPackageManager(context);
         handleService(context);
         handleActivity(context);
         installActivity();
         handleContentProvider(context);
         hookClipboard();
+    }
+
+
+    /**
+     * exempt hide api limit
+     */
+    private void unseal() {
+        int reflection = Reflection.unseal();
+        Log.d(TAG, reflection == 0 ? "hide api exempt success" : "hide api exempt failure");
+    }
+
+    private void initApplication() {
+        mApplication = this;
+    }
+
+    private void setClassLoaderReporter() {
+        BaseDexClassLoaderReporter.setReporterHook();
     }
 
     private void hookClipboard() {
@@ -69,7 +87,7 @@ public class MApplication extends Application {
                 final File apkFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_PROVIDER_APK);
                 final File dexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_PROVIDER_DEX);
                 if (!apkFile.exists()) {
-                    Log.e(TAG, "extractAssets");
+                    Log.d(TAG, "plugin contentProvider apk start extract");
                     if (Build.VERSION.SDK_INT >= 18) {
                         PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_PROVIDER_APK);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, dexFile);
@@ -82,6 +100,7 @@ public class MApplication extends Application {
                         PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_PROVIDER_APK, new PluginUtils.CopyCallback() {
                             @Override
                             public void onSuccess() {
+                                Log.d(TAG, "plugin contentProvider apk extract success");
                                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, dexFile);
                                 mHandler.post(new Runnable() {
                                     @Override
@@ -93,12 +112,12 @@ public class MApplication extends Application {
 
                             @Override
                             public void onFail() {
-
+                                Log.e(TAG, "plugin contentProvider apk extract fail");
                             }
                         });
                     }
                 } else {
-                    Log.e(TAG, "extractAssets not!!");
+                    Log.d(TAG, "plugin contentProvider apk not need extract");
                     if (Build.VERSION.SDK_INT >= 18) {
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, dexFile);
                         ProviderHelper.installProviders(context, apkFile);
@@ -117,15 +136,6 @@ public class MApplication extends Application {
         mSingleThreadExecutor.execute(providerRunnable);
     }
 
-    private void init() {
-        mApplication = this;
-        BaseDexClassLoaderReporter.setReporterHook();
-    }
-
-    private void unseal() {
-        int reflection = Reflection.unseal();
-        Log.d(TAG, reflection == 0 ? "hide api 解除成功" : "hide api 解除失败");
-    }
 
     private void handleActivity(Context context) {
         if (mHookInstrumentation) {
@@ -152,7 +162,7 @@ public class MApplication extends Application {
         mSingleThreadExecutor.execute(patchClassLoaderRunnable);
     }
 
-    private void getPM(Context context) {
+    private void getPackageManager(Context context) {
         mmPM = HookPMS.getApplicationPackageManager(context);
         msPackageManager = HookPMS.getPackageManager();
     }
@@ -163,7 +173,7 @@ public class MApplication extends Application {
      */
     private void handleService(final Context context) {
         try {
-            HookAMSForServicePlugin.hookActivityManagerNative();
+            HookAMSForServicePlugin.hookActivityManager();
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -173,7 +183,7 @@ public class MApplication extends Application {
                 final File apkFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_SERVICE_APK);
                 final File odexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_SERVICE_DEX);
                 if (!apkFile.exists()) {
-                    Log.e(TAG, "pluginService extractAssets");
+                    Log.d(TAG, "pluginService apk start extract");
                     if (Build.VERSION.SDK_INT >= 18) {
                         PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
@@ -190,6 +200,7 @@ public class MApplication extends Application {
                         PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK, new PluginUtils.CopyCallback() {
                             @Override
                             public void onSuccess() {
+                                Log.d(TAG, "pluginService apk extract success");
                                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                                 mHandler.post(new Runnable() {
                                     @Override
@@ -205,12 +216,12 @@ public class MApplication extends Application {
 
                             @Override
                             public void onFail() {
-
+                                Log.e(TAG, "pluginService apk extract fail");
                             }
                         });
                     }
                 } else {
-                    Log.e(TAG, "pluginService extractAssets not!!");
+                    Log.d(TAG, "pluginService apk not need extract");
                     if (Build.VERSION.SDK_INT >= 18) {
                         BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         try {
