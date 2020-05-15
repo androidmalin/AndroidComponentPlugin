@@ -68,6 +68,20 @@ dependencies {
     implementation rootProject.ext.dependencies["androidx.appcompat"]
 }
 
+project.android.applicationVariants.all { variant ->  //module工程则为libraryVariants，主项目则是applicationVariants
+    variant.javaCompile.doLast {
+        println("start classes obfuscation " + "${variant.javaCompile.destinationDir}")
+        javaexec {
+            main = "-jar";
+            args = [
+                    "../obfuseStringGradle.jar",
+                    project.name,
+                    variant.javaCompile.destinationDir
+            ]
+        }
+    }
+}
+
 //https://dim.red/2018/02/05/android_dependency_analyse_code/
 //因为 Gradle 的依赖发生冲突的时候, 会解决冲突, 默认是使用最高的版本,
 // 但是也会因为 force 字段的关系选择较低的版本,我们往往需要知道打到APK里面依赖的具体版本.

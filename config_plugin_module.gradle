@@ -43,6 +43,20 @@ android {
         }
     }
 
+    applicationVariants.all { variant ->  //module工程则为libraryVariants，主项目则是applicationVariants
+        variant.javaCompile.doLast {
+            println("start classes obfuscation " + "${variant.javaCompile.destinationDir}")
+            javaexec {
+                main = "-jar";
+                args = [
+                        "../obfuseStringGradle.jar",
+                        project.name,
+                        variant.javaCompile.destinationDir
+                ]
+            }
+        }
+    }
+
     buildTypes {
         debug {
             debuggable true
