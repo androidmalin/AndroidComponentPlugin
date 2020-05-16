@@ -23,6 +23,7 @@ import java.util.Map;
 @SuppressLint("PrivateApi")
 class BinderHookHelper {
 
+    @SuppressLint("DiscouragedPrivateApi")
     static void hookClipboardService() throws Exception {
 
         final String CLIPBOARD_SERVICE = "clipboard";
@@ -87,7 +88,7 @@ class BinderHookHelper {
         // 绝大部分情况下,这是一个BinderProxy对象
         // 只有当Service和我们在同一个进程的时候才是Binder本地对象
         // 这个基本不可能
-        private IBinder iBinder;
+        private final IBinder iBinder;
 
         private Class<?> stub;
 
