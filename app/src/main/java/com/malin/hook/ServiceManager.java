@@ -58,7 +58,7 @@ public final class ServiceManager {
      * @param startId     startId
      */
     void onStart(Intent proxyIntent, int startId) {
-
+        if (proxyIntent == null) return;
         Intent targetIntent = proxyIntent.getParcelableExtra(HookAMSForServicePlugin.EXTRA_TARGET_INTENT);
         if (targetIntent == null) throw new NullPointerException("targetIntent==null");
         ServiceInfo serviceInfo = selectPluginService(targetIntent);

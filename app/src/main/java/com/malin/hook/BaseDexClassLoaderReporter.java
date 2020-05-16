@@ -62,8 +62,13 @@ public class BaseDexClassLoaderReporter {
         public Object invoke(Object proxy, Method method, Object[] args) {
             String TAG = "ReportInvocationHandler";
             Log.d(TAG, "method:" + method.toString());
-            Log.d(TAG, "List<ClassLoader> classLoadersChain:" + args[0]);
-            Log.d(TAG, "List<String> classPaths:" + args[1]);
+            int argsLength = args.length;
+            if (argsLength >= 1) {
+                Log.d(TAG, "List<ClassLoader> classLoadersChain:" + args[0]);
+            }
+            if (argsLength >= 2) {
+                Log.d(TAG, "List<String> classPaths:" + args[1]);
+            }
             return null;
         }
     }
