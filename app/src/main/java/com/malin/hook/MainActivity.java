@@ -281,6 +281,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return success;
     }
 
+    private boolean mRegisterReceiver;
+
     private void initReceiverPlugin() {
         Runnable receiverPluginRegisterRunnable = new Runnable() {
             @Override
@@ -296,6 +298,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
                 // 注册插件收到我们发送的广播之后, 回传的广播
                 registerReceiver(mReceiver, new IntentFilter(PLUGIN_SEND_ACTION));
+                mRegisterReceiver = true;
             }
         };
         mSingleThreadExecutor.execute(receiverPluginRegisterRunnable);
@@ -373,7 +376,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mReceiver);
+        if (mRegisterReceiver) {
+            unregisterReceiver(mReceiver);
+        }
         ReceiverHelper.unregisterReceiver(MainActivity.this);
     }
 }
