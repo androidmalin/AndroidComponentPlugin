@@ -13,7 +13,7 @@ ext {
     ]
 
     versions = [
-            appcompat: "1.2.0-beta01",
+            appcompat: "1.2.0-rc01",
     ]
 
     dependencies = [
