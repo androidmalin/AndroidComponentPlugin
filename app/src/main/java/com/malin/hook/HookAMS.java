@@ -29,31 +29,31 @@ public class HookAMS {
      * @return IActivityManager实例
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
-    static Object getIActivityManagerObj() {
+    static Object getIActivityManager() {
         Object iActivityManagerObj = null;
         try {
-            Field gDefaultField;
+            Field iActivityManagerSingletonField;
             if (Build.VERSION.SDK_INT >= 26) {
                 //1.获取ActivityManager的Class对象
                 //package android.app
                 //public class ActivityManager
-                Class<?> activityManager = Class.forName("android.app.ActivityManager");
+                Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
 
                 //2.获取ActivityManager中IActivityManagerSingleton属性的Field
                 //private static final Singleton<IActivityManager> IActivityManagerSingleton
-                gDefaultField = activityManager.getDeclaredField("IActivityManagerSingleton");
+                iActivityManagerSingletonField = activityManagerClazz.getDeclaredField("IActivityManagerSingleton");
             } else {
-                Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
-                gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
+                Class<?> activityManagerNativeClazz = Class.forName("android.app.ActivityManagerNative");
+                iActivityManagerSingletonField = activityManagerNativeClazz.getDeclaredField("gDefault");
             }
 
             //3.禁止Java语言访问检查
-            gDefaultField.setAccessible(true);
+            iActivityManagerSingletonField.setAccessible(true);
 
             //4.获取IActivityManagerSingleton属性的值
             // 所有静态对象的反射可以通过传null获取。如果是实列必须传实例
             // private static final Singleton<IActivityManager> IActivityManagerSingleton
-            Object gDefaultObj = gDefaultField.get(null);
+            Object iActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
 
             //5.获取Singleton类的对象
             //package android.util;
@@ -62,13 +62,13 @@ public class HookAMS {
 
             //6.获取Singleton中mInstance属性的Field
             // private T mInstance;既 IActivityManager mInstance
-            Field iActivityManagerField = singletonClazz.getDeclaredField("mInstance");
+            Field mInstanceField = singletonClazz.getDeclaredField("mInstance");
 
             //7.禁止Java语言访问检查
-            iActivityManagerField.setAccessible(true);
+            mInstanceField.setAccessible(true);
 
             //8.获取mInstance属性的的值,既IActivityManager
-            iActivityManagerObj = iActivityManagerField.get(gDefaultObj);
+            iActivityManagerObj = mInstanceField.get(iActivityManagerSingletonObj);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -83,25 +83,25 @@ public class HookAMS {
     /**
      * 重置系统的IActivityManager
      *
-     * @param iActivityManagerObj IActivityManager
+     * @param iActivityManager IActivityManager
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
-    static void resetIActivityManager(Object iActivityManagerObj) {
+    static void resetIActivityManager(Object iActivityManager) {
         try {
-            Field gDefaultField;
+            Field iActivityManagerSingletonField;
             if (Build.VERSION.SDK_INT >= 26) {
-                Class<?> activityManager = Class.forName("android.app.ActivityManager");
-                gDefaultField = activityManager.getDeclaredField("IActivityManagerSingleton");
+                Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
+                iActivityManagerSingletonField = activityManagerClazz.getDeclaredField("IActivityManagerSingleton");
             } else {
                 Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
-                gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
+                iActivityManagerSingletonField = activityManagerNativeClass.getDeclaredField("gDefault");
             }
-            gDefaultField.setAccessible(true);
-            Object gDefaultObj = gDefaultField.get(null);
+            iActivityManagerSingletonField.setAccessible(true);
+            Object iActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
             Class<?> singletonClazz = Class.forName("android.util.Singleton");
-            Field iActivityManagerField = singletonClazz.getDeclaredField("mInstance");
-            iActivityManagerField.setAccessible(true);
-            iActivityManagerField.set(gDefaultObj, iActivityManagerObj);
+            Field mInstanceField = singletonClazz.getDeclaredField("mInstance");
+            mInstanceField.setAccessible(true);
+            mInstanceField.set(iActivityManagerSingletonObj, iActivityManager);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

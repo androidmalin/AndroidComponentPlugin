@@ -65,15 +65,7 @@ class ProviderHelper {
 
 
             //4.call ActivityThread#installContentProviders()
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-29
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-28
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-27
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-26
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-25
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-24
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-23
-            //...
-            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//api-15
+            //private void installContentProviders(Context context, List<ProviderInfo> providers) {}//15=<api<=29
             Method installContentProvidersMethod = activityThreadClazz.getDeclaredMethod("installContentProviders", Context.class, List.class);
             installContentProvidersMethod.setAccessible(true);
             installContentProvidersMethod.invoke(currentActivityThread, context, providerInfoList);
@@ -106,16 +98,12 @@ class ProviderHelper {
             Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
 
             //2.获取parsePackage()方法的Method
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-            //...
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-            //...
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
             Method parsePackageMethod;
             if (Build.VERSION.SDK_INT >= 20) {
+                //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//21=<api<=29
                 parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
             } else {
+                //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//15=<api<=19
                 // 15<=Build.VERSION.SDK_INT <=19
                 parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, String.class, DisplayMetrics.class, int.class);
             }
@@ -127,8 +115,8 @@ class ProviderHelper {
                 packageParser = packageParserClazz.newInstance();
             } else {
                 // 15<=Build.VERSION.SDK_INT <=19
-                //public PackageParser(String archiveSourcePath) {}//api-19
-                Constructor constructor = packageParserClazz.getDeclaredConstructor(String.class);
+                //public PackageParser(String archiveSourcePath) {}//15=<api<=19
+                Constructor<?> constructor = packageParserClazz.getDeclaredConstructor(String.class);
                 constructor.setAccessible(true);
                 String archiveSourcePath = apkFile.getCanonicalPath();
                 packageParser = constructor.newInstance(archiveSourcePath);
@@ -138,8 +126,7 @@ class ProviderHelper {
             //Package为PackageParser的内部类;public final static class Package implements Parcelable {}
             Object packageObj;
             if (Build.VERSION.SDK_INT >= 20) {
-                //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-                //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
+                //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//21=<api<=29
                 packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_PROVIDERS);
             } else {
                 // 15<=Build.VERSION.SDK_INT <=19
@@ -147,15 +134,14 @@ class ProviderHelper {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 displayMetrics.setToDefaults();
 
-                //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-                //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
+                //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//15=<api<=19
                 packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_PROVIDERS);
             }
 
             if (packageObj == null) return null;
 
             //android.content.pm.PackageParser$Package
-            // 读取Package对象里面的services字段
+            // 读取Package对象里面的providers字段
             // 接下来要做的就是根据这个List<Provider> 获取到Provider对应的ProviderInfo
             //public final ArrayList<Provider> providers = new ArrayList<Provider>(0);
             Field providersField = packageObj.getClass().getDeclaredField("providers");
@@ -196,9 +182,7 @@ class ProviderHelper {
                 // 需要调用 android.content.pm.PackageParser#generateProviderInfo
 
 
-                //public static final ProviderInfo generateProviderInfo(Provider p, int flags, PackageUserState state, int userId) {}//api-29
-                //...
-                //public static final ProviderInfo generateProviderInfo(Provider p, int flags, PackageUserState state, int userId) {}//api-17
+                //public static final ProviderInfo generateProviderInfo(Provider p, int flags, PackageUserState state, int userId) {}//17=<api<=29
                 //public static final ProviderInfo generateProviderInfo(Provider p, int flags, boolean stopped,int enabledState, int userId) {}//api-16
                 //public static final ProviderInfo generateProviderInfo(Provider p,int flags) {}//api-15
                 generateProviderInfo = packageParserClazz.getDeclaredMethod(
@@ -207,8 +191,8 @@ class ProviderHelper {
 
                 List<ProviderInfo> ret = new ArrayList<>();
                 // 解析出intent对应的Provider组件
-                for (Object service : providers) {
-                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, service, 0, defaultUserState, userId);
+                for (Object provider : providers) {
+                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, provider, 0, defaultUserState, userId);
                     ret.add(info);
                 }
                 return ret;
@@ -230,9 +214,9 @@ class ProviderHelper {
 
                 List<ProviderInfo> ret = new ArrayList<>();
                 // 解析出intent对应的Provider组件
-                for (Object service : providers) {
+                for (Object provider : providers) {
                     int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, service, 0, false, enabledState, userId);
+                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, provider, 0, false, enabledState, userId);
                     ret.add(info);
                 }
                 return ret;
@@ -245,8 +229,8 @@ class ProviderHelper {
 
                 List<ProviderInfo> ret = new ArrayList<>();
                 // 解析出intent对应的Provider组件
-                for (Object service : providers) {
-                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, service, 0);
+                for (Object provider : providers) {
+                    ProviderInfo info = (ProviderInfo) generateProviderInfo.invoke(packageParser, provider, 0);
                     ret.add(info);
                 }
                 return ret;
@@ -275,7 +259,7 @@ class ProviderHelper {
         String readPermission = providerInfo.readPermission;
         String writePermission = providerInfo.writePermission;
         boolean grantUriPermissions = providerInfo.grantUriPermissions;
-        boolean multiprocess = providerInfo.multiprocess;
+        boolean multiProcess = providerInfo.multiprocess;
         int initOrder = providerInfo.initOrder;
         PatternMatcher[] uriPermissionPatterns = providerInfo.uriPermissionPatterns;
         PathPermission[] pathPermissions = providerInfo.pathPermissions;
@@ -285,7 +269,7 @@ class ProviderHelper {
         Log.d(TAG, "readPermission:" + readPermission);
         Log.d(TAG, "writePermission:" + writePermission);
         Log.d(TAG, "grantUriPermissions:" + grantUriPermissions);
-        Log.d(TAG, "multiprocess:" + multiprocess);
+        Log.d(TAG, "multiprocess:" + multiProcess);
         Log.d(TAG, "initOrder:" + initOrder);
         Log.d(TAG, "uriPermissionPatterns:" + Arrays.toString(uriPermissionPatterns));
         Log.d(TAG, "pathPermissions:" + Arrays.toString(pathPermissions));

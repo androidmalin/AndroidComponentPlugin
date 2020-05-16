@@ -145,7 +145,7 @@ public class MApplication extends Application {
                 HookInstrumentation.hookInstrumentation(context, StubActivity.class);
             }
         } else {
-            mIActivityManagerObj = HookAMS.getIActivityManagerObj();
+            mIActivityManagerObj = HookAMS.getIActivityManager();
         }
     }
 
