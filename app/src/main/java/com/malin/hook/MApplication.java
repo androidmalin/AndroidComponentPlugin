@@ -140,9 +140,9 @@ public class MApplication extends Application {
     private void handleActivity(Context context) {
         if (mHookInstrumentation) {
             if (mHookInstrumentation_is_appcompatActivity) {
-                HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class.getCanonicalName());
+                HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class);
             } else {
-                HookInstrumentation.hookInstrumentation(context, StubActivity.class.getCanonicalName());
+                HookInstrumentation.hookInstrumentation(context, StubActivity.class);
             }
         } else {
             mIActivityManagerObj = HookAMS.getIActivityManagerObj();
