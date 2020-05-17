@@ -27,7 +27,7 @@ class ApplicationInfoUtil {
 
         try {
             Class<?> applicationInfoClazz = Class.forName("android.content.pm.ApplicationInfo");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 //1.scanSourceDir
                 Field scanSourceDirFiled = applicationInfoClazz.getDeclaredField("scanSourceDir");
                 scanSourceDirFiled.setAccessible(true);
@@ -50,12 +50,15 @@ class ApplicationInfoUtil {
                 }
             }
 
+            //5.uid
             applicationInfo.uid = MApplication.getInstance().getApplicationInfo().uid;
+
+            //6.nativeLibraryDir
             if (applicationInfo.nativeLibraryDir == null) {
                 applicationInfo.nativeLibraryDir = MApplication.getInstance().getApplicationInfo().nativeLibraryDir;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= 24) {
                 try {
                     if (Build.VERSION.SDK_INT < 26) {
                         //deviceEncryptedDataDir

@@ -48,10 +48,13 @@ class ProviderHelper {
                 return;
             }
 
+            String path = apkFile.getCanonicalPath();
+
             int i = 0;
             //2.set packageName
             for (ProviderInfo providerInfo : providerInfoList) {
                 providerInfo.applicationInfo.packageName = context.getPackageName();
+                ApplicationInfoUtil.fixApplicationInfo(providerInfo.applicationInfo, path);
                 printProviderInfo(providerInfo, i);
                 i++;
             }
@@ -76,6 +79,8 @@ class ProviderHelper {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
