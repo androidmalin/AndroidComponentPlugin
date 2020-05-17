@@ -9,3 +9,4 @@ wget -c http://androidxref.com/5.0.0_r2/raw/frameworks/base/core/java/android/co
 wget -c http://androidxref.com/5.0.0_r2/raw/frameworks/base/core/java/android/os/UserHandle.java
 wget -c http://androidxref.com/5.0.0_r2/raw/frameworks/base/core/java/android/app/ActivityThread.java
 wget -c http://androidxref.com/5.0.0_r2/raw/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+wget -c http://androidxref.com/5.0.0_r2/raw/frameworks/base/core/java/android/content/pm/ApplicationInfo.java
