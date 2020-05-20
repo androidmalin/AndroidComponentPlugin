@@ -155,10 +155,18 @@ public class MApplication extends Application {
             public void run() {
                 PluginUtils.extractAssets(MApplication.getInstance(), PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
                 File dexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
-                try {
-                    LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(dexFile);
-                } catch (Throwable e) {
-                    e.printStackTrace();
+                File optDexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_DEX);
+
+                if (mHookInstrumentation) {
+                    try {
+                        //插件使用自己的ClassLoader加载
+                        LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(dexFile);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    //插件使用宿主的ClassLoader加载
+                    BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
                 }
             }
         };
