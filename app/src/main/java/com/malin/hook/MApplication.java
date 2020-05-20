@@ -189,11 +189,7 @@ public class MApplication extends Application {
                     Log.d(TAG, "pluginService apk start extract");
                     if (Build.VERSION.SDK_INT >= 18) {
                         PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
-                        try {
-                            LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(apkFile);
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         try {
                             ServiceManager.getInstance().preLoadServices(apkFile);
                         } catch (Throwable throwable) {
@@ -208,11 +204,7 @@ public class MApplication extends Application {
                             @Override
                             public void onSuccess() {
                                 Log.d(TAG, "pluginService apk extract success");
-                                try {
-                                    LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(apkFile);
-                                } catch (Throwable e) {
-                                    e.printStackTrace();
-                                }
+                                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                                 mHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -234,22 +226,14 @@ public class MApplication extends Application {
                 } else {
                     Log.d(TAG, "pluginService apk not need extract");
                     if (Build.VERSION.SDK_INT >= 18) {
-                        try {
-                            LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(apkFile);
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         try {
                             ServiceManager.getInstance().preLoadServices(apkFile);
                         } catch (Throwable throwable) {
                             throwable.printStackTrace();
                         }
                     } else {
-                        try {
-                            LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(apkFile);
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
+                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
