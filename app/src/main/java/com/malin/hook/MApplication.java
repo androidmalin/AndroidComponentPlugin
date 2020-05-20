@@ -155,8 +155,11 @@ public class MApplication extends Application {
             public void run() {
                 PluginUtils.extractAssets(MApplication.getInstance(), PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
                 File dexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
-                File optDexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_DEX);
-                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
+                try {
+                    LoadedApkClassLoaderHookHelper.hookLoadedApkInActivityThread(dexFile);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         };
         mSingleThreadExecutor.execute(patchClassLoaderRunnable);

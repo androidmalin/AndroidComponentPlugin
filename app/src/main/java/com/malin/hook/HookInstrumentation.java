@@ -14,6 +14,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.Keep;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -161,11 +162,21 @@ class HookInstrumentation {
         public Activity newActivity(ClassLoader classLoader, String className, Intent intent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
             Intent pluginIntent = intent.getParcelableExtra(TARGET_INTENT_CLASS);
             boolean pluginIntentClassNameExist = pluginIntent != null && !TextUtils.isEmpty(pluginIntent.getComponent().getClassName());
+
+            //1.className
             String finalClassName = pluginIntentClassNameExist ? pluginIntent.getComponent().getClassName() : className;
+
+            //2.intent
             Intent finalIntent = pluginIntentClassNameExist ? pluginIntent : intent;
-            if (Build.VERSION.SDK_INT >= 28)
-                return mInstrumentation.newActivity(classLoader, finalClassName, finalIntent);
-            return super.newActivity(classLoader, finalClassName, finalIntent);
+
+            //3.classLoader
+            File pluginDexFile = MApplication.getInstance().getFileStreamPath(PluginApkNameVersion.PLUGIN_ACTIVITY_APK);
+            ClassLoader finalClassLoader = pluginIntentClassNameExist ? CustomClassLoader.getPluginClassLoader(pluginDexFile, "com.malin.plugin") : classLoader;
+
+            if (Build.VERSION.SDK_INT >= 28) {
+                return mInstrumentation.newActivity(finalClassLoader, finalClassName, finalIntent);
+            }
+            return super.newActivity(finalClassLoader, finalClassName, finalIntent);
         }
     }
 }

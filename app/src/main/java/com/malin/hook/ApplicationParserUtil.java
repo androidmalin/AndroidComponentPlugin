@@ -51,7 +51,7 @@ public class ApplicationParserUtil {
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
             //public PackageParser(String archiveSourcePath) {}//15<=api<=19
-            Constructor packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
+            Constructor<?> packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = packageParserConstructor.newInstance(archiveSourcePath);
