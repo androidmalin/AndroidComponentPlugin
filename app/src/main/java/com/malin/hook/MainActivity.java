@@ -378,7 +378,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onDestroy();
         if (mRegisterReceiver) {
             unregisterReceiver(mReceiver);
+            ReceiverHelper.unregisterReceiver(MainActivity.this);
         }
-        ReceiverHelper.unregisterReceiver(MainActivity.this);
     }
 }
