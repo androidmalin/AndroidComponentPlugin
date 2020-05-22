@@ -4,11 +4,13 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -534,6 +536,10 @@ class HookActivity {
                 }
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
                 args[index] = componentName;
+            }
+            if ("getPackageInfo".equals(method.getName())) {
+                Log.d("getPackageInfo", "getPackageInfo:call");
+                return new PackageInfo();
             }
             return method.invoke(mIPackageManagerObj, args);
         }

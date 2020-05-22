@@ -13,11 +13,13 @@ ext {
     ]
 
     versions = [
-            appcompat: "1.2.0-rc01",
+            appcompat: "1.3.0-alpha01",
+            okio     : "2.6.0",
     ]
 
     dependencies = [
-            'androidx.appcompat': "androidx.appcompat:appcompat:${versions["appcompat"]}"
+            'androidx.appcompat': "androidx.appcompat:appcompat:${versions["appcompat"]}",
+            'okio'              : "com.squareup.okio:okio:${versions["okio"]}"
     ]
 
 }
