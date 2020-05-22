@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import okio.BufferedSource;
 import okio.Okio;
+import okio.Sink;
 import okio.Source;
 
 /**
@@ -39,11 +40,15 @@ class PluginUtils {
     static void extractAssets(Context context, String sourceName, CopyCallback copyCallback) {
         AssetManager assets = context.getAssets();
         InputStream inputStream = null;
+        Source source = null;
+        BufferedSource buffer = null;
+        Sink sink = null;
         try {
             inputStream = assets.open(sourceName);
-            Source source = Okio.source(inputStream);
-            BufferedSource buffer = Okio.buffer(source);
-            buffer.readAll(Okio.sink(context.getFileStreamPath(sourceName)));
+            source = Okio.source(inputStream);
+            buffer = Okio.buffer(source);
+            sink = Okio.sink(context.getFileStreamPath(sourceName));
+            buffer.readAll(sink);
             if (copyCallback != null) {
                 copyCallback.onSuccess();
             }
@@ -56,6 +61,30 @@ class PluginUtils {
             if (inputStream != null) {
                 try {
                     inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (source != null) {
+                try {
+                    source.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (sink != null) {
+                try {
+                    sink.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (buffer != null) {
+                try {
+                    buffer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
