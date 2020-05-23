@@ -146,3 +146,6 @@
 #-------------------------------okio-------------------------------
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 #-------------------------------okio-------------------------------
+
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}

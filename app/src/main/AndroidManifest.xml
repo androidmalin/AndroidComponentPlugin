@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.malin.hook">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MApplication"
         android:allowBackup="true"

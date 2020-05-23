@@ -61,7 +61,12 @@ final class ReceiverHelper {
         if (context == null) return;
         for (BroadcastReceiver broadcastReceiver : sReceiverList) {
             if (broadcastReceiver == null) continue;
-            context.unregisterReceiver(broadcastReceiver);
+            try {
+                context.unregisterReceiver(broadcastReceiver);
+            } catch (IllegalArgumentException i) {
+                //java.lang.IllegalArgumentException: Receiver not registered
+                i.printStackTrace();
+            }
         }
         sCache.clear();
         sReceiverList.clear();
