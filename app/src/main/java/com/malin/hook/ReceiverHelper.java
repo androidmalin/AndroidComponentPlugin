@@ -34,8 +34,8 @@ final class ReceiverHelper {
 
     private static final String TAG = "ReceiverHelper";
 
-    private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
-    private static List<BroadcastReceiver> sReceiverList = new ArrayList<>();
+    private static final Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
+    private static final List<BroadcastReceiver> sReceiverList = new ArrayList<>();
 
     static void preLoadReceiver(Context context, File apkFile) throws Exception {
         parserReceivers(apkFile);
@@ -119,7 +119,7 @@ final class ReceiverHelper {
             //public PackageParser(String archiveSourcePath) {}//api-17
             //public PackageParser(String archiveSourcePath) {}//api-16
             //public PackageParser(String archiveSourcePath) {}//api-15
-            Constructor packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
+            Constructor<?> packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
             packageParser = packageParserConstructor.newInstance(archiveSourcePath);

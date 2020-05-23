@@ -21,7 +21,7 @@ import java.util.Map;
 public class LoadedApkClassLoaderHookHelper23 {
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private static Map<String, Object> sLoadedApk = new HashMap<>();
+    private static final Map<String, Object> sLoadedApk = new HashMap<>();
 
     //1.ActivityThread$H #handleMessage-->case LAUNCH_ACTIVITY 中public getPackageInfoNoCheck()
     //2.private getPackageInfo()
@@ -59,7 +59,7 @@ public class LoadedApkClassLoaderHookHelper23 {
 
         //5.获取mPackages的实例对象
         //final ArrayMap<String,WeakReference<LoadedApk>> mPackages = new ArrayMap<String,WeakReference<LoadedApk>>();
-        Map mPackages = (Map) mPackagesField.get(currentActivityThread);
+        Map<String, WeakReference<?>> mPackages = (Map<String, WeakReference<?>>) mPackagesField.get(currentActivityThread);
         if (mPackages == null) throw new NullPointerException("mPackages == null");
 
         //二:获取LoadAPK
@@ -126,7 +126,7 @@ public class LoadedApkClassLoaderHookHelper23 {
         sLoadedApk.put(applicationInfo.packageName, loadedApk);
 
         //17.将创建的WeakReference(loadedApk)存进mPackages中
-        WeakReference weakReferenceLoadApk = new WeakReference(loadedApk);
+        WeakReference<?> weakReferenceLoadApk = new WeakReference<>(loadedApk);
 
         //ActivityThread类中mPackages成员
         //final ArrayMap<String,WeakReference<LoadedApk>> mPackages = new ArrayMap<String,WeakReference<LoadedApk>>();

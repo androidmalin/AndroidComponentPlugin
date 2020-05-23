@@ -31,10 +31,10 @@ public final class ServiceManager20 {
     private static final String TAG = "ServiceManager";
 
     // 动态创建的Service信息,调用ActivityThread#handleCreateService(CreateServiceData data){}方法,创建Service对象
-    private volatile Map<String, Service> mServiceMap = new HashMap<>();
+    private final Map<String, Service> mServiceMap = new HashMap<>();
 
     // 存储插件的Service信息
-    private volatile Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
+    private final Map<ComponentName, ServiceInfo> mServiceInfoMap = new HashMap<>();
 
     private static class Holder {
         private static final ServiceManager20 instance = new ServiceManager20();
@@ -178,12 +178,11 @@ public final class ServiceManager20 {
 
         //3.给serviceInfo.applicationInfo增加必须的属性.
         // 之前android.content.pm.PackageParser#generateServiceInfo(){}方法,得到的ServiceInfo中 serviceInfo.applicationInfo属性没有值;
-        // TODO:思考一下,是不是跟flag参数有关,目前传递的是flag=0;
         //这个修改是为了loadClass的时候, LoadedApk会是主程序的ClassLoader, 我们选择Hook BaseDexClassLoader的方式加载插件
         serviceInfo.applicationInfo.packageName = MApplication.getInstance().getPackageName();
 
         //android10出现的异常解决办法,通过异常，寻找出错的地方
-        //TODO:插件APK的路径
+        //插件APK的路径
         String path = MApplication.getInstance().getFileStreamPath("pluginService-debug-1.0.apk").getPath();
         serviceInfo.applicationInfo.sourceDir = path;
         serviceInfo.applicationInfo.publicSourceDir = path;
@@ -229,7 +228,7 @@ public final class ServiceManager20 {
         //final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
         Field mServicesField = activityThreadClazz.getDeclaredField("mServices");
         mServicesField.setAccessible(true);
-        Map mServices = (Map) mServicesField.get(currentActivityThread);
+        Map<?, ?> mServices = (Map<?, ?>) mServicesField.get(currentActivityThread);
         if (mServices == null) throw new NullPointerException("mServices==null");
         //8.获取我们新创建出来的Service对象
         Service service = (Service) mServices.get(token);
@@ -290,7 +289,9 @@ public final class ServiceManager20 {
         //public static final int getCallingUserId() {}
         Method getCallingUserIdMethod = userHandlerClazz.getDeclaredMethod("getCallingUserId");
         getCallingUserIdMethod.setAccessible(true);
-        int userId = (Integer) getCallingUserIdMethod.invoke(null);
+        Object userIdObj = getCallingUserIdMethod.invoke(null);
+        if (!(userIdObj instanceof Integer)) return;
+        int userId = (Integer) userIdObj;
 
         //7. call generateServiceInfo方法
         // public static final ServiceInfo generateServiceInfo(android.content.pm.PackageParser.Service s, int flags, android.content.pm.PackageUserState state, int userId) {

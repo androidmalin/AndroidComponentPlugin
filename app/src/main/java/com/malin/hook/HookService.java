@@ -62,9 +62,9 @@ class HookService {
     }
 
     private static class IActivityManagerProxy implements InvocationHandler {
-        private Context mContext;
-        private Object mActivityManager;
-        private Class<?> mStubServiceClass;
+        private final Context mContext;
+        private final Object mActivityManager;
+        private final Class<?> mStubServiceClass;
 
         IActivityManagerProxy(Context context, Object activityManager, Class<?> proxyServiceClass) {
             mContext = context;
@@ -72,7 +72,6 @@ class HookService {
             mStubServiceClass = proxyServiceClass;
         }
 
-        @SuppressWarnings("ConstantConditions")
         @Override
         public Object invoke(Object o, Method method, Object[] args) throws Throwable {
             //public android.content.ComponentName startService(android.app.IApplicationThread caller, android.content.Intent service, java.lang.String resolvedType, boolean requireForeground, java.lang.String callingPackage, int userId) throws android.os.RemoteException;

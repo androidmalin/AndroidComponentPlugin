@@ -27,7 +27,7 @@ public final class ReceiverHelper23 {
 
     private static final String TAG = "ReceiverHelper23";
 
-    private static Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
+    private static final Map<ActivityInfo, List<? extends IntentFilter>> sCache = new HashMap<>();
 
     public static void preLoadReceiver(Context context, File apk) throws Exception {
         parserReceivers(apk);
