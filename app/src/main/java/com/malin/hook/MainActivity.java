@@ -347,6 +347,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
-        ReceiverHelper.unregisterReceiver(MainActivity.this);
+        ReceiverHelper.unregisterReceiver(MApplication.getInstance());
     }
 }

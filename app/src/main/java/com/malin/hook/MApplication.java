@@ -54,7 +54,7 @@ public class MApplication extends Application {
         handleActivity(context);
         installActivity();
         handleContentProvider(context);
-        handleReceiver();
+        handleReceiver(context);
         hookClipboard();
     }
 
@@ -219,14 +219,14 @@ public class MApplication extends Application {
         mSingleThreadExecutor.execute(providerRunnable);
     }
 
-    private void handleReceiver() {
+    private void handleReceiver(final Context context) {
         Runnable receiverPluginRegisterRunnable = new Runnable() {
             @Override
             public void run() {
-                PluginUtils.extractAssets(getApplicationContext(), PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
+                PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
                 File receiverPluginFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
                 try {
-                    ReceiverHelper.preLoadReceiver(getApplicationContext(), receiverPluginFile);
+                    ReceiverHelper.preLoadReceiver(context, receiverPluginFile);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
