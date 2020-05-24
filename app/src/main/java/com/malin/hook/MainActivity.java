@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,7 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        initData();
+        initViewStatus();
         initListener();
         initReceiverPlugin();
     }
@@ -72,21 +71,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
 
-    private void initData() {
+    private void initViewStatus() {
         if (MApplication.getInstance().isHookInstrumentation()) {
+            mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
+            mBtnHookInstrumentationAppCompatActivity.setVisibility(View.VISIBLE);
             mBtnHookAmsActivity.setVisibility(View.GONE);
             mBtnHookAmsAppCompatActivity.setVisibility(View.GONE);
-            if (MApplication.getInstance().isHookInstrumentationIsAppCompatActivity()) {
-                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.VISIBLE);
-                mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
-                mBtnStartPluginActivity.setVisibility(View.VISIBLE);
-                mBtnStartPluginAppCompatActivity.setVisibility(View.VISIBLE);
-            } else {
-                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
-                mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
-                mBtnStartPluginActivity.setVisibility(View.VISIBLE);
-                mBtnStartPluginAppCompatActivity.setVisibility(View.GONE);
-            }
         } else {
             mBtnHookAmsActivity.setVisibility(View.VISIBLE);
             mBtnHookAmsAppCompatActivity.setVisibility(View.VISIBLE);
@@ -195,7 +185,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     return;
                 }
                 if (MApplication.getInstance().isHookInstrumentation()) {
-                    //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
                     MApplication.resetPms();
                     HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
                 } else {
@@ -281,27 +270,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return success;
     }
 
-    private boolean mRegisterReceiver;
-
     private void initReceiverPlugin() {
-        Runnable receiverPluginRegisterRunnable = new Runnable() {
-            @Override
-            public void run() {
-                PluginUtils.extractAssets(MainActivity.this.getApplicationContext(), PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
-
-                // /data/data/com.malin.hook/files/pluginBroadcastReceiver-debug-1.0.apk
-                File receiverPluginFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
-                try {
-                    ReceiverHelper.preLoadReceiver(MainActivity.this, receiverPluginFile);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                // 注册插件收到我们发送的广播之后, 回传的广播
-                registerReceiver(mReceiver, new IntentFilter(PLUGIN_SEND_ACTION));
-                mRegisterReceiver = true;
-            }
-        };
-        mSingleThreadExecutor.execute(receiverPluginRegisterRunnable);
+        registerReceiver(mReceiver, new IntentFilter(PLUGIN_SEND_ACTION));
     }
 
     private static final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -376,9 +346,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mRegisterReceiver) {
-            unregisterReceiver(mReceiver);
-            ReceiverHelper.unregisterReceiver(MainActivity.this);
-        }
+        unregisterReceiver(mReceiver);
+        ReceiverHelper.unregisterReceiver(MainActivity.this);
     }
 }

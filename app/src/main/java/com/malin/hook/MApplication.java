@@ -54,13 +54,16 @@ public class MApplication extends Application {
         handleActivity(context);
         installActivity();
         handleContentProvider(context);
+        handleReceiver();
         hookClipboard();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashReport.initCrashReport(getApplicationContext(), "f923fd7c0f", true);
+        if (!BuildConfig.DEBUG) {
+            CrashReport.initCrashReport(getApplicationContext(), "f923fd7c0f", true);
+        }
     }
 
     /**
@@ -202,70 +205,35 @@ public class MApplication extends Application {
                 final File odexFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_SERVICE_DEX);
                 if (!apkFile.exists()) {
                     Log.d(TAG, "pluginService apk start extract");
-                    if (Build.VERSION.SDK_INT >= 18) {
-                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
-                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
-                        try {
-                            ServiceManager.getInstance().preLoadServices(apkFile);
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
-                    } else {
-                        //15=<Build.VERSION.SDK_INT<=17
-                        //static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
-                        //public static ActivityThread currentActivityThread() {return sThreadLocal.get();}
-                        //currentActivityThread()方法需要在UI线程中调用
-                        PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK, new PluginUtils.CopyCallback() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(TAG, "pluginService apk extract success");
-                                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            ServiceManager.getInstance().preLoadServices(apkFile);
-                                        } catch (Throwable throwable) {
-                                            throwable.printStackTrace();
-                                        }
-                                    }
-                                });
-                            }
+                    PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
 
-                            @Override
-                            public void onFail() {
-                                Log.e(TAG, "pluginService apk extract fail");
-                            }
-                        });
-                    }
-                } else {
-                    Log.d(TAG, "pluginService apk not need extract");
-                    if (Build.VERSION.SDK_INT >= 18) {
-                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
-                        try {
-                            ServiceManager.getInstance().preLoadServices(apkFile);
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
-                    } else {
-                        BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    ServiceManager.getInstance().preLoadServices(apkFile);
-                                } catch (Throwable throwable) {
-                                    throwable.printStackTrace();
-                                }
-                            }
-                        });
-                    }
+                }
+                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
+                try {
+                    ServiceManager.getInstance().preLoadServices(apkFile);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
             }
         };
         mSingleThreadExecutor.execute(providerRunnable);
     }
 
+    private void handleReceiver() {
+        Runnable receiverPluginRegisterRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PluginUtils.extractAssets(getApplicationContext(), PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
+                File receiverPluginFile = getFileStreamPath(PluginApkNameVersion.PLUGIN_RECEIVER_PLUGIN);
+                try {
+                    ReceiverHelper.preLoadReceiver(getApplicationContext(), receiverPluginFile);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        mSingleThreadExecutor.execute(receiverPluginRegisterRunnable);
+    }
 
     public static void resetAms() {
         if (mIActivityManagerObj == null) return;
@@ -282,11 +250,6 @@ public class MApplication extends Application {
     public boolean isHookInstrumentation() {
         return mHookInstrumentation;
     }
-
-    public boolean isHookInstrumentationIsAppCompatActivity() {
-        return mHookInstrumentation_is_appcompatActivity;
-    }
-
 
     public static MApplication getInstance() {
         return mApplication;
