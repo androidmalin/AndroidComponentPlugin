@@ -28,7 +28,6 @@ class HookInstrumentation {
 
     private static final String TARGET_INTENT_CLASS = "target_intent_class";
 
-    @Keep
     static void hookInstrumentation(Context context, Class<?> stubActivityClassName) {
 
         try {
@@ -63,7 +62,6 @@ class HookInstrumentation {
         }
     }
 
-    @Keep
     @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     private static class InstrumentationProxy extends Instrumentation {

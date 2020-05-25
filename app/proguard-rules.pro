@@ -23,7 +23,7 @@
 #https://github.com/WrBug/FrenziedProguard
 # ----------------------------------------------------------------------------
 # 混淆的压缩比例，0-7
--optimizationpasses 5
+-optimizationpasses 7
 # 指定不去忽略非公共的库的类的成员
 -dontskipnonpubliclibraryclassmembers
 # 指定混淆是采用的算法
@@ -51,11 +51,13 @@
 -keep public class * extends android.content.ContentProvider
 -keep public class * extends android.app.backup.BackupAgentHelper
 -keep public class * extends android.preference.Preference
+#noinspection ShrinkerUnresolvedReference
 -keep public class com.google.vending.licensing.ILicensingService
 -keep public class com.android.vending.licensing.ILicensingService
 -keep public class * extends java.lang.Throwable {*;}
 -keep public class * extends java.lang.Exception {*;}
 
+#noinspection ShrinkerUnresolvedReference
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.support.v7.app.AppCompatActivity
 
@@ -113,19 +115,23 @@
 -dontwarn android.support.**
 
 #-------------------------------Understand the @Keep support annotation.-------------------------------
+#noinspection ShrinkerUnresolvedReference
 -keep class android.support.annotation.Keep
 
 -keep @android.support.annotation.Keep class * {*;}
 
 -keepclasseswithmembers class * {
+#noinspection ShrinkerUnresolvedReference
     @android.support.annotation.Keep <methods>;
 }
 
 -keepclasseswithmembers class * {
+#noinspection ShrinkerUnresolvedReference
     @android.support.annotation.Keep <fields>;
 }
 
 -keepclasseswithmembers class * {
+#noinspection ShrinkerUnresolvedReference
     @android.support.annotation.Keep <init>(...);
 }
 #-------------------------------Understand the @Keep support annotation.-------------------------------
@@ -142,3 +148,35 @@
 }
 
 #-------------------------------common-------------------------------
+
+#-------------------------------androidx-------------------------------
+#https://stackoverflow.com/a/52592334/3326683
+#noinspection ShrinkerUnresolvedReference
+-keep class com.google.android.material.** {*;}
+-dontwarn com.google.android.material.**
+-dontnote com.google.android.material.**
+#noinspection ShrinkerUnresolvedReference
+-keep class androidx.** {*;}
+-keep interface androidx.** {*;}
+-dontwarn androidx.**
+-dontnote androidx.**
+-keep public class * extends androidx.**
+#-------------------------------androidx-------------------------------
+
+#-------------------------------androidx Understand the @Keep support annotation.-------------------------------
+-keep class androidx.annotation.Keep
+
+-keep @androidx.annotation.Keep class * {*;}
+
+-keepclasseswithmembers class * {
+    @androidx.annotation.Keep <methods>;
+}
+
+-keepclasseswithmembers class * {
+    @androidx.annotation.Keep <fields>;
+}
+
+-keepclasseswithmembers class * {
+    @androidx.annotation.Keep <init>(...);
+}
+#-------------------------------androidx Understand the @Keep support annotation.-------------------------------
