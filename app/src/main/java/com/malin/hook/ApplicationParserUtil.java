@@ -12,10 +12,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * 15-27 ok
- * >=28,29,30 error
- */
 public class ApplicationParserUtil {
 
     /**
