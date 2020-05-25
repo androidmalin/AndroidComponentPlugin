@@ -11,6 +11,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +23,6 @@ import java.util.List;
 /**
  * 对Activity启动流程中的两次拦截
  */
-@SuppressWarnings("ALL")
 @SuppressLint("PrivateApi")
 public class HookActivity {
     private static final String TAG = "HookActivity";
@@ -39,6 +40,7 @@ public class HookActivity {
      * @param context          context
      * @param subActivityClass 在AndroidManifest.xml中注册了的Activity
      */
+    @SuppressWarnings("JavaReflectionMemberAccess")
     public static void hookStartActivity(Context context, Class<?> subActivityClass) {
 
         try {
@@ -62,7 +64,7 @@ public class HookActivity {
 
                 //5.
                 handleIActivityTaskManager(context, subActivityClass, IActivityTaskManagerSingletonObj);
-            } else if (Build.VERSION.SDK_INT >= 26 && Build.VERSION.SDK_INT <= 28) {
+            } else if (Build.VERSION.SDK_INT >= 26) {
                 //1.获取ActivityManager的Class对象
                 //package android.app
                 //public class ActivityManager
@@ -215,9 +217,9 @@ public class HookActivity {
      */
     private static class IActivityInvocationHandler implements InvocationHandler {
 
-        private Object mIActivityManager;
-        private Class<?> mSubActivityClass;
-        private Context mContext;
+        private final Object mIActivityManager;
+        private final Class<?> mSubActivityClass;
+        private final Context mContext;
 
 
         public IActivityInvocationHandler(Object iActivityManager, Context context, Class<?> subActivityClass) {
@@ -274,10 +276,9 @@ public class HookActivity {
      * @param context          context
      * @param subActivityClass 注册了的Activity的Class对象
      * @param isAppCompat      是否是AppCompatActivity的子类
-     * @throws ClassNotFoundException classNotFoundException
-     * @throws NoSuchFieldException   noSuchFieldException
-     * @throws IllegalAccessException illegalAccessException
      */
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressLint("DiscouragedPrivateApi")
     public static void hookLauncherActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
 
         try {
@@ -344,9 +345,9 @@ public class HookActivity {
      * 对应<9.0情况,创建一个Handler的Callback接口的实例对象
      */
     private static class HandlerCallback implements Handler.Callback {
-        private Context context;
-        private Class<?> subActivityClass;
-        private boolean isAppCompat;
+        private final Context context;
+        private final Class<?> subActivityClass;
+        private final boolean isAppCompat;
 
         public HandlerCallback(Context context, Class<?> subActivityClass, boolean isAppCompat) {
             this.context = context;
@@ -355,7 +356,7 @@ public class HookActivity {
         }
 
         @Override
-        public boolean handleMessage(Message msg) {
+        public boolean handleMessage(@NonNull Message msg) {
             handleLaunchActivity(msg, context, subActivityClass, isAppCompat);
             return false;
         }
@@ -377,7 +378,11 @@ public class HookActivity {
             Field launch_activity_field = hClass.getField("LAUNCH_ACTIVITY");
 
             //3.获取LAUNCH_ACTIVITY的值
-            LAUNCH_ACTIVITY = (int) launch_activity_field.get(null);
+            Object object = launch_activity_field.get(null);
+            if (object instanceof Integer) {
+                LAUNCH_ACTIVITY = (int) object;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -395,6 +400,7 @@ public class HookActivity {
 
             //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
             Intent safeIntent = (Intent) safeIntentField.get(activityClientRecordObj);
+            if (safeIntent == null) return;
 
             //4.获取原始的Intent
             Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
@@ -419,9 +425,9 @@ public class HookActivity {
      */
     private static class HandlerCallbackP implements Handler.Callback {
 
-        private Context context;
-        private Class<?> subActivityClass;
-        private boolean isAppCompat;
+        private final Context context;
+        private final Class<?> subActivityClass;
+        private final boolean isAppCompat;
 
         public HandlerCallbackP(Context context, Class<?> subActivityClass, boolean isAppCompat) {
             this.context = context;
@@ -458,9 +464,9 @@ public class HookActivity {
                 mActivityCallbacksField.setAccessible(true);
 
                 //4.获取ClientTransaction类中mActivityCallbacks属性的值,既List<ClientTransactionItem>
-                List mActivityCallbacks = (List) mActivityCallbacksField.get(clientTransactionObj);
+                List<?> mActivityCallbacks = (List<?>) mActivityCallbacksField.get(clientTransactionObj);
 
-                if (mActivityCallbacks.size() <= 0) return;
+                if (mActivityCallbacks == null || mActivityCallbacks.size() <= 0) return;
                 if (mActivityCallbacks.get(0) == null) return;
 
 
@@ -487,6 +493,7 @@ public class HookActivity {
                 //10.获取mIntent属性的值,既桩Intent(安全的Intent)
                 //从LaunchActivityItem中获取属性mIntent的值
                 Intent safeIntent = (Intent) mIntentField.get(launchActivityItem);
+                if (safeIntent == null) return;
 
                 //11.获取原始的Intent
                 Intent originIntent = safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
@@ -525,6 +532,7 @@ public class HookActivity {
      * @param context          context
      * @param subActivityClass 注册了的Activity的class对象
      */
+    @SuppressLint("DiscouragedPrivateApi")
     public static void hookPackageManager(Context context, Class<?> subActivityClass) {
 
         try {
@@ -575,9 +583,9 @@ public class HookActivity {
 
 
     private static class PackageManagerProxyHandler implements InvocationHandler {
-        private String mSubActivityClassName;
-        private Object mIPackageManagerObj;
-        private String mAppPackageName;
+        private final String mSubActivityClassName;
+        private final Object mIPackageManagerObj;
+        private final String mAppPackageName;
 
         public PackageManagerProxyHandler(Object iPackageManagerObj, String appPackageName, String subActivityClassName) {
             this.mIPackageManagerObj = iPackageManagerObj;
@@ -597,32 +605,10 @@ public class HookActivity {
                         break;
                     }
                 }
-
-                //test start
-                ComponentName originComponentName = null;
-                try {
-                    originComponentName = (ComponentName) args[index];
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                if (originComponentName != null) {
-                    Log.d(TAG, "originComponentName != null");
-                    String packageName = originComponentName.getPackageName();
-                    String className = originComponentName.getClassName();
-                    Log.d(TAG, "originComponentName packageName:" + packageName);
-                    Log.d(TAG, "originComponentName className:" + className);
-                } else {
-                    Log.d(TAG, "originComponentName == null");
-                }
-                //test end
-
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
                 args[index] = componentName;
             }
             return method.invoke(mIPackageManagerObj, args);
         }
     }
-
-
 }
