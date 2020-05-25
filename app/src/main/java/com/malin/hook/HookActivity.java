@@ -240,6 +240,12 @@ public class HookActivity {
                 //将启动的未注册的Activity对应的Intent,替换为安全的注册了的桩Activity的Intent
                 //1.将未注册的Activity对应的Intent,改为安全的Intent,既在AndroidManifest.xml中配置了的Activity的Intent
                 Intent originIntent = (Intent) args[intentIndex];
+                String originClassName = originIntent.getComponent().getClassName();
+
+                //TODO:每次调用,下次触发startActivity方法的次数就会加1,经测试不断的累加; 原因待查;目前临时处理.
+                if (originClassName.equals("com.malin.hook.StubActivity") || originClassName.equals("com.malin.hook.StubAppCompatActivity")) {
+                    originIntent = originIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+                }
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClass);
                 //public class Intent implements Parcelable;
@@ -253,7 +259,7 @@ public class HookActivity {
                 //final H mH = new H();
                 //hook Handler消息的处理,给Handler增加mCallback
 
-
+                return method.invoke(mIActivityManager, args);
             }
             //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
             //public abstract int android.app.IActivityTaskManager.startActivity(whoThread, who.getBasePackageName(), intent,intent.resolveTypeIfNeeded(who.getContentResolver()),token, target != null ? target.mEmbeddedID : null,requestCode, 0, null, options);
