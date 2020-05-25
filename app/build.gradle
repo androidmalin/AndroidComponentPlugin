@@ -63,5 +63,4 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation rootProject.ext.dependencies["androidx.appcompat"]
-    implementation rootProject.ext.dependencies["okio"]
 }

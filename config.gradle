@@ -19,7 +19,6 @@ ext {
 
     dependencies = [
             'androidx.appcompat': "androidx.appcompat:appcompat:${versions["appcompat"]}",
-            'okio'              : "com.squareup.okio:okio:${versions["okio"]}"
     ]
 
 }
