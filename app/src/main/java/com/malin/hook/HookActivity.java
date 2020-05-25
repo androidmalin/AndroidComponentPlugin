@@ -218,7 +218,7 @@ public class HookActivity {
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private final Object mIActivityManager;
-        private final Class<?> mSubActivityClass;
+        private Class<?> mSubActivityClass;
         private final Context mContext;
 
 
@@ -245,8 +245,12 @@ public class HookActivity {
                 String originClassName = originIntent.getComponent().getClassName();
 
                 //TODO:每次调用,下次触发startActivity方法的次数就会加1,经测试不断的累加; 原因待查;目前临时处理.
-                if (originClassName.equals("com.malin.hook.StubActivity") || originClassName.equals("com.malin.hook.StubAppCompatActivity")) {
+                if (originClassName.equals("com.malin.hook.StubActivity")) {
                     originIntent = originIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+                    mSubActivityClass = StubActivity.class;
+                } else if (originClassName.equals("com.malin.hook.StubAppCompatActivity")) {
+                    originIntent = originIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
+                    mSubActivityClass = StubAppCompatActivity.class;
                 }
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClass);
