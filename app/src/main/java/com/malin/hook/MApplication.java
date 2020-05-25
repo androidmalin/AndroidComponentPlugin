@@ -8,8 +8,6 @@ import android.os.Looper;
 import android.os.StrictMode;
 import android.util.Log;
 
-import com.tencent.bugly.crashreport.CrashReport;
-
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,14 +54,6 @@ public class MApplication extends Application {
         handleContentProvider(context);
         handleReceiver(context);
         hookClipboard();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        if (!BuildConfig.DEBUG) {
-            CrashReport.initCrashReport(getApplicationContext(), "f923fd7c0f", true);
-        }
     }
 
     /**
