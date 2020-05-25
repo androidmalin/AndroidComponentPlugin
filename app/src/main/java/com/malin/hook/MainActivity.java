@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
-import androidx.core.os.BuildCompat;
 
 import java.io.File;
 
@@ -17,9 +14,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private Button mBtnHookAmsActivity;
     private Button mBtnHookAmsAppCompatActivity;
-    private Button mBtnHookInstrumentationActivity;
-    private Button mBtnHookInstrumentationAppCompatActivity;
-    private Button mBtnHookService;
     private Button mBtnDownloadPlugin;
     private Button mBtnStartPluginActivity;
     private Button mBtnStartPluginAppCompatActivity;
@@ -38,9 +32,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void initView() {
         mBtnHookAmsActivity = findViewById(R.id.btn_start);
         mBtnHookAmsAppCompatActivity = findViewById(R.id.btn_start_appcompat);
-        mBtnHookInstrumentationActivity = findViewById(R.id.btn_start_instrumentation);
-        mBtnHookInstrumentationAppCompatActivity = findViewById(R.id.btn_start_instrumentation_appCompat);
-        mBtnHookService = findViewById(R.id.btn_service);
         mBtnDownloadPlugin = findViewById(R.id.btn_download_plugin_apk);
         mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
@@ -48,30 +39,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     private void initData() {
-        if (MApplication.getInstance().isHookInstrumentation()) {
-            mBtnHookAmsActivity.setVisibility(View.GONE);
-            mBtnHookAmsAppCompatActivity.setVisibility(View.GONE);
-            if (MApplication.getInstance().isHookInstrumentationIsAppCompatActivity()) {
-                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.VISIBLE);
-                mBtnHookInstrumentationActivity.setVisibility(View.GONE);
-            } else {
-                mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
-                mBtnHookInstrumentationActivity.setVisibility(View.VISIBLE);
-            }
-        } else {
-            mBtnHookAmsActivity.setVisibility(View.VISIBLE);
-            mBtnHookAmsAppCompatActivity.setVisibility(View.VISIBLE);
-            mBtnHookInstrumentationActivity.setVisibility(View.GONE);
-            mBtnHookInstrumentationAppCompatActivity.setVisibility(View.GONE);
-        }
+        mBtnHookAmsActivity.setVisibility(View.VISIBLE);
+        mBtnHookAmsAppCompatActivity.setVisibility(View.VISIBLE);
     }
 
     private void initListener() {
         mBtnHookAmsActivity.setOnClickListener(this);
         mBtnHookAmsAppCompatActivity.setOnClickListener(this);
-        mBtnHookInstrumentationActivity.setOnClickListener(this);
-        mBtnHookInstrumentationAppCompatActivity.setOnClickListener(this);
-        mBtnHookService.setOnClickListener(this);
         mBtnDownloadPlugin.setOnClickListener(this);
         mBtnStartPluginActivity.setOnClickListener(this);
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
@@ -83,42 +57,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int id = v.getId();
         switch (id) {
             case R.id.btn_start: {
-                if (!MApplication.getInstance().isHookInstrumentation() && BuildCompat.isAtLeastQ()) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 startHook(false);
                 startActivity(new Intent(this, TargetActivity.class));
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (!MApplication.getInstance().isHookInstrumentation() && BuildCompat.isAtLeastQ()) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 startHook(true);
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
                 break;
             }
 
-            case R.id.btn_start_instrumentation: {
-                MApplication.resetPms();
-                HookActivity.hookPackageManager(this, StubActivity.class);
-                startActivity(new Intent(this, TargetActivity.class));
-                break;
-            }
-
-            case R.id.btn_start_instrumentation_appCompat: {
-                MApplication.resetPms();
-                HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
-                startActivity(new Intent(this, TargetAppCompatActivity.class));
-                break;
-            }
-
-            case R.id.btn_service: {
-                startService(new Intent(this, TargetService.class));
-                break;
-            }
 
             case R.id.btn_download_plugin_apk: {
                 PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
@@ -129,10 +77,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
-                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
-                MApplication.resetPms();
-                HookActivity.hookPackageManager(this, StubActivity.class);
-
+                //HookActivity.hookPackageManager(this, StubActivity.class);
+                startHook(false);
                 //start plugin activity
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
@@ -142,10 +88,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
-                //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;mHookInstrumentation_is_appcompatActivity=true;
-                MApplication.resetPms();
                 HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
-
+                startHook(true);
                 //start plugin activity
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));

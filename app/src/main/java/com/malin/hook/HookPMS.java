@@ -8,26 +8,25 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@SuppressLint("PrivateApi")
-public class HookPMS {
+@SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
+class HookPMS {
 
-
-    public static Object getPackageManager() {
+    static Object getPackageManager() {
         Object sPackageManager = null;
         try {
             //1.获取ActivityThread的值
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
 
             //public static ActivityThread currentActivityThread() {return sCurrentActivityThread;}
-            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
-            Object activityThread = currentActivityThreadMethod.invoke(null);
+            Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
             //2.获取ActivityThread里面原始的 sPackageManager
             //static IPackageManager sPackageManager;
-            Field sPackageManagerField = activityThreadClass.getDeclaredField("sPackageManager");
+            Field sPackageManagerField = activityThreadClazz.getDeclaredField("sPackageManager");
             sPackageManagerField.setAccessible(true);
-            sPackageManager = sPackageManagerField.get(activityThread);
+            sPackageManager = sPackageManagerField.get(activityThreadObj);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -43,23 +42,23 @@ public class HookPMS {
     }
 
 
-    public static void resetPackageManager(Object object) {
+    static void resetPackageManager(Object packageManagerObj) {
         Object sPackageManager;
         try {
             //1.获取ActivityThread的值
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
 
             //public static ActivityThread currentActivityThread() {return sCurrentActivityThread;}
-            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
-            Object activityThread = currentActivityThreadMethod.invoke(null);
+            Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
             //2.获取ActivityThread里面原始的 sPackageManager
             //static IPackageManager sPackageManager;
-            Field sPackageManagerField = activityThreadClass.getDeclaredField("sPackageManager");
+            Field sPackageManagerField = activityThreadClazz.getDeclaredField("sPackageManager");
             sPackageManagerField.setAccessible(true);
-            sPackageManager = sPackageManagerField.get(activityThread);
-            sPackageManagerField.set(sPackageManager, object);
+            sPackageManager = sPackageManagerField.get(activityThreadObj);
+            sPackageManagerField.set(sPackageManager, packageManagerObj);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -73,15 +72,34 @@ public class HookPMS {
         }
     }
 
-    public static void resetApplicationPackageManager(Context context, Object object) {
+
+    static Object getApplicationPackageManager(Context context) {
+        Object mPM = null;
         try {
             //1.获取 ApplicationPackageManager里面的 mPM对象
-            PackageManager packageManager = context.getApplicationContext().getPackageManager();
+            PackageManager packageManager = context.getPackageManager();
             //PackageManager的实现类ApplicationPackageManager中的mPM
             //private final IPackageManager mPM;
-            Field mPmField = packageManager.getClass().getDeclaredField("mPM");
-            mPmField.setAccessible(true);
-            mPmField.set(packageManager, object);
+            Field mPMField = packageManager.getClass().getDeclaredField("mPM");
+            mPMField.setAccessible(true);
+            mPM = mPMField.get(packageManager);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return mPM;
+    }
+
+    static void resetApplicationPackageManager(Context context, Object packageManagerObj) {
+        try {
+            //1.获取 ApplicationPackageManager里面的 mPM对象
+            PackageManager packageManager = context.getPackageManager();
+            //PackageManager的实现类ApplicationPackageManager中的mPM
+            //private final IPackageManager mPM;
+            Field mPMField = packageManager.getClass().getDeclaredField("mPM");
+            mPMField.setAccessible(true);
+            mPMField.set(packageManager, packageManagerObj);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
