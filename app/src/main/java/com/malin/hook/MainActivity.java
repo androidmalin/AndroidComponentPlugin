@@ -115,19 +115,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.btn_start: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
-                    Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 startHook(false);
                 startActivity(new Intent(this, TargetActivity.class));
                 break;
             }
             case R.id.btn_start_appcompat: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
-                    Toast.makeText(this, "暂不支持>=android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 startHook(true);
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
                 break;
@@ -158,11 +150,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             case R.id.btn_start_plugin_apk_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
                 if (MApplication.getInstance().isHookInstrumentation()) {
                     //use hook Instrumentation, please modify MApplication#mHookInstrumentation=true;
                     MApplication.resetPms();
@@ -180,10 +167,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
             case R.id.btn_start_plugin_apk_appcompat_activity: {
-                if (!MApplication.getInstance().isHookInstrumentation() && Build.VERSION.SDK_INT >= 29) {
-                    Toast.makeText(this, "暂不支持android-Q", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 if (MApplication.getInstance().isHookInstrumentation()) {
                     MApplication.resetPms();
                     HookActivity.hookPackageManager(this, StubAppCompatActivity.class);
