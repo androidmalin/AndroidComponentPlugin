@@ -3,6 +3,8 @@ package com.malin.hook;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,9 +21,15 @@ public class TargetAppCompatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setGravity(Gravity.CENTER);
+
         TextView textView = new TextView(this);
         textView.setText("未注册的TargetAppCompatActivity,成功!");
-        setContentView(textView);
+
+        relativeLayout.addView(textView);
+        setContentView(relativeLayout);
     }
 
 

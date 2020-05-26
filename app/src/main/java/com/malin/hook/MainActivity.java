@@ -7,14 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import java.io.File;
-
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
     private Button mBtnHookAmsActivity;
     private Button mBtnHookAmsAppCompatActivity;
-    private Button mBtnDownloadPlugin;
     private Button mBtnStartPluginActivity;
     private Button mBtnStartPluginAppCompatActivity;
 
@@ -24,29 +21,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        initData();
         initListener();
-
     }
 
     private void initView() {
         mBtnHookAmsActivity = findViewById(R.id.btn_start);
         mBtnHookAmsAppCompatActivity = findViewById(R.id.btn_start_appcompat);
-        mBtnDownloadPlugin = findViewById(R.id.btn_download_plugin_apk);
         mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
         mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
-    }
-
-
-    private void initData() {
-        mBtnHookAmsActivity.setVisibility(View.VISIBLE);
-        mBtnHookAmsAppCompatActivity.setVisibility(View.VISIBLE);
     }
 
     private void initListener() {
         mBtnHookAmsActivity.setOnClickListener(this);
         mBtnHookAmsAppCompatActivity.setOnClickListener(this);
-        mBtnDownloadPlugin.setOnClickListener(this);
         mBtnStartPluginActivity.setOnClickListener(this);
         mBtnStartPluginAppCompatActivity.setOnClickListener(this);
     }
@@ -64,15 +51,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.btn_start_appcompat: {
                 startHook(true);
                 startActivity(new Intent(this, TargetAppCompatActivity.class));
-                break;
-            }
-
-
-            case R.id.btn_download_plugin_apk: {
-                PluginUtils.extractAssets(MApplication.getInstance(), "pluginapk-debug.apk");
-                File dexFile = getFileStreamPath("pluginapk-debug.apk");
-                File optDexFile = getFileStreamPath("pluginapk-debug.dex");
-                BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), dexFile, optDexFile);
                 break;
             }
 

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
@@ -18,9 +20,15 @@ public class TargetActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setGravity(Gravity.CENTER);
+
         TextView textView = new TextView(this);
         textView.setText("未注册的TargetActivity,成功!");
-        setContentView(textView);
+
+        relativeLayout.addView(textView);
+        setContentView(relativeLayout);
     }
 
     @Override
