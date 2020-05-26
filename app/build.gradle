@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    compileSdkVersion 'android-R'
+    buildToolsVersion '30.0.0-rc4'
     defaultConfig {
         applicationId "com.malin.hook"
         minSdkVersion 15
