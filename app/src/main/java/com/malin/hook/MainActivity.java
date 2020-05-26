@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (isAppCompatActivity) {
             HookAMS.hookStartActivity(this, StubAppCompatActivity.class, true);
         } else {
-            HookAMS.hookStartActivity(this, StubActivity.class, false);
+            HookAMS.hookStartActivity(this, StubAppCompatActivity.class, false);
         }
     }
 }

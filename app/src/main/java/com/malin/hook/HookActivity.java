@@ -27,13 +27,15 @@ import java.util.List;
 public class HookActivity {
     private static final String TAG = "HookActivity";
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
+    @SuppressLint("StaticFieldLeak")
+    private static IActivityInvocationHandler mIActivityInvocationHandler;
 
 
     /**
      * 对IActivityManager接口中的startActivity方法进行动态代理,发生在app的进程中
      * {@link android.app.Activity#startActivity(Intent)}
      * {@link android.app.Activity#startActivityForResult(Intent, int, Bundle)}
-     * {@link android.app.Instrumentation#execStartActivity()}
+     * android.app.Instrumentation#execStartActivity()
      * Activity#startActivityForResult-->Instrumentation#execStartActivity-->ActivityManager.getService().startActivity()-->
      * IActivityManager public int startActivity(android.app.IApplicationThread caller, java.lang.String callingPackage, android.content.Intent intent, java.lang.String resolvedType, android.os.IBinder resultTo, java.lang.String resultWho, int requestCode, int flags, android.app.ProfilerInfo profilerInfo, android.os.Bundle options) throws android.os.RemoteException;
      *
@@ -48,11 +50,11 @@ public class HookActivity {
                 //1.获取ActivityTaskManager的Class对象
                 //package android.app;
                 //public class ActivityTaskManager
-                Class<?> activityTaskManagerClass = Class.forName("android.app.ActivityTaskManager");
+                Class<?> activityTaskManagerClazz = Class.forName("android.app.ActivityTaskManager");
 
                 //2.获取ActivityTaskManager的私有静态属性IActivityTaskManagerSingleton
                 // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
-                Field iActivityTaskManagerSingletonField = activityTaskManagerClass.getDeclaredField("IActivityTaskManagerSingleton");
+                Field iActivityTaskManagerSingletonField = activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton");
 
                 //3.取消Java的权限检查
                 iActivityTaskManagerSingletonField.setAccessible(true);
@@ -121,11 +123,11 @@ public class HookActivity {
             //6.获取Singleton类对象
             //package android.util
             //public abstract class Singleton<T>
-            Class<?> singletonClass = Class.forName("android.util.Singleton");
+            Class<?> singletonClazz = Class.forName("android.util.Singleton");
 
             //7.获取mInstance属性
             //private T mInstance;
-            Field mInstanceField = singletonClass.getDeclaredField("mInstance");
+            Field mInstanceField = singletonClazz.getDeclaredField("mInstance");
 
             //8.取消Java的权限检查
             mInstanceField.setAccessible(true);
@@ -138,13 +140,18 @@ public class HookActivity {
             //10.获取IActivityTaskManager接口的类对象
             //package android.app
             //public interface IActivityTaskManager
-            Class<?> IActivityTaskManagerClass = Class.forName("android.app.IActivityTaskManager");
+            Class<?> IActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager");
+
+            if (mIActivityInvocationHandler == null) {
+                Log.d(TAG, "mIActivityInvocationHandler == null new ....");
+                mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClass);
+            }
 
             //11.创建一个IActivityTaskManager接口的代理对象
             Object IActivityTaskManagerProxy = Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
-                    new Class[]{IActivityTaskManagerClass},
-                    new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClass)
+                    new Class[]{IActivityTaskManagerClazz},
+                    mIActivityInvocationHandler
             );
 
             //11.重新赋值
@@ -218,7 +225,7 @@ public class HookActivity {
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private final Object mIActivityManager;
-        private Class<?> mSubActivityClass;
+        private final Class<?> mSubActivityClass;
         private final Context mContext;
 
 
@@ -244,14 +251,7 @@ public class HookActivity {
                 Intent originIntent = (Intent) args[intentIndex];
                 String originClassName = originIntent.getComponent().getClassName();
 
-                //TODO:每次调用,下次触发startActivity方法的次数就会加1,经测试不断的累加; 原因待查;目前临时处理.
-                if (originClassName.equals("com.malin.hook.StubActivity")) {
-                    originIntent = originIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
-                    mSubActivityClass = StubActivity.class;
-                } else if (originClassName.equals("com.malin.hook.StubAppCompatActivity")) {
-                    originIntent = originIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT);
-                    mSubActivityClass = StubAppCompatActivity.class;
-                }
+                Log.d(TAG, "IActivityInvocationHandler==>originClassName:" + originClassName);
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClass);
                 //public class Intent implements Parcelable;
@@ -269,6 +269,7 @@ public class HookActivity {
             }
             //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
             //public abstract int android.app.IActivityTaskManager.startActivity(whoThread, who.getBasePackageName(), intent,intent.resolveTypeIfNeeded(who.getContentResolver()),token, target != null ? target.mEmbeddedID : null,requestCode, 0, null, options);
+            Log.d(TAG, "IActivityInvocationHandler==>method:" + method.getName());
             return method.invoke(mIActivityManager, args);
         }
     }
