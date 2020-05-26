@@ -44,10 +44,10 @@ public class HookActivity {
      * IActivityManager public int startActivity(android.app.IApplicationThread caller, java.lang.String callingPackage, android.content.Intent intent, java.lang.String resolvedType, android.os.IBinder resultTo, java.lang.String resultWho, int requestCode, int flags, android.app.ProfilerInfo profilerInfo, android.os.Bundle options) throws android.os.RemoteException;
      *
      * @param context          context
-     * @param subActivityClass 在AndroidManifest.xml中注册了的Activity
+     * @param subActivityClazz 在AndroidManifest.xml中注册了的Activity
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
-    public static void hookStartActivity(Context context, Class<?> subActivityClass) {
+    public static void hookStartActivity(Context context, Class<?> subActivityClazz) {
 
         try {
             if (Build.VERSION.SDK_INT >= 29) {
@@ -69,7 +69,7 @@ public class HookActivity {
                 Object IActivityTaskManagerSingletonObj = iActivityTaskManagerSingletonField.get(null);
 
                 //5.
-                handleIActivityTaskManager(context, subActivityClass, IActivityTaskManagerSingletonObj);
+                handleIActivityTaskManager(context, subActivityClazz, IActivityTaskManagerSingletonObj);
             } else if (Build.VERSION.SDK_INT >= 26) {
                 //1.获取ActivityManager的Class对象
                 //package android.app
@@ -86,7 +86,7 @@ public class HookActivity {
                 //4.获取IActivityManagerSingleton的实例对象
                 //private static final Singleton<IActivityManager> IActivityManagerSingleton
                 //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-                handleIActivityManager(context, subActivityClass, iActivityManagerSingletonField.get(null));
+                handleIActivityManager(context, subActivityClazz, iActivityManagerSingletonField.get(null));
             } else {
                 //1.获取ActivityManagerNative的Class对象
                 //package android.app
@@ -103,7 +103,7 @@ public class HookActivity {
                 //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
                 //所有静态对象的反射可以通过传null获取
                 //private static final Singleton<IActivityManager> gDefault
-                handleIActivityManager(context, subActivityClass, singletonField.get(null));
+                handleIActivityManager(context, subActivityClazz, singletonField.get(null));
             }
 
 
@@ -116,7 +116,7 @@ public class HookActivity {
         }
     }
 
-    private static void handleIActivityTaskManager(Context context, Class<?> subActivityClass, Object IActivityTaskManagerSingletonObj) {
+    private static void handleIActivityTaskManager(Context context, Class<?> subActivityClazz, Object IActivityTaskManagerSingletonObj) {
 
         try {
             //5.获取private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton对象中的属性private T mInstance的值
@@ -148,7 +148,9 @@ public class HookActivity {
 
             if (mIActivityInvocationHandler == null) {
                 Log.d(TAG, "mIActivityInvocationHandler == null ==> new IActivityInvocationHandler(...)");
-                mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClass);
+                mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz);
+            } else {
+                mIActivityInvocationHandler.updateStubActivity(subActivityClazz);
             }
 
             //11.创建一个IActivityTaskManager接口的代理对象
@@ -172,7 +174,7 @@ public class HookActivity {
     }
 
 
-    private static void handleIActivityManager(Context context, Class<?> subActivityClass, Object IActivityManagerSingletonObj) {
+    private static void handleIActivityManager(Context context, Class<?> subActivityClazz, Object IActivityManagerSingletonObj) {
 
         try {
             //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
@@ -203,7 +205,9 @@ public class HookActivity {
             Class<?> iActivityManagerClazz = Class.forName("android.app.IActivityManager");
 
             if (mIActivityInvocationHandlerL == null) {
-                mIActivityInvocationHandlerL = new IActivityInvocationHandler(iActivityManager, context, subActivityClass);
+                mIActivityInvocationHandlerL = new IActivityInvocationHandler(iActivityManager, context, subActivityClazz);
+            } else {
+                mIActivityInvocationHandlerL.updateStubActivity(subActivityClazz);
             }
 
             //11.创建一个IActivityManager接口的代理对象
@@ -233,7 +237,7 @@ public class HookActivity {
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private final Object mIActivityManager;
-        private final Class<?> mSubActivityClazz;
+        private Class<?> mSubActivityClazz;
         private final Context mContext;
 
 
@@ -241,6 +245,10 @@ public class HookActivity {
             this.mIActivityManager = iActivityManager;
             this.mSubActivityClazz = subActivityClazz;
             this.mContext = context;
+        }
+
+        public void updateStubActivity(Class<?> subActivityClazz) {
+            this.mSubActivityClazz = subActivityClazz;
         }
 
         @Override
@@ -374,7 +382,7 @@ public class HookActivity {
     }
 
 
-    private static void handleLaunchActivity(Message msg, Context context, Class<?> subActivityClass, boolean isAppCompat) {
+    private static void handleLaunchActivity(Message msg, Context context, Class<?> subActivityClazz, boolean isAppCompat) {
         int LAUNCH_ACTIVITY = 100;
         try {
             //1.获取ActivityThread的内部类H的Class对象
@@ -423,7 +431,7 @@ public class HookActivity {
 
             //6.处理启动的Activity为AppCompatActivity类或者子类的情况
             if (!isAppCompat) return;
-            hookPackageManager(context, subActivityClass);
+            hookPackageManager(context, subActivityClazz);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -599,13 +607,13 @@ public class HookActivity {
 
 
     private static class PackageManagerProxyHandler implements InvocationHandler {
-        private final String mSubActivityClassName;
+        private final String mSubActivityClazzName;
         private final Object mIPackageManagerObj;
         private final String mAppPackageName;
 
-        public PackageManagerProxyHandler(Object iPackageManagerObj, String appPackageName, String subActivityClassName) {
+        public PackageManagerProxyHandler(Object iPackageManagerObj, String appPackageName, String subActivityClazzName) {
             this.mIPackageManagerObj = iPackageManagerObj;
-            this.mSubActivityClassName = subActivityClassName;
+            this.mSubActivityClazzName = subActivityClazzName;
             this.mAppPackageName = appPackageName;
         }
 
@@ -621,7 +629,7 @@ public class HookActivity {
                         break;
                     }
                 }
-                ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClassName);
+                ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClazzName);
                 args[index] = componentName;
             }
             return method.invoke(mIPackageManagerObj, args);
