@@ -2,7 +2,6 @@ package com.malin.hook;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -13,46 +12,51 @@ public class MApplication extends Application {
 
     private static MApplication mApplication;
 
-    //为了重置,否则第二次之后的启动都是已经注册的Activity
+    /**
+     * 为了重置,否则在HookAMS的情况下第二次之后的启动都是已经注册的Activity
+     */
     private static Object mIActivityManagerObj;
-    private static Object mPmsObj;
+    private static Object msPackageManager;
+    private static Object mmPM;
     private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
         mApplication = this;
+        Reflection.unseal();
+        getIActivityManager();
+        getPackageManager(context);
+        installActivity();
+    }
+
+    private void getIActivityManager() {
         try {
-            if (Build.VERSION.SDK_INT >= 28) {
-                Reflection.unseal();
-            }
-            mPmsObj = HookPMS.getPackageManager();
             mIActivityManagerObj = HookAMS.getIActivityManagerObj();
-            installActivity();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
 
     public static void resetAms() {
-        if (mIActivityManagerObj != null) {
-            try {
-                HookAMS.resetIActivityManager(mIActivityManagerObj);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
+        if (mIActivityManagerObj == null) return;
+        try {
+            HookAMS.resetIActivityManager(mIActivityManagerObj);
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 
+    private void getPackageManager(Context context) {
+        mmPM = HookPMS.getApplicationPackageManager(context);
+        msPackageManager = HookPMS.getPackageManager();
+    }
+
     public static void resetPms() {
-        if (mPmsObj != null) {
-            try {
-                HookPMS.resetPackageManager(mPmsObj);
-                HookPMS.resetApplicationPackageManager(getInstance().getApplicationContext(), mPmsObj);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        }
+        if (mmPM == null) return;
+        HookPMS.resetApplicationPackageManager(getInstance(), mmPM);
+        if (msPackageManager == null) return;
+        HookPMS.resetPackageManager(msPackageManager);
     }
 
     public static MApplication getInstance() {
