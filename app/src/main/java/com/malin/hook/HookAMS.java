@@ -9,12 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * get set ActivityManager, PackageManager, ActivityThread$H
+ * get/reset ActivityManager, PackageManager, ActivityThread$H
  */
-@SuppressLint({"PrivateApi", "DiscouragedPrivateApi"})
 public class HookAMS {
 
-    static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
+    public static void hookStartActivity(Context context, Class<?> subActivityClass, boolean isAppCompat) {
         if (Build.VERSION.SDK_INT <= 18) {
             HookActivity.hookPackageManager(context, subActivityClass);
         }
@@ -24,22 +23,31 @@ public class HookAMS {
 
 
     /**
-     * 获取IActivityManager实例
+     * 获取IActivityManager/IActivityTaskManager实例
      *
-     * @return IActivityManager实例
+     * @return IActivityManager/IActivityTaskManager实例
      */
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    static Object getIActivityManager() {
-        Object iActivityManagerObj = null;
+    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi"})
+    public static Object getIActivityManager() {
         try {
             Field iActivityManagerSingletonField;
-            if (Build.VERSION.SDK_INT >= 26) {
+            if (Build.VERSION.SDK_INT >= 29) {
+                //1.获取ActivityTaskManager的Class对象
+                //package android.app;
+                //public class ActivityTaskManager
+                Class<?> activityTaskManagerClazz = Class.forName("android.app.ActivityTaskManager");
+
+                //2.获取ActivityTaskManager的私有静态成员变量IActivityTaskManagerSingleton Field
+                // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                iActivityManagerSingletonField = activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton");
+
+            } else if (Build.VERSION.SDK_INT >= 26) {
                 //1.获取ActivityManager的Class对象
                 //package android.app
                 //public class ActivityManager
                 Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
 
-                //2.获取ActivityManager中IActivityManagerSingleton属性的Field
+                //2.获取ActivityManager中IActivityManagerSingleton成员变量的IActivityManagerSingleton Field
                 //private static final Singleton<IActivityManager> IActivityManagerSingleton
                 iActivityManagerSingletonField = activityManagerClazz.getDeclaredField("IActivityManagerSingleton");
             } else {
@@ -50,8 +58,9 @@ public class HookAMS {
             //3.禁止Java语言访问检查
             iActivityManagerSingletonField.setAccessible(true);
 
-            //4.获取IActivityManagerSingleton属性的值
+            //4.获取IActivityTaskManagerSingleton/IActivityManagerSingleton属性的值
             // 所有静态对象的反射可以通过传null获取。如果是实列必须传实例
+            // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
             // private static final Singleton<IActivityManager> IActivityManagerSingleton
             Object iActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
 
@@ -61,14 +70,14 @@ public class HookAMS {
             Class<?> singletonClazz = Class.forName("android.util.Singleton");
 
             //6.获取Singleton中mInstance属性的Field
-            // private T mInstance;既 IActivityManager mInstance
+            // private T mInstance;既 IActivityTaskManager mInstance /IActivityManager mInstance
             Field mInstanceField = singletonClazz.getDeclaredField("mInstance");
 
             //7.禁止Java语言访问检查
             mInstanceField.setAccessible(true);
 
-            //8.获取mInstance属性的的值,既IActivityManager
-            iActivityManagerObj = mInstanceField.get(iActivityManagerSingletonObj);
+            //8.获取mInstance属性的的值,既IActivityTaskManager/IActivityManager
+            return mInstanceField.get(iActivityManagerSingletonObj);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -76,32 +85,42 @@ public class HookAMS {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-        return iActivityManagerObj;
+        return null;
     }
 
 
     /**
-     * 重置系统的IActivityManager
+     * 重置系统的IActivityManager/IActivityTaskManager
      *
-     * @param iActivityManager IActivityManager
+     * @param iActivityManagerObj IActivityManager/IActivityTaskManager
      */
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    static void resetIActivityManager(Object iActivityManager) {
+    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi"})
+    public static void resetIActivityManager(Object iActivityManagerObj) {
         try {
             Field iActivityManagerSingletonField;
-            if (Build.VERSION.SDK_INT >= 26) {
+            if (Build.VERSION.SDK_INT >= 29) {
+                //1.获取ActivityTaskManager的Class对象
+                //package android.app;
+                //public class ActivityTaskManager
+                Class<?> activityTaskManagerClazz = Class.forName("android.app.ActivityTaskManager");
+
+                //2.获取ActivityTaskManager的私有静态成员变量IActivityTaskManagerSingleton
+                // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                iActivityManagerSingletonField = activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton");
+
+            } else if (Build.VERSION.SDK_INT >= 26) {
                 Class<?> activityManagerClazz = Class.forName("android.app.ActivityManager");
                 iActivityManagerSingletonField = activityManagerClazz.getDeclaredField("IActivityManagerSingleton");
             } else {
-                Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
-                iActivityManagerSingletonField = activityManagerNativeClass.getDeclaredField("gDefault");
+                Class<?> activityManagerNativeClazz = Class.forName("android.app.ActivityManagerNative");
+                iActivityManagerSingletonField = activityManagerNativeClazz.getDeclaredField("gDefault");
             }
             iActivityManagerSingletonField.setAccessible(true);
-            Object iActivityManagerSingletonObj = iActivityManagerSingletonField.get(null);
+            Object iActivityManager = iActivityManagerSingletonField.get(null);
             Class<?> singletonClazz = Class.forName("android.util.Singleton");
             Field mInstanceField = singletonClazz.getDeclaredField("mInstance");
             mInstanceField.setAccessible(true);
-            mInstanceField.set(iActivityManagerSingletonObj, iActivityManager);
+            mInstanceField.set(iActivityManager, iActivityManagerObj);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -116,34 +135,32 @@ public class HookAMS {
      *
      * @return ActivityThread类中的内部类H的值 Handler
      */
-    @SuppressWarnings("unused")
+    @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
     public static Object getActivityThreadInnerHandler() {
-        Object handlerObj = null;
         try {
             //1.获取ActivityThread的Class对象
             //package android.app
             //public final class ActivityThread
-            Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+            Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
 
-            //public static ActivityThread currentActivityThread()
             //2.获取currentActivityThread()方法
             //public static ActivityThread currentActivityThread()
-            Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
+            Method currentActivityThreadMethod = activityThreadClazz.getDeclaredMethod("currentActivityThread");
             currentActivityThreadMethod.setAccessible(true);
 
             //3.获取ActivityThread的对象
             //public static ActivityThread currentActivityThread()
             Object activityThreadObj = currentActivityThreadMethod.invoke(null);
 
-            //5.获取mH属性的Field
+            //4.获取mH属性的Field
             // final H mH = new H();
-            Field mHField = activityThreadClass.getDeclaredField("mH");
+            Field mHField = activityThreadClazz.getDeclaredField("mH");
 
-            //6.禁止Java语言访问检查
+            //5.禁止Java语言访问检查
             mHField.setAccessible(true);
 
-            //7.获取mH属性对应的值,既ActivityThread类中的Handler
-            handlerObj = mHField.get(activityThreadObj);
+            //6.获取mH属性对应的值,既ActivityThread类中的Handler
+            return mHField.get(activityThreadObj);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -155,7 +172,7 @@ public class HookAMS {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-        return handlerObj;
+        return null;
     }
 
     /**
@@ -163,7 +180,7 @@ public class HookAMS {
      *
      * @param mH Handler
      */
-    @SuppressWarnings("unused")
+    @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
     public static void resetActivityThreadInnerHandler(Object mH) {
         try {
             //1.获取ActivityThread的Class对象
@@ -171,7 +188,6 @@ public class HookAMS {
             //public final class ActivityThread
             Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
 
-            //public static ActivityThread currentActivityThread()
             //2.获取currentActivityThread()方法
             //public static ActivityThread currentActivityThread()
             Method currentActivityThreadMethod = activityThreadClass.getDeclaredMethod("currentActivityThread");
@@ -180,7 +196,6 @@ public class HookAMS {
             //3.获取ActivityThread的对象
             //public static ActivityThread currentActivityThread()
             Object activityThreadObj = currentActivityThreadMethod.invoke(null);
-
 
             //4.获取ActivityThread的中mH属性的Field
             //final H mH = new H();
