@@ -31,20 +31,12 @@ public class MApplication extends Application {
     }
 
     private void getIActivityManager() {
-        try {
-            mIActivityManagerObj = HookAMS.getIActivityManagerObj();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        mIActivityManagerObj = HookAMS.getIActivityManager();
     }
 
     public static void resetAms() {
         if (mIActivityManagerObj == null) return;
-        try {
-            HookAMS.resetIActivityManager(mIActivityManagerObj);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        HookAMS.resetIActivityManager(mIActivityManagerObj);
     }
 
     private void getPackageManager(Context context) {
