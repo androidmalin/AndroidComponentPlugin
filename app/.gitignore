@@ -4,3 +4,4 @@
 .settings
 *.iml
 bugly
+proguard-merge-config.txt

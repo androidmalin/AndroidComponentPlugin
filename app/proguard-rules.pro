@@ -24,6 +24,9 @@
 # ----------------------------------------------------------------------------
 # 混淆的压缩比例，0-7
 -optimizationpasses 7
+-allowaccessmodification
+-dontpreverify
+
 # 指定不去忽略非公共的库的类的成员
 -dontskipnonpubliclibraryclassmembers
 # 指定混淆是采用的算法
@@ -37,32 +40,59 @@
 
 #-------------------------------common-------------------------------
 
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-verbose
+
 #保留Annotation不混淆,避免混淆泛型;抛出异常时保留代码行号
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod,LocalVariableTable,*JavascriptInterface*
 ###keepattributes###
 
+#hide the original source file name.
+-renamesourcefileattribute SourceFile
 
+#==============proguard6.2.2/gradle/src/proguard/gradle/proguard-android-common.pro start======
 # 保持哪些类不被混淆
--keep public class * extends android.app.Fragment
+# From default AGP configuration.
+# Make sure that such classes are kept as they are
+# referenced from the AndroidManifest.xml or other
+# resource files. Some rules might be obsoleted by
+# aapt generated rules but keep them to be sure.
+-dontnote android.support.v4.app.Fragment
+-dontnote com.google.vending.licensing.ILicensingService
+-dontnote com.android.vending.licensing.ILicensingService
+
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.BroadcastReceiver
 -keep public class * extends android.content.ContentProvider
--keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.app.backup.BackupAgent
 -keep public class * extends android.preference.Preference
 #noinspection ShrinkerUnresolvedReference
+-keep public class * extends android.support.v4.app.Fragment
+-keep public class * extends android.app.Fragment
 -keep public class com.google.vending.licensing.ILicensingService
 -keep public class com.android.vending.licensing.ILicensingService
 -keep public class * extends java.lang.Throwable {*;}
 -keep public class * extends java.lang.Exception {*;}
 
-#noinspection ShrinkerUnresolvedReference
--keep public class * extends android.support.v4.app.Fragment
--keep public class * extends android.support.v7.app.AppCompatActivity
+# From the default AGP config: keep constructors that are called from
+# the system via reflection.
+-keep public class * extends android.view.View {
+    public <init>(android.content.Context);
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+    public void set*(...);
+}
 
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
 
--renamesourcefileattribute SourceFile
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
 
 # For native methods, see http://proguard.sourceforge.net/manual/examples.html#native
 -keepclasseswithmembernames class * {
@@ -76,28 +106,52 @@
    *** get*();
 }
 
-# We want to keep methods in Activity that could be used in the XML attribute onClick
--keepclassmembers class * extends android.app.Activity {
-   public void *(android.view.View);
-}
-
 # For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
 
-
-#不混淆Parcelable类方法
 -keepclassmembers class * implements android.os.Parcelable {
   #noinspection ShrinkerUnresolvedReference
   public static final android.os.Parcelable$Creator CREATOR;
 }
 
+# The support library contains references to newer platform versions.
+# Don't warn about those in case this app is linking against an older
+# platform version.  We know about them, and they are safe.
+-dontwarn android.support.**
+
+# Understand the @Keep support annotation.
+-dontnote android.support.annotation.Keep
+-keep class android.support.annotation.Keep
+
+-keep @android.support.annotation.Keep class * {*;}
+
+-keepclasseswithmembers class * {
+    #noinspection ShrinkerUnresolvedReference
+    @android.support.annotation.Keep <methods>;
+}
+
+-keepclasseswithmembers class * {
+    #noinspection ShrinkerUnresolvedReference
+    @android.support.annotation.Keep <fields>;
+}
+
+-keepclasseswithmembers class * {
+    #noinspection ShrinkerUnresolvedReference
+    @android.support.annotation.Keep <init>(...);
+}
+#==============proguard6.2.2/gradle/src/proguard/gradle/proguard-android-common.pro end======
+
+# We want to keep methods in Activity that could be used in the XML attribute onClick
+-keepclassmembers class * extends android.app.Activity {
+   public void *(android.view.View);
+}
+
 -keepclassmembers class * implements java.io.Serializable {
     static final long serialVersionUID;
     private static final java.io.ObjectStreamField[] serialPersistentFields;
-    !static !transient <fields>;
     private void writeObject(java.io.ObjectOutputStream);
     private void readObject(java.io.ObjectInputStream);
     java.lang.Object writeReplace();
@@ -107,45 +161,6 @@
 -keep class **.R
 -keepclassmembers class **.R$* {
     public static <fields>;
-}
-
-
-# The support library contains references to newer platform versions.
-# Don't warn about those in case this app is linking against an older
-# platform version.  We know about them, and they are safe.
--dontwarn android.support.**
-
-#-------------------------------Understand the @Keep support annotation.-------------------------------
-#noinspection ShrinkerUnresolvedReference
--keep class android.support.annotation.Keep
-
--keep @android.support.annotation.Keep class * {*;}
-
--keepclasseswithmembers class * {
-#noinspection ShrinkerUnresolvedReference
-    @android.support.annotation.Keep <methods>;
-}
-
--keepclasseswithmembers class * {
-#noinspection ShrinkerUnresolvedReference
-    @android.support.annotation.Keep <fields>;
-}
-
--keepclasseswithmembers class * {
-#noinspection ShrinkerUnresolvedReference
-    @android.support.annotation.Keep <init>(...);
-}
-#-------------------------------Understand the @Keep support annotation.-------------------------------
-
-
-# 保持自定义控件类不被混淆
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
-
-# 保持自定义控件类不被混淆
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet, int);
 }
 
 #-------------------------------common-------------------------------
@@ -181,6 +196,58 @@
     @androidx.annotation.Keep <init>(...);
 }
 #-------------------------------androidx Understand the @Keep support annotation.-------------------------------
+
+
+#proguard6.2.2/examples/android/proguard-project.txt
+# If you wish, you can let the optimization step remove Android logging calls.
+#-assumenosideeffects class android.util.Log {
+#    public static boolean isLoggable(java.lang.String, int);
+#    public static int v(...);
+#    public static int i(...);
+#    public static int w(...);
+#    public static int d(...);
+#    public static int e(...);
+#}
+
+#proguard6.2.2/examples/android/proguard-project.txt start
+# In that case, it's especially useful to also clean up any corresponding
+# string concatenation calls.
+-assumenoexternalsideeffects class java.lang.StringBuilder {
+    public java.lang.StringBuilder();
+    public java.lang.StringBuilder(int);
+    public java.lang.StringBuilder(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.Object);
+    public java.lang.StringBuilder append(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.StringBuffer);
+    public java.lang.StringBuilder append(char[]);
+    public java.lang.StringBuilder append(char[], int, int);
+    public java.lang.StringBuilder append(boolean);
+    public java.lang.StringBuilder append(char);
+    public java.lang.StringBuilder append(int);
+    public java.lang.StringBuilder append(long);
+    public java.lang.StringBuilder append(float);
+    public java.lang.StringBuilder append(double);
+    public java.lang.String toString();
+}
+
+-assumenoexternalreturnvalues class java.lang.StringBuilder {
+    public java.lang.StringBuilder append(java.lang.Object);
+    public java.lang.StringBuilder append(java.lang.String);
+    public java.lang.StringBuilder append(java.lang.StringBuffer);
+    public java.lang.StringBuilder append(char[]);
+    public java.lang.StringBuilder append(char[], int, int);
+    public java.lang.StringBuilder append(boolean);
+    public java.lang.StringBuilder append(char);
+    public java.lang.StringBuilder append(int);
+    public java.lang.StringBuilder append(long);
+    public java.lang.StringBuilder append(float);
+    public java.lang.StringBuilder append(double);
+}
+#proguard6.2.2/examples/android/proguard-project.txt end
+
+#https://proandroiddev.com/improving-proguard-name-obfuscation-83b27b34c52a
+-repackageclasses 'o'
+-printconfiguration proguard-merge-config.txt
 
 #-------------------------------reflect system api.-------------------------------
 #-keepclassmembers class android.content.pm.ApplicationInfo {
