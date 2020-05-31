@@ -1,5 +1,6 @@
 package com.malin.hook;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executors;
 public class MApplication extends Application {
 
     private static final String TAG = "MApplication";
+    @SuppressLint("StaticFieldLeak")
     private static MApplication mApplication;
 
     /**

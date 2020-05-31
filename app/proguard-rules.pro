@@ -90,6 +90,7 @@
 
 #不混淆Parcelable类方法
 -keepclassmembers class * implements android.os.Parcelable {
+  #noinspection ShrinkerUnresolvedReference
   public static final android.os.Parcelable$Creator CREATOR;
 }
 
@@ -180,3 +181,20 @@
     @androidx.annotation.Keep <init>(...);
 }
 #-------------------------------androidx Understand the @Keep support annotation.-------------------------------
+
+#-------------------------------reflect system api.-------------------------------
+#-keepclassmembers class android.content.pm.ApplicationInfo {
+#  public java.lang.String scanSourceDir;
+#  public java.lang.String scanPublicSourceDir;
+#  public java.lang.String deviceProtectedDataDir;
+#  public java.lang.String credentialProtectedDataDir;
+#  #noinspection ShrinkerUnresolvedReference
+#  public java.lang.String deviceEncryptedDataDir;
+#  public java.lang.String credentialEncryptedDataDir;
+#}
+#
+#-keepclassmembers class android.os.Handler{
+#  #noinspection ShrinkerUnresolvedReference
+#  final android.os.Handler$Callback mCallback;
+#}
+#-------------------------------reflect system api.-------------------------------
