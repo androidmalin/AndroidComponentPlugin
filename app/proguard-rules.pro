@@ -180,7 +180,8 @@
 #-------------------------------androidx-------------------------------
 
 #-------------------------------androidx Understand the @Keep support annotation.-------------------------------
--keep class androidx.annotation.Keep
+#noinspection ShrinkerUnresolvedReference
+-keep,allowobfuscation @interface androidx.annotation.Keep
 
 -keep @androidx.annotation.Keep class * {*;}
 
