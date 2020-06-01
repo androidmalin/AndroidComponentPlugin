@@ -34,11 +34,6 @@ public class MApplication extends Application {
      */
     private final boolean mHookInstrumentation = true;
 
-    /**
-     * Hook Instrumentation的方式下,是否启动appcompatActivity类型的Activity.
-     */
-    private final boolean mHookInstrumentation_is_appcompatActivity = true;
-
     private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -141,11 +136,7 @@ public class MApplication extends Application {
 
     private void handleActivity(Context context) {
         if (mHookInstrumentation) {
-            if (mHookInstrumentation_is_appcompatActivity) {
-                HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class);
-            } else {
-                HookInstrumentation.hookInstrumentation(context, StubActivity.class);
-            }
+            HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class);
         } else {
             mIActivityManagerObj = HookAMS.getIActivityManager();
         }
