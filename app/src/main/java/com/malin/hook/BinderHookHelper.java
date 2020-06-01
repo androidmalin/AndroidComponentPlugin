@@ -23,6 +23,7 @@ import java.util.Map;
 @SuppressLint("PrivateApi")
 class BinderHookHelper {
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     static void hookClipboardService() throws Exception {
 

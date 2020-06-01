@@ -51,6 +51,7 @@ public final class ServiceManager20 {
      * @param proxyIntent proxyIntent
      * @param startId     startId
      */
+    @SuppressWarnings("deprecation")
     void onStart(Intent proxyIntent, int startId) {
 
         Intent targetIntent = proxyIntent.getParcelableExtra(HookAMSForServicePlugin.EXTRA_TARGET_INTENT);
@@ -160,6 +161,7 @@ public final class ServiceManager20 {
      * @param serviceInfo 插件的ServiceInfo
      * @throws Throwable e
      */
+    @SuppressWarnings("JavaReflectionMemberAccess")
     private void proxyCreateService(ServiceInfo serviceInfo) throws Throwable {
         //0.
         IBinder token = new Binder();
@@ -253,7 +255,7 @@ public final class ServiceManager20 {
      * @param apkFile 插件对应的apk文件
      * @throws Throwable 解析出错或者反射调用出错, 均会抛出异常
      */
-    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressWarnings({"JavaReflectionInvocation"})
     void preLoadServices(File apkFile) throws Throwable {
         //1.生成PackageParser对象
         Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");

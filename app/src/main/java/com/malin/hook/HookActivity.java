@@ -115,6 +115,7 @@ public class HookActivity {
         }
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     private static void handleIActivityTaskManager(Context context, Class<?> subActivityClazz, Object IActivityTaskManagerSingletonObj) {
 
         try {
@@ -173,6 +174,7 @@ public class HookActivity {
     }
 
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     private static void handleIActivityManager(Context context, Class<?> subActivityClazz, Object IActivityManagerSingletonObj) {
 
         try {
@@ -293,7 +295,6 @@ public class HookActivity {
      * @param subActivityClazz 注册了的Activity的Class对象
      * @param isAppCompat      是否是AppCompatActivity的子类
      */
-    @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     public static void hookLauncherActivity(Context context, Class<?> subActivityClazz, boolean isAppCompat) {
 
@@ -474,6 +475,7 @@ public class HookActivity {
             return false;
         }
 
+        @SuppressWarnings("JavaReflectionMemberAccess")
         private void handleActivity(Message msg) {
 
             try {

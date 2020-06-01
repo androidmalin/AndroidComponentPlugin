@@ -75,6 +75,7 @@ final class ReceiverHelper {
     /**
      * 解析Apk文件中的 <receiver>, 并存储起来
      */
+    @SuppressWarnings("JavaReflectionInvocation")
     @SuppressLint("DiscouragedPrivateApi")
     private static void parserReceivers(File apkFile) throws Exception {
         int version = Build.VERSION.SDK_INT;

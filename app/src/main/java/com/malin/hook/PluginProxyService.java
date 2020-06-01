@@ -25,6 +25,7 @@ public class PluginProxyService extends Service {
      * 以onStart为例，在启动ProxyService之后，会收到ProxyService的onStart回调，
      * 我们可以在这个方法里面把具体的任务交给原始要启动的插件Service组件：
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void onStart(Intent intent, int startId) {
         Log.d(TAG, "onStart() called with " + "intent = [" + intent + "], startId = [" + startId + "]");

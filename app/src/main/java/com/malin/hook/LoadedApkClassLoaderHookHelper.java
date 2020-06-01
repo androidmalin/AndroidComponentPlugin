@@ -39,7 +39,7 @@ public class LoadedApkClassLoaderHookHelper {
      * 进而使用反射创建Activity实例;接着创建Application,Context等完成Activity组件的启动.
      */
     @SuppressLint("DiscouragedPrivateApi")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "JavaReflectionInvocation"})
     public static void hookLoadedApkInActivityThread(File apkFile) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException, InstantiationException, NullPointerException, IOException {
 

@@ -21,7 +21,6 @@ import java.util.Map;
  * http://weishu.me/2016/04/12/understand-plugin-framework-receiver/
  * androidmalin 增加代码注释...
  */
-@SuppressWarnings("JavaReflectionMemberAccess")
 @SuppressLint({"PrivateApi", "unchecked"})
 public final class ReceiverHelper23 {
 
@@ -52,6 +51,7 @@ public final class ReceiverHelper23 {
     /**
      * 解析Apk文件中的 <receiver>, 并存储起来
      */
+    @SuppressWarnings("JavaReflectionInvocation")
     @SuppressLint("DiscouragedPrivateApi")
     private static void parserReceivers(File apkFile) throws Exception {
 

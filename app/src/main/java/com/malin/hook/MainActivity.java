@@ -218,7 +218,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * Accessing hidden field Landroid/app/ActivityManager;->INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS:I (blacklist, reflection, denied)
      * System.err  W  java.lang.NoSuchFieldException: INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS
      */
-    @SuppressWarnings("JavaReflectionMemberAccess")
     private boolean testBlackListApi() {
         boolean success = true;
         if (Build.VERSION.SDK_INT < 29) return true;

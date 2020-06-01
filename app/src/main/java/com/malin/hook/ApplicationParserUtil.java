@@ -19,6 +19,7 @@ public class ApplicationParserUtil {
      * 这个方法的最终目的是调用
      * android.content.pm.PackageParser#generateActivityInfo(android.content.pm.PackageParser.Activity,int,android.content.pm.PackageUserState,int)
      */
+    @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
     @SuppressLint("PrivateApi")
     public static ApplicationInfo generateApplicationInfo(File apkFile)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException, IOException {

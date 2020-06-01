@@ -21,6 +21,7 @@ class ProviderHelper23 {
     /**
      * 在进程内部安装provider, 也就是调用 ActivityThread.installContentProviders方法
      */
+    @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     static void installProviders(Context context, File apkFile) {
         try {
@@ -63,8 +64,8 @@ class ProviderHelper23 {
      *
      * @param apkFile 插件对应的apk文件
      */
+    @SuppressWarnings("JavaReflectionInvocation")
     @SuppressLint("DiscouragedPrivateApi")
-    @SuppressWarnings("JavaReflectionMemberAccess")
     private static List<ProviderInfo> parseProviders(File apkFile) {
         try {
             Class<?> packageParserClass = Class.forName("android.content.pm.PackageParser");

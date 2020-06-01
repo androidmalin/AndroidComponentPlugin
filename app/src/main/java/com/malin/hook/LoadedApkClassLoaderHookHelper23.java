@@ -37,7 +37,7 @@ public class LoadedApkClassLoaderHookHelper23 {
      * 这个方法使用从getPackageInfoNoCheck中拿到LoadedApk中的mClassLoader来加载Activity类,
      * 进而使用反射创建Activity实例;接着创建Application,Context等完成Activity组件的启动.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "JavaReflectionInvocation"})
     public static void hookLoadedApkInActivityThread(File apkFile) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException, InstantiationException, NullPointerException {
 
@@ -160,6 +160,7 @@ public class LoadedApkClassLoaderHookHelper23 {
      * 这个方法的最终目的是调用
      * android.content.pm.PackageParser#generateActivityInfo(android.content.pm.PackageParser.Activity,int,android.content.pm.PackageUserState,int)
      */
+    @SuppressWarnings("JavaReflectionInvocation")
     private static ApplicationInfo generateApplicationInfo(File apkFile)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
 
