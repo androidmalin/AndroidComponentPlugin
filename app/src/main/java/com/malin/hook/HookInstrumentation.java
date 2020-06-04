@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * 适配android15-28,android Q
+ * Activity插件化 Hook Instrumentation
  * 代码参考 android 进阶解密第十五章
  */
 @SuppressLint("PrivateApi")
@@ -28,7 +28,7 @@ class HookInstrumentation {
 
     private static final String TARGET_INTENT_CLASS = "target_intent_class";
 
-    static void hookInstrumentation(Context context, Class<?> stubActivityClassName) {
+    static void hookInstrumentation(Context context) {
 
         try {
             //1.ContextImpl-->mMainThread
@@ -52,7 +52,7 @@ class HookInstrumentation {
             Instrumentation mInstrumentationObj = (Instrumentation) mInstrumentationField.get(activityThreadObj);
 
             //4.reset set value
-            mInstrumentationField.set(activityThreadObj, new InstrumentationProxy(mInstrumentationObj, context.getPackageManager(), stubActivityClassName));
+            mInstrumentationField.set(activityThreadObj, new InstrumentationProxy(mInstrumentationObj, context.getPackageManager(), StubAppCompatActivity.class));
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -105,6 +105,7 @@ class HookInstrumentation {
             try {
                 //通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
                 Method execStartActivityMethod = Instrumentation.class.getDeclaredMethod("execStartActivity", Context.class, IBinder.class, IBinder.class, Activity.class, Intent.class, int.class, Bundle.class);
+                execStartActivityMethod.setAccessible(true);
                 return (ActivityResult) execStartActivityMethod.invoke(mInstrumentation, who, contextThread, token, target, finalIntent, requestCode, options);
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -144,6 +145,7 @@ class HookInstrumentation {
                 //just for android-15
                 //通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
                 Method execStartActivityMethod = Instrumentation.class.getDeclaredMethod("execStartActivity", Context.class, IBinder.class, IBinder.class, Activity.class, Intent.class, int.class);
+                execStartActivityMethod.setAccessible(true);
                 return (ActivityResult) execStartActivityMethod.invoke(mInstrumentation, who, contextThread, token, target, finalIntent, requestCode);
             } catch (Throwable e) {
                 e.printStackTrace();

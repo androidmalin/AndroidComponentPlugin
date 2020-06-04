@@ -26,7 +26,7 @@ import java.util.List;
  */
 @SuppressLint("PrivateApi")
 public class HookActivity {
-    private static final String TAG = "HookActivity";
+
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
     @SuppressLint("StaticFieldLeak")
     private static IActivityInvocationHandler mIActivityInvocationHandler;
@@ -147,7 +147,6 @@ public class HookActivity {
             Class<?> IActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager");
 
             if (mIActivityInvocationHandler == null) {
-                Log.d(TAG, "mIActivityInvocationHandler == null ==> new IActivityInvocationHandler(...)");
                 mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz);
             } else {
                 mIActivityInvocationHandler.updateStubActivity(subActivityClazz);
@@ -255,7 +254,6 @@ public class HookActivity {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
             if (method.getName().equals("startActivity")) {
-                Log.d(TAG, "startActivity hook");
                 int intentIndex = 2;
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] instanceof Intent) {
@@ -266,8 +264,6 @@ public class HookActivity {
                 //将启动的未注册的Activity对应的Intent,替换为安全的注册了的桩Activity的Intent
                 //1.将未注册的Activity对应的Intent,改为安全的Intent,既在AndroidManifest.xml中配置了的Activity的Intent
                 Intent originIntent = (Intent) args[intentIndex];
-                String originClassName = originIntent.getComponent().getClassName();
-                Log.d(TAG, "IActivityInvocationHandler==>originClassName:" + originClassName);
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClazz);
                 //public class Intent implements Parcelable;

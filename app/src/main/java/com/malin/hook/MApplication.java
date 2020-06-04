@@ -136,7 +136,7 @@ public class MApplication extends Application {
 
     private void handleActivity(Context context) {
         if (mHookInstrumentation) {
-            HookInstrumentation.hookInstrumentation(context, StubAppCompatActivity.class);
+            HookInstrumentation.hookInstrumentation(context);
         } else {
             mIActivityManagerObj = HookAMS.getIActivityManager();
         }
