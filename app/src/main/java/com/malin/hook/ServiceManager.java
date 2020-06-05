@@ -61,7 +61,7 @@ public final class ServiceManager {
     void onStart(Intent proxyIntent, int startId) {
         if (proxyIntent == null) return;
         Intent targetIntent = proxyIntent.getParcelableExtra(HookAMSForServicePlugin.EXTRA_TARGET_INTENT);
-        if (targetIntent == null) throw new NullPointerException("targetIntent==null");
+        if (targetIntent == null) return;
         ServiceInfo serviceInfo = selectPluginService(targetIntent);
 
         if (serviceInfo == null) {
@@ -69,24 +69,17 @@ public final class ServiceManager {
             return;
         }
         try {
-            String processName0 = ProcessUtil.getProcessNameViaManager(MApplication.getInstance());
-            Log.d(TAG, "0processName:" + processName0);
-            Log.d(TAG, "0mServiceMap.size:" + mServiceMap.size());
-            Log.d(TAG, "0mServiceMap.containsKey(serviceInfo.name):" + serviceInfo.name);
-
             if (!mServiceMap.containsKey(serviceInfo.name)) {
                 // service还不存在, 先创建
                 proxyCreateService(serviceInfo);
             }
 
             Service service = mServiceMap.get(serviceInfo.name);
-            if (service == null) throw new NullPointerException("service==null");
+            if (service == null) {
+                Log.e(TAG, "service == null, mServiceMap not has");
+                return;
+            }
             service.onStart(targetIntent, startId);
-
-            String processName2 = ProcessUtil.getProcessNameViaManager(MApplication.getInstance());
-            Log.d(TAG, "2processName:" + processName2);
-            Log.d(TAG, "2mServiceMap.size:" + mServiceMap.size());
-            Log.d(TAG, "2mServiceMap.get(serviceInfo.name):" + serviceInfo.name);
         } catch (Throwable e) {
             Log.e(TAG, "Throwable:" + e.getMessage());
             e.printStackTrace();
@@ -105,11 +98,6 @@ public final class ServiceManager {
             Log.e(TAG, "can not found service: " + targetIntent.getComponent());
             return 0;
         }
-        String processName3 = ProcessUtil.getProcessNameViaManager(MApplication.getInstance());
-        Log.d(TAG, "3processName:" + processName3);
-        Log.d(TAG, "3mServiceMap.size:" + mServiceMap.size());
-        Log.d(TAG, "3mServiceMap.get(serviceInfo.name):" + serviceInfo.name);
-
         Service service = mServiceMap.get(serviceInfo.name);
         if (service == null) {
             Log.w(TAG, "can not running, are you stopped it multi-times?");
@@ -255,11 +243,6 @@ public final class ServiceManager {
 
         //10.将此Service存储起来
         mServiceMap.put(serviceInfo.name, service);
-
-        String processName1 = ProcessUtil.getProcessNameViaManager(MApplication.getInstance());
-        Log.d(TAG, "1processName:" + processName1);
-        Log.d(TAG, "1mServiceMap.size:" + mServiceMap.size());
-        Log.d(TAG, "1mServiceMap.put(serviceInfo.name, service):" + serviceInfo.name);
     }
 
     /**
@@ -325,12 +308,16 @@ public final class ServiceManager {
 
         //5.读取Package对象里面的services字段
         //public final ArrayList<Service> services = new ArrayList<Service>(0);
-        Field servicesField = packageObj.getClass().getDeclaredField("services");
+        Class<?> packageParser$PackageClazz = Class.forName("android.content.pm.PackageParser$Package");
+        Field servicesField = packageParser$PackageClazz.getDeclaredField("services");
         servicesField.setAccessible(true);
 
         //6.get services
         List<?> services = (List<?>) servicesField.get(packageObj);
-        if (services == null) throw new NullPointerException("services==null");
+        if (services == null) {
+            Log.e(TAG, "services == null");
+            return;
+        }
 
         //7.接下来要做的就是根据这个List<Service> 获取到Service对应的ServiceInfo
         // 调用generateServiceInfo 方法, 把PackageParser$Service转换成ServiceInfo

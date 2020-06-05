@@ -189,7 +189,6 @@ public class MApplication extends Application {
                 if (!apkFile.exists()) {
                     Log.d(TAG, "pluginService apk start extract");
                     PluginUtils.extractAssets(context, PluginApkNameVersion.PLUGIN_SERVICE_APK);
-
                 }
                 BaseDexClassLoaderHookHelper.patchClassLoader(getClassLoader(), apkFile, odexFile);
                 try {
