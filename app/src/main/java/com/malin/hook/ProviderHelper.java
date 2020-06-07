@@ -28,6 +28,12 @@ import java.util.List;
  * 在模拟器上运行,给system_server进程断点;查看发现;调用方法queryProvider时全局变量mProvidersByAuthority中没有插件的Authority;
  * 方法返回值为null;在外层调用处,进行了版本判断,target>=26;就异常了;
  * mProvidersByAuthority变量的赋值在系统进程中;目前没有解决办法了;
+ * <p>
+ * com/android/server/am/ActivityManagerService.java
+ * 发生在server进程里的public String checkContentProviderAccess(String authority, int userId) {}方法里,
+ * 调用了 com/android/server/pm/PackageManagerService.java 里的resolveContentProvider(),
+ * 无法通过hook IPackageManager来解决.因为调用发生在server进程里.
+ * https://agehua.github.io/2017/07/12/android-noroot-hook/
  */
 @SuppressLint("PrivateApi")
 class ProviderHelper {

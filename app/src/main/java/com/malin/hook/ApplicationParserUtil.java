@@ -125,6 +125,7 @@ public class ApplicationParserUtil {
         String apkPath = apkFile.getPath();
         applicationInfo.sourceDir = apkPath;
         applicationInfo.publicSourceDir = apkPath;
+        ApplicationInfoUtil.fixApplicationInfo(applicationInfo, apkPath);
         return applicationInfo;
     }
 }
