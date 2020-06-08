@@ -86,20 +86,8 @@ final class ReceiverHelper {
         Class<?> packageParserClazz = Class.forName("android.content.pm.PackageParser");
 
         //2.获取parsePackage()方法的Method
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-28
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-27
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-26
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-25
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-24
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-23
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-22
-        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
-        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-18
-        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-17
-        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-16
-        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
+        //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//21=<api<=29
+        //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//15=<api<=19
         Method parsePackageMethod;
         if (Build.VERSION.SDK_INT >= 20) {
             parsePackageMethod = packageParserClazz.getDeclaredMethod("parsePackage", File.class, int.class);
@@ -115,11 +103,7 @@ final class ReceiverHelper {
             packageParser = packageParserClazz.newInstance();
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
-            //public PackageParser(String archiveSourcePath) {}//api-19
-            //public PackageParser(String archiveSourcePath) {}//api-18
-            //public PackageParser(String archiveSourcePath) {}//api-17
-            //public PackageParser(String archiveSourcePath) {}//api-16
-            //public PackageParser(String archiveSourcePath) {}//api-15
+            //public PackageParser(String archiveSourcePath) {}//15=<api<=19
             Constructor<?> packageParserConstructor = packageParserClazz.getDeclaredConstructor(String.class);
             packageParserConstructor.setAccessible(true);
             String archiveSourcePath = apkFile.getCanonicalPath();
@@ -130,8 +114,7 @@ final class ReceiverHelper {
         //Package为PackageParser的内部类;public final static class Package implements Parcelable {}
         Object packageObj;
         if (Build.VERSION.SDK_INT >= 20) {
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-29
-            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//api-21
+            //public Package parsePackage(File packageFile, int flags) throws PackageParserException {}//21=<api<=29
             packageObj = parsePackageMethod.invoke(packageParser, apkFile, PackageManager.GET_RECEIVERS);
         } else {
             // 15<=Build.VERSION.SDK_INT <=19
@@ -139,8 +122,7 @@ final class ReceiverHelper {
             DisplayMetrics displayMetrics = new DisplayMetrics();
             displayMetrics.setToDefaults();//参考api=29时 PackageParser的默认构造函数中的表达式
 
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-19
-            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//api-15
+            //public Package parsePackage(File sourceFile, String destCodePath, DisplayMetrics metrics, int flags) {}//15=<api<=19
             packageObj = parsePackageMethod.invoke(packageParser, apkFile, destCodePath, displayMetrics, PackageManager.GET_RECEIVERS);
         }
 
@@ -157,7 +139,8 @@ final class ReceiverHelper {
 
         //5.获取Package中的receivers字段Field
         //public final ArrayList<Activity> receivers = new ArrayList<Activity>(0);
-        Field receiversField = packageObj.getClass().getDeclaredField("receivers");
+        Class<?> packageParser$Package = Class.forName("android.content.pm.PackageParser$Package");
+        Field receiversField = packageParser$Package.getDeclaredField("receivers");
         receiversField.setAccessible(true);
 
         //6.获取Package对象里面的receivers字段的值,注意这是一个 ArrayList<Activity> (没错,底层把<receiver>当作<Activity>处理)
@@ -187,18 +170,7 @@ final class ReceiverHelper {
         //handle 1.api17-29
         //handle 2.api16
         //handle 3.api15
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=29
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=28
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=27
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=26
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=25
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=24
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=23
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=22
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=21
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=19
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=18
-        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//api=17
+        //public static final ActivityInfo generateActivityInfo(Activity a, int flags,PackageUserState state, int userId) {}//17=<api<=29
         //public static final ActivityInfo generateActivityInfo(Activity a, int flags, boolean stopped,int enabledState, int userId) {}//api=16
         //public static final ActivityInfo generateActivityInfo(Activity a,int flags) {}//api=15
         Method generateActivityInfoMethod;
