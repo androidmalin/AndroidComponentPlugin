@@ -8,7 +8,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -41,7 +40,6 @@ final class ReceiverHelper {
         parserReceivers(apkFile);
         ClassLoader classLoader = null;
         for (ActivityInfo activityInfo : ReceiverHelper.sCache.keySet()) {
-            Log.i(TAG, "preload receiver:" + activityInfo.name);
             List<? extends IntentFilter> intentFilters = ReceiverHelper.sCache.get(activityInfo);
             if (classLoader == null) {
                 classLoader = CustomClassLoader.getPluginClassLoader(apkFile, activityInfo.packageName);
@@ -220,8 +218,10 @@ final class ReceiverHelper {
                 //       public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
                 //
                 //       }
-                //        public static abstract class Component<II extends IntentInfo> {
+                //       public static abstract class Component<II extends IntentInfo> {
                 //               public final ArrayList<II> intents;
+                //       }
+                //       public static abstract class IntentInfo extends IntentFilter {
                 //       }
                 // }
 
