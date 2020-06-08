@@ -1,12 +1,18 @@
-### Android上简单实现Activity，Service，BroadcastReceiver，ContentProvider的插件化
+### Android上简单实现四大组件的插件化
 
 ### 说明:
-从开始学习插件化，到简单地实现了四大组件的插件化，断断续续地持续了近10个月的时间，收获很大。学习了反射，泛型，动态代理，静态代理，AIDL，binder，ClassLoader等等的知识。
+此项目仅用于学习插件化基本的实现思路，在此基础上学习理解四大组件的运行机制。
 
-代码主要参考维术插件化系列博客。在此基础上做了大量的版本适配(android4.0 ~ android10,android R)。
-[维术插件化系列博客](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)和[示例代码](https://github.com/tiann/understand-plugin-framework)，写的特别好，值得反复学习，在此特别感谢。
+实现插件化的重点在于对Android四大组件和资源加载流程的分析和解读。
 
-示例代码测试情况如下:
+插件化代码的编写，涉及到的知识点主要有java中的反射，动态代理，静态代理以及android中的AIDL跨进程通信，binder机制，ClassLoader加载机制，四大组件的运行原理等等。
+
+本项目代码主要参考[维术插件化系列博客](http://weishu.me/2016/01/28/understand-plugin-framework-overview/)和[示例代码](https://github.com/tiann/understand-plugin-framework)。在此基础上做了大量的版本适配(android4.0 ~ android10，android R)，以及对代码增加了大量的注释。
+维术插件化系列博客和示例代码，写的特别好，值得反复学习和思考，在此特别感谢。
+
+万事开头难，学习的过程是辛苦的，对遇到的知识点采用各个击破的方法，对四大组件流程分析文章进行反复的阅读和理解，日积月累，会有所收获。
+
+示例代码适配情况如下:
 
 | 版本\组件 | api | Activity | Service | BroadcastReceiver | ContentProvider |
 | :----: | :----: | :----: | :----: | :----: | :----: |
@@ -28,19 +34,26 @@
 
 ✅表示测试通过.
 
-适配了Android4-11，四大组件中的Activity和Service的插件化；要彻底搞清楚代码，需要提前掌握的知识点如下:
+本项目特色：
+1. Activity的插件化，提供了2种方式：Hook IActivityManager和Hook Instrumentation
+2. 加载插件中的类，提供了2种方式去Hook BaseDexClassLoader
+3. 示例代码均提供详尽的注释，提供插件化入门的基础知识点
+4. 提供方便的调试脚本
+5. 提供了通用的项目gradle配置和混淆配置
+
+要彻底搞清楚代码，需要提前掌握的知识点如下:
 
 0. [反射的使用1](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
 1. [反射的使用2](https://www.geeksforgeeks.org/reflection-in-java/)
 2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
-3. [动态代理](https://blog.csdn.net/u011784767/article/details/78281384)
+3. [动态代理](https://web.archive.org/web/20150226062232/http://userpages.umbc.edu/~tarr/dp/lectures/DynProxies-2pp.pdf)
 4. [AIDL通信](https://blog.csdn.net/luoyanglizi/article/details/51980630)
 5. [Activity启动流程以及其中涉及到的两次跨进程通信](http://www.520monkey.com/archives/867)
 6. [Handler消息处理机制](https://blog.csdn.net/guolin_blog/article/details/9991569)
 
 
 ### 问题思考
-1. 如何确保我们启动的未注册的Activity，有正常的Activity的生命周期?
+1. 如何确保我们启动的未注册的Activity，有正常的Activity生命周期?
 
 [源码探索系列29---插件化基础之启动插件的Activity](http://sanjay-f.github.io/2016/04/01/%E6%BA%90%E7%A0%81%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%9729---%E6%8F%92%E4%BB%B6%E5%8C%96%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%90%AF%E5%8A%A8%E6%8F%92%E4%BB%B6%E7%9A%84Activity/)
 
@@ -96,3 +109,7 @@ public PackageManager getPackageManager() {
 12. [Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](http://www.520monkey.com/archives/867)
 13. [Android插件化的兼容性（中）:Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
 14. [Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
+
+
+## License
+AndroidComponentPlugin is [Apache License 2.0](https://github.com/androidmalin/AndroidComponentPlugin/blob/master/LICENSE).
