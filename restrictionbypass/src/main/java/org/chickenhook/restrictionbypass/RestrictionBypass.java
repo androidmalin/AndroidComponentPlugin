@@ -32,7 +32,7 @@ public class RestrictionBypass {
     }
 
 
-    public static Field getDeclaredField(Class obj, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static Field getDeclaredField(Class<?> obj, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return NativeReflectionBypass.getDeclaredField(obj, name);
         } else {

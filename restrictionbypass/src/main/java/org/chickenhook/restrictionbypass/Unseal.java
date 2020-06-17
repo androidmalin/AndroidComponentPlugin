@@ -11,6 +11,7 @@ public class Unseal {
         );
         getRuntime.setAccessible(true);
         Object vmRuntime = getRuntime.invoke(null);
+        if (vmRuntime == null) throw new NullPointerException("vmRuntime==null");
 
         Method setHiddenApiExemptions = RestrictionBypass.getDeclaredMethod(
                 vmRuntime.getClass(),

@@ -1,4 +1,4 @@
-package org.chickenhook.restrictionbypass.helpers;
+package org.chickenhook.restrictionbypass;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,8 +52,7 @@ public class Reflection {
      * @throws NoSuchFieldException   when field was found
      * @throws IllegalAccessException when field was not accessible
      */
-    public static @Nullable
-    void setReflective(@NonNull Object obj, @NonNull String field, @Nullable Object value) throws NoSuchFieldException, IllegalAccessException {
+    public static void setReflective(@NonNull Object obj, @NonNull String field, @Nullable Object value) throws NoSuchFieldException, IllegalAccessException {
         setReflective(obj, obj.getClass(), field, value);
     }
 
@@ -67,8 +66,7 @@ public class Reflection {
      * @throws NoSuchFieldException   when field was found
      * @throws IllegalAccessException when field was not accessible
      */
-    public static @Nullable
-    void setReflective(@Nullable Object obj, @NonNull Class<?> cls, @NonNull String field, @Nullable Object value) throws NoSuchFieldException, IllegalAccessException {
+    public static void setReflective(@Nullable Object obj, @NonNull Class<?> cls, @NonNull String field, @Nullable Object value) throws NoSuchFieldException, IllegalAccessException {
         Field f = cls.getDeclaredField(field);
         f.setAccessible(true);
         f.set(obj, value);

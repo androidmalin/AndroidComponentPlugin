@@ -2,6 +2,9 @@ package com.malin.hook;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
+
+import org.chickenhook.restrictionbypass.Unseal;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
@@ -24,10 +27,19 @@ public class MApplication extends Application {
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
         mApplication = this;
-        Reflection.unseal();
+        unseal();
         getIActivityManager();
         getPackageManager(context);
         installActivity();
+    }
+
+    private void unseal() {
+        try {
+            Unseal.unseal();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(MApplication.class.getSimpleName(), "Unable to unseal hidden api access", e);
+        }
     }
 
     private void getIActivityManager() {

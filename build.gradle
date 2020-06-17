@@ -1,7 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.3.72'
     repositories {
         google()
         jcenter()
@@ -9,7 +8,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -20,22 +18,6 @@ allprojects {
         google()
         jcenter()
 
-    }
-
-    //skip Test tasks
-    gradle.taskGraph.whenReady {
-        tasks.each { task ->
-            if (task.name.contains("lint")
-                    //如果项目中有用到aidl则不可以舍弃这个任务
-                    || task.name.contains("Aidl")
-                    || task.name.contains("mockableAndroidJar")
-                    || task.name.contains("test")
-                    || task.name.contains("Wear")
-                    || task.name.contains("UnitTest")
-                    || task.name.contains("AndroidTest")) {
-                task.enabled = false
-            }
-        }
     }
 
     gradle.projectsEvaluated {

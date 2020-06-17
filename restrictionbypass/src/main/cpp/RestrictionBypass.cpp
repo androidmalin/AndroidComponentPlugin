@@ -32,10 +32,10 @@ void printClassName(jobject obj, JNIEnv *env) {
     mid = env->GetMethodID(cls, "getName", "()Ljava/lang/String;");
 
 // Call the getName() to get a jstring object back
-    jstring strObj = (jstring) env->CallObjectMethod(clsObj, mid);
+    auto strObj = (jstring) env->CallObjectMethod(clsObj, mid);
 
 // Now get the c string from the java jstring object
-    const char *str = env->GetStringUTFChars(strObj, NULL);
+    const char *str = env->GetStringUTFChars(strObj, nullptr);
 
 // Print the class name
     __android_log_print(ANDROID_LOG_DEBUG, "native", "Calling class is: %s\n", str);
@@ -78,12 +78,12 @@ static jobject Java_getDeclaredMethod(
         jstring method_name,
         jobjectArray params) {
     auto global_clazz = env->NewGlobalRef(clazz);
-    jstring global_method_name = (jstring) env->NewGlobalRef(method_name);
+    auto global_method_name = (jstring) env->NewGlobalRef(method_name);
     int arg_length = env->GetArrayLength(params);
     jobjectArray global_params = nullptr;
     if (params != nullptr) {
         for (int i = 0; i < arg_length; i++) {
-            jobject element = (jobject) env->GetObjectArrayElement(params, i);
+            auto element = (jobject) env->GetObjectArrayElement(params, i);
             jobject global_element = env->NewGlobalRef(element);
             env->SetObjectArrayElement(params, i, global_element);
         }
@@ -133,12 +133,12 @@ static jobject Java_getMethod(
         jstring method_name,
         jobjectArray params) {
     auto global_clazz = env->NewGlobalRef(clazz);
-    jstring global_method_name = (jstring) env->NewGlobalRef(method_name);
+    auto global_method_name = (jstring) env->NewGlobalRef(method_name);
     int arg_length = env->GetArrayLength(params);
     jobjectArray global_params = nullptr;
     if (params != nullptr) {
         for (int i = 0; i < arg_length; i++) {
-            jobject element = (jobject) env->GetObjectArrayElement(params, i);
+            auto element = (jobject) env->GetObjectArrayElement(params, i);
             jobject global_element = env->NewGlobalRef(element);
             env->SetObjectArrayElement(params, i, global_element);
         }
@@ -187,7 +187,7 @@ static jobject Java_getDeclaredField(
         jobject object,
         jstring field_name) {
     auto global_object = env->NewGlobalRef(object);
-    jstring global_field_name = (jstring) env->NewGlobalRef(field_name);
+    auto global_field_name = (jstring) env->NewGlobalRef(field_name);
     auto future = std::async(&getDeclaredField_internal, global_object,
                              global_field_name);
     auto result = future.get();

@@ -1,6 +1,5 @@
 package org.chickenhook.restrictionbypass;
 
-import org.chickenhook.restrictionbypass.helpers.Reflection;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -125,6 +125,7 @@ class Reflection {
             setHiddenApiExemptions.invoke(sVmRuntime, new Object[]{methods});
             return true;
         } catch (Throwable e) {
+            e.printStackTrace();
             return false;
         }
     }
