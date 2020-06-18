@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +26,7 @@ import java.util.List;
  */
 @SuppressLint("PrivateApi")
 public class HookActivity {
-    private static final String TAG = "HookActivity";
+
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
     @SuppressLint("StaticFieldLeak")
     private static IActivityInvocationHandler mIActivityInvocationHandler;
@@ -105,8 +106,6 @@ public class HookActivity {
                 //private static final Singleton<IActivityManager> gDefault
                 handleIActivityManager(context, subActivityClazz, singletonField.get(null));
             }
-
-
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -147,7 +146,6 @@ public class HookActivity {
             Class<?> IActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager");
 
             if (mIActivityInvocationHandler == null) {
-                Log.d(TAG, "mIActivityInvocationHandler == null ==> new IActivityInvocationHandler(...)");
                 mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz);
             } else {
                 mIActivityInvocationHandler.updateStubActivity(subActivityClazz);
@@ -254,7 +252,6 @@ public class HookActivity {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
             if (method.getName().equals("startActivity")) {
-                Log.d(TAG, "startActivity hook");
                 int intentIndex = 2;
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] instanceof Intent) {
@@ -265,9 +262,6 @@ public class HookActivity {
                 //将启动的未注册的Activity对应的Intent,替换为安全的注册了的桩Activity的Intent
                 //1.将未注册的Activity对应的Intent,改为安全的Intent,既在AndroidManifest.xml中配置了的Activity的Intent
                 Intent originIntent = (Intent) args[intentIndex];
-                String originClassName = originIntent.getComponent().getClassName();
-
-                Log.d(TAG, "IActivityInvocationHandler==>originClassName:" + originClassName);
 
                 Intent safeIntent = new Intent(mContext, mSubActivityClazz);
                 //public class Intent implements Parcelable;
@@ -283,7 +277,6 @@ public class HookActivity {
             }
             //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
             //public abstract int android.app.IActivityTaskManager.startActivity(whoThread, who.getBasePackageName(), intent,intent.resolveTypeIfNeeded(who.getContentResolver()),token, target != null ? target.mEmbeddedID : null,requestCode, 0, null, options);
-            Log.d(TAG, "IActivityInvocationHandler==>method:" + method.getName());
             return method.invoke(mIActivityManager, args);
         }
     }
@@ -407,8 +400,20 @@ public class HookActivity {
         }
 
         if (msg.what != LAUNCH_ACTIVITY) return;
-        //final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
+        // private class H extends Handler {
+        // public void handleMessage(Message msg) {
+        //            switch (msg.what) {
+        //                case LAUNCH_ACTIVITY: {
+        //                    final ActivityClientRecord r = (ActivityClientRecord) msg.obj;
+        //                    r.packageInfo = getPackageInfoNoCheck(r.activityInfo.applicationInfo, r.compatInfo);
+        //                    handleLaunchActivity(r, null, "LAUNCH_ACTIVITY");
+        //                    break;
+        //                }
+        //            }
+        //    }
         //1.从msg中获取ActivityClientRecord对象
+        //android.app.ActivityThread$ActivityClientRecord
+        //static final class ActivityClientRecord {}
         Object activityClientRecordObj = msg.obj;
 
         try {
@@ -621,7 +626,6 @@ public class HookActivity {
         public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
             //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo".equals(method.getName())) {
-
                 int index = 0;
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] instanceof ComponentName) {
@@ -631,6 +635,10 @@ public class HookActivity {
                 }
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClazzName);
                 args[index] = componentName;
+            }
+            if ("getPackageInfo".equals(method.getName())) {
+                Log.d("getPackageInfo", "getPackageInfo:call");
+                return new PackageInfo();
             }
             return method.invoke(mIPackageManagerObj, args);
         }
