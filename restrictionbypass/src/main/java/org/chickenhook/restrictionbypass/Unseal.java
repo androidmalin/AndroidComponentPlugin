@@ -2,9 +2,15 @@ package org.chickenhook.restrictionbypass;
 
 import java.lang.reflect.Method;
 
+import static android.os.Build.VERSION.SDK_INT;
+
 public class Unseal {
 
     public static void unseal() throws Exception {
+        if (SDK_INT < 28) {
+            // Below Android P, ignore
+            return;
+        }
         Method getRuntime = RestrictionBypass.getDeclaredMethod(
                 Class.forName("dalvik.system.VMRuntime"),
                 "getRuntime"

@@ -3,30 +3,21 @@ package com.malin.plugin;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
 
 @SuppressLint("SetTextI18n")
-public class PluginAppCompatActivity extends AppCompatActivity {
+public class PluginAppCompatActivity extends BaseActivity {
 
     private static final String TAG = "PluginAppCompatActivity";
 
+    @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
-
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        relativeLayout.setGravity(Gravity.CENTER);
-
-        TextView textView = new TextView(this);
-        textView.setText("启动插件APK中的PluginAppCompatActivity,成功!");
-
-        relativeLayout.addView(textView);
-        setContentView(relativeLayout);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.plugin_activity, null);
+        setContentView(view);
     }
 
 
