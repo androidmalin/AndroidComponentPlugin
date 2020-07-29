@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 30
     buildToolsVersion '30.0.1'
+    ndkVersion '21.3.6528147'
     defaultConfig {
         applicationId "com.malin.hook"
         minSdkVersion 15
