@@ -3,18 +3,16 @@ package com.malin.hook;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
-    private Button mBtnHookAmsActivity;
-    private Button mBtnHookAmsAppCompatActivity;
-    private Button mBtnStartPluginActivity;
-    private Button mBtnStartPluginAppCompatActivity;
-
+    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,18 +22,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initListener();
     }
 
+
     private void initView() {
-        mBtnHookAmsActivity = findViewById(R.id.btn_start);
-        mBtnHookAmsAppCompatActivity = findViewById(R.id.btn_start_appcompat);
-        mBtnStartPluginActivity = findViewById(R.id.btn_start_plugin_apk_activity);
-        mBtnStartPluginAppCompatActivity = findViewById(R.id.btn_start_plugin_apk_appcompat_activity);
+        mImageView = findViewById(R.id.iv_image_plugin);
     }
 
     private void initListener() {
-        mBtnHookAmsActivity.setOnClickListener(this);
-        mBtnHookAmsAppCompatActivity.setOnClickListener(this);
-        mBtnStartPluginActivity.setOnClickListener(this);
-        mBtnStartPluginAppCompatActivity.setOnClickListener(this);
+        mImageView.setOnClickListener(this);
+        findViewById(R.id.btn_start).setOnClickListener(this);
+        findViewById(R.id.btn_start_appcompat).setOnClickListener(this);
+        findViewById(R.id.btn_start_plugin_apk_activity).setOnClickListener(this);
+        findViewById(R.id.btn_start_plugin_apk_appcompat_activity).setOnClickListener(this);
+        findViewById(R.id.btn_load_img).setOnClickListener(this);
     }
 
 
@@ -72,6 +70,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
                 startActivity(intent);
+                break;
+            }
+
+            case R.id.btn_load_img: {
+                Drawable drawable = PluginResourceUtil.getPluginDrawableByName(this, "pluginapk-debug.apk", "com.malin.plugin", "plugin_img");
+                mImageView.setImageDrawable(drawable);
                 break;
             }
 

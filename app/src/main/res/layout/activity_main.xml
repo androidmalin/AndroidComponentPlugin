@@ -7,6 +7,20 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/iv_image_plugin"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="30dp" />
+
+    <Button
+        android:id="@+id/btn_load_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="加载插件资源"
+        tools:ignore="HardcodedText" />
+
     <Button
         android:id="@+id/btn_start"
         android:layout_width="wrap_content"
