@@ -1,0 +1,26 @@
+#!/bin/bash
+pidcat com.malin.hook \
+-i ActivityThread \
+-i EGL_emulation \
+-i eglCodecCommon \
+-i HostConnection \
+-i OpenGLRenderer \
+-i ConfigStore \
+-i Gralloc3 \
+-i RenderThread \
+-i libEGL \
+-i libc \
+-i Gralloc4 \
+-i goldfish-address-space \
+-i NetworkSecurityConfig \
+-i zygote \
+-i art \
+-i Atlas \
+-i Surface \
+-i "ViewRootImpl\[MainActivity\]" \
+-i ViewConfigCompat \
+-i gralloc_ranchu \
+-i dalvikvm-heap \
+-i HardwareRenderer \
+-i dalvikvm \
+-i Trace
