@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,13 +25,6 @@ public class PluginActivity extends Activity {
         textView.setText("启动插件APK中的PluginActivity,成功!");
 
         relativeLayout.addView(textView);
-
-        relativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
         setContentView(relativeLayout);
     }
 

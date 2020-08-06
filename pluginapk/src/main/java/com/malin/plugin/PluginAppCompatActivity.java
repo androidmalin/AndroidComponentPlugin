@@ -16,14 +16,7 @@ public class PluginAppCompatActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
-        PluginResourceUtil.testLayoutId(mContext);
         View view = LayoutInflater.from(mContext).inflate(R.layout.plugin_activity, null);
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
         setContentView(view);
     }
 

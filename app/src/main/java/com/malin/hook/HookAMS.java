@@ -28,6 +28,7 @@ public class HookAMS {
      * @return IActivityManager/IActivityTaskManager实例
      */
     @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi"})
+    @SuppressLint("DiscouragedPrivateApi")
     public static Object getIActivityManager() {
         try {
             Field iActivityManagerSingletonField;

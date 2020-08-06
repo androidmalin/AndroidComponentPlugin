@@ -17,7 +17,7 @@ public class PluginResourceUtil {
         String PATH = context.getFileStreamPath(pluginApkName).getAbsolutePath();
         Resources resources = getPluginResources(context, PATH);
         int resId = 0;
-        int mode = 3;
+        int mode = 1;
         switch (mode) {
             case 1: {
                 resId = getResId(pluginPackageName, sourceName);
