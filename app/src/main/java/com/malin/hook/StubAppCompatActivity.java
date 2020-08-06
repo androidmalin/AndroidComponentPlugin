@@ -19,7 +19,7 @@ public class StubAppCompatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView textView = new TextView(this);
-        textView.setText("StubActivity");
+        textView.setText("StubAppCompatActivity");
         setContentView(textView);
     }
 

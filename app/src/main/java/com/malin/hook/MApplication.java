@@ -16,7 +16,10 @@ public class MApplication extends Application {
     private static MApplication mApplication;
 
     /**
-     * 为了重置,否则在HookAMS的情况下第二次之后的启动都是已经注册的Activity
+     * 前提:每次启动插件Activity时都进行了hook.
+     * 第二次之后的启动都是已经注册的Activity bug的解决方案
+     * 1.重置
+     * 2.在HookActivity中设置IActivityInvocationHandler时,不是每次都new出一个, 而是复用上次生产的IActivityInvocationHandler
      */
     private static Object mIActivityManagerObj;
     private static Object msPackageManager;

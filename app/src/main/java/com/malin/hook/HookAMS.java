@@ -77,12 +77,24 @@ public class HookAMS {
             mInstanceField.setAccessible(true);
 
             //8.获取mInstance属性的的值,既IActivityTaskManager/IActivityManager
-            return mInstanceField.get(iActivityManagerSingletonObj);
+            Object managerObj = mInstanceField.get(iActivityManagerSingletonObj);
+
+            //9.android10之后,从mInstanceField中取到的值为null,这里判断如果为null,就再次从get方法中再取一次
+            if (managerObj == null) {
+                Method getMethod = singletonClazz.getDeclaredMethod("get");
+                getMethod.setAccessible(true);
+                managerObj = getMethod.invoke(iActivityManagerSingletonObj);
+            }
+            return managerObj;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;
