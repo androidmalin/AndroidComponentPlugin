@@ -12,7 +12,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="80dp"
-        android:layout_marginBottom="30dp" />
+        android:layout_marginBottom="30dp"
+        tools:ignore="ContentDescription" />
 
     <Button
         android:id="@+id/btn_load_img"
