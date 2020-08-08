@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 @SuppressLint({"SetTextI18n", "Registered"})
 public class TargetAppCompatActivity extends AppCompatActivity {
 
-    private static final String TAG = "TargetAppCompat";
+    private static final String TAG = "TargetAppCompatActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
