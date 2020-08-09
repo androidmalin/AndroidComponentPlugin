@@ -1,4 +1,4 @@
-package com.malin.hook;
+package com.malin.plugin.impl;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -16,7 +16,6 @@ import java.io.InputStream;
 public class PluginUtils {
 
     private static File sBaseDir;
-
 
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
@@ -47,15 +46,15 @@ public class PluginUtils {
     /**
      * 待加载插件经过opt优化之后存放odex得路径
      */
-    public static File getPluginOptDexDir(String packageName) {
-        return enforceDirExists(new File(getPluginBaseDir(packageName), "odex"));
+    public static File getPluginOptDexDir(Context context, String packageName) {
+        return enforceDirExists(new File(getPluginBaseDir(context, packageName), "odex"));
     }
 
     /**
      * 插件得lib库路径, 这个demo里面没有用
      */
-    public static File getPluginLibDir(String packageName) {
-        return enforceDirExists(new File(getPluginBaseDir(packageName), "lib"));
+    public static File getPluginLibDir(Context context, String packageName) {
+        return enforceDirExists(new File(getPluginBaseDir(context, packageName), "lib"));
     }
 
     private static void closeSilently(Closeable closeable) {
@@ -71,9 +70,9 @@ public class PluginUtils {
     /**
      * 需要加载得插件得基本目录 /data/data/<package>/files/plugin/
      */
-    private static File getPluginBaseDir(String packageName) {
+    private static File getPluginBaseDir(Context context, String packageName) {
         if (sBaseDir == null) {
-            sBaseDir = MApplication.getInstance().getFileStreamPath("plugin");
+            sBaseDir = context.getFileStreamPath("plugin");
             enforceDirExists(sBaseDir);
         }
         return enforceDirExists(new File(sBaseDir, packageName));

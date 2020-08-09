@@ -1,16 +1,16 @@
-package com.malin.hook;
+package com.malin.plugin.impl;
 
 import android.os.Build;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.zip.ZipFile;
 
+import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
 
 /**
@@ -23,9 +23,10 @@ import dalvik.system.PathClassLoader;
  * 会自动遍历到我们添加进去的插件信息,从而完成插件类的加载！
  * <p>
  * 这个类用来进行对于BaseDexClassLoader的Hook
- * 使用makePathElements()或者makeDexElements()方法生成插件的Element[]
+ * com from wei shu
+ * http://weishu.me/2016/04/05/understand-plugin-framework-classloader/
  */
-final class BaseDexClassLoaderHookHelperAnother {
+public final class BaseDexClassLoaderHookHelper {
 
     /*
      * 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的ClassLoader加载所有的类;
@@ -50,8 +51,9 @@ final class BaseDexClassLoaderHookHelperAnother {
      *                           ContextImpl重写了getClassLoader方法,
      *                           因此我们在Context环境中直接getClassLoader()获取到的就是宿主程序唯一的ClassLoader.
      * @param apkFile            apkFile
+     * @param optDexFile         optDexFile
      */
-    static void patchClassLoader(ClassLoader baseDexClassLoader, File apkFile) {
+    public static void patchClassLoader(ClassLoader baseDexClassLoader, File apkFile, File optDexFile) {
 
         // -->PathClassLoader
         // -->BaseDexClassLoader
@@ -95,51 +97,64 @@ final class BaseDexClassLoaderHookHelperAnother {
 
 
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
+            Object elementPluginObj;
+            if (Build.VERSION.SDK_INT >= 26) {
+                //26<=API<=R (8.0<=API<=11.0)
+                //7.构造插件Element
+                // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
+                // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){},使用会报错
+                // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#637
+                // 注意getConstructor vs getDeclaredConstructor 的区别
+                // public Element(File dir, boolean isDirectory, File zip, DexFile dexFile) {
+                @SuppressWarnings("deprecation")
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(DexFile.class, File.class);
+                elementConstructor.setAccessible(true);
 
+                //8. 生成Element的实例对象
+                //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
 
-            File optimizedDirectory = PluginUtils.getPluginOptDexDir("com.malin.plugin");
-            Object[] pluginElements;
+                //DexFile.loadDex(String sourcePathName,String outputPathName,int flag){}
+                //  @param sourcePathName Jar or APK file with "classes.dex".  (May expand this to include "raw DEX" in the future.)
+                //  @param outputPathName File that will hold the optimized form of the DEX data.
+                //  @param flags Enable optional features.  (Currently none defined.)
+                // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
+                @SuppressWarnings("deprecation")
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
+                elementPluginObj = elementConstructor.newInstance(dexFile, apkFile);
+            } else if (Build.VERSION.SDK_INT >= 18) {
+                //18<=API<=25 (4.3<=API<=7.1.1)
+                //7.构造插件Element
+                // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, boolean.class, File.class, DexFile.class);
+                elementConstructor.setAccessible(true);
 
-            //7.创建插件element数组
-            if (Build.VERSION.SDK_INT >= 23) {
-                //1.
-                List<File> files = new ArrayList<>();
-                files.add(apkFile);
-                List<IOException> suppressedExceptions = new ArrayList<>();
+                //8. 生成Element的实例对象
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
+                elementPluginObj = elementConstructor.newInstance(apkFile, false, apkFile, dexFile);
+            } else if (Build.VERSION.SDK_INT == 17) {
+                //API=17  (API=4.2)
+                //7.构造插件Element
+                // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, File.class, DexFile.class);
+                elementConstructor.setAccessible(true);
 
-                //2.
-                //private static Element[] makePathElements(List<File> files, File optimizedDirectory, List<IOException> suppressedExceptions)
-                Method makePathElementsMethod = dexPathList.getClass().getDeclaredMethod("makePathElements", List.class, File.class, List.class);
-                makePathElementsMethod.setAccessible(true);
-
-                //3.
-                pluginElements = (Object[]) makePathElementsMethod.invoke(null, files, optimizedDirectory, suppressedExceptions);
-            } else if (Build.VERSION.SDK_INT >= 19) {
-                //1.
-                ArrayList<File> files = new ArrayList<>();
-                files.add(apkFile);
-                ArrayList<IOException> suppressedExceptions = new ArrayList<>();
-
-                //2.
-                //private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory,ArrayList<IOException> suppressedExceptions)
-                Method makeDexElementsMethod = dexPathList.getClass().getDeclaredMethod("makeDexElements", ArrayList.class, File.class, ArrayList.class);
-                makeDexElementsMethod.setAccessible(true);
-
-                //3.
-                pluginElements = (Object[]) makeDexElementsMethod.invoke(null, files, optimizedDirectory, suppressedExceptions);
+                //8. 生成Element的实例对象
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
+                elementPluginObj = elementConstructor.newInstance(apkFile, apkFile, dexFile);
             } else {
-                //1.
-                ArrayList<File> files = new ArrayList<>();
-                files.add(apkFile);
+                //15~16 (4.0.3=<API=4.1)
+                //7.构造插件Element
+                // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
+                Constructor<?> elementConstructor = elementClazz.getDeclaredConstructor(File.class, ZipFile.class, DexFile.class);
+                elementConstructor.setAccessible(true);
 
-                //2.
-                //private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory)
-                Method makeDexElementsMethod = dexPathList.getClass().getDeclaredMethod("makeDexElements", ArrayList.class, File.class);
-                makeDexElementsMethod.setAccessible(true);
-                pluginElements = (Object[]) makeDexElementsMethod.invoke(null, files, optimizedDirectory);
+                //8. 生成Element的实例对象
+                DexFile dexFile = DexFile.loadDex(apkFile.getCanonicalPath(), optDexFile.getCanonicalPath(), 0);
+                elementPluginObj = elementConstructor.newInstance(apkFile, new ZipFile(apkFile), dexFile);
             }
 
-            if (pluginElements == null) return;
+            //9.创建插件element数组
+            Object[] pluginElements = new Object[]{elementPluginObj};
 
             //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
             //* @param      src      the source array.
@@ -149,13 +164,13 @@ final class BaseDexClassLoaderHookHelperAnother {
             //* @param      length   the number of array elements to be copied.
             //https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
-            //8.把插件的element数组复制进去
+            //10.把插件的element数组复制进去
             System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.length);
 
-            //9.把宿主的elements复制进去
+            //11.把宿主的elements复制进去
             System.arraycopy(dexElements, 0, hostAndPluginElements, pluginElements.length, dexElements.length);
 
-            //10.替换
+            //12.替换
             dexElementsField.set(dexPathList, hostAndPluginElements);
 
             // 简要总结一下这种方式的原理:
@@ -164,6 +179,10 @@ final class BaseDexClassLoaderHookHelperAnother {
             // 宿主程序的ClassLoader最终继承自BaseDexClassLoader,BaseDexClassLoader通过DexPathList进行类的查找过程;
             // 而这个查找通过遍历一个dexElements的数组完成;
             // 我们通过把插件dex添加进这个数组就让宿主ClassLoader获取了加载插件类的能力.
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {

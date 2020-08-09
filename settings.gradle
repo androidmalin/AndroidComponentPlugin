@@ -1,3 +1,4 @@
 include ':app'
-include ':pluginapk'
+include ':pluingImpl'
 include ':restrictionbypass'
+include ':pluginapk'

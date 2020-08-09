@@ -1,0 +1,22 @@
+ext {
+    android = [
+            applicationId    : "com.malin.hook",
+            compileSdkVersion: 30,
+            buildToolsVersion: "30.0.1",
+            minSdkVersion    : 15,
+            targetSdkVersion : 30,
+            ndkVersion       : "21.3.6528147",
+            versionCode      : 1,
+            versionName      : "1.0",
+
+    ]
+
+    versions = [
+            appcompat: "1.2.0",
+    ]
+
+    dependencies = [
+            'androidx.appcompat': "androidx.appcompat:appcompat:${versions["appcompat"]}",
+    ]
+
+}

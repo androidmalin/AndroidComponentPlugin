@@ -1,25 +1,24 @@
-package com.malin.hook;
+package com.malin.plugin.impl;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 /**
- * AppCompatActivity类型的桩Activity
+ * 普通的桩Activity
  */
 @SuppressLint("SetTextI18n")
-public class StubAppCompatActivity extends AppCompatActivity {
+public class StubActivity extends Activity {
 
-    private static final String TAG = "StubAppCompatActivity";
+    private static final String TAG = "StubActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextView textView = new TextView(this);
-        textView.setText("StubAppCompatActivity");
+        textView.setText("StubActivity");
         setContentView(textView);
     }
 

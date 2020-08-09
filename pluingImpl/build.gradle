@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
@@ -7,7 +7,6 @@ android {
 
     defaultConfig {
         resConfigs "zh", "en"
-        applicationId "com.malin.plugin"
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
         versionCode rootProject.ext.android.versionCode
@@ -28,6 +27,6 @@ android {
 }
 
 dependencies {
-    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly rootProject.ext.dependencies["androidx.appcompat"]
+    implementation rootProject.ext.dependencies["androidx.appcompat"]
+    implementation project(path: ':restrictionbypass')
 }
