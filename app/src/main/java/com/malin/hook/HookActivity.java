@@ -4,13 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -28,13 +26,6 @@ import java.util.List;
 public class HookActivity {
 
     private static final String EXTRA_ORIGIN_INTENT = "EXTRA_ORIGIN_INTENT";
-    @SuppressLint("StaticFieldLeak")
-    private static IActivityInvocationHandler mIActivityInvocationHandler;
-    @SuppressLint("StaticFieldLeak")
-    private static IActivityInvocationHandler mIActivityInvocationHandlerL;
-    @SuppressLint("StaticFieldLeak")
-    private static PackageManagerProxyHandler mPackageManagerProxyHandler;
-
 
     /**
      * 对IActivityManager接口中的startActivity方法进行动态代理,发生在app的进程中
@@ -115,6 +106,7 @@ public class HookActivity {
         }
     }
 
+    @SuppressLint("DiscouragedPrivateApi")
     private static void handleIActivityTaskManager(Context context, Class<?> subActivityClazz, Object IActivityTaskManagerSingletonObj) {
 
         try {
@@ -140,25 +132,27 @@ public class HookActivity {
             Object IActivityTaskManager = mInstanceField.get(IActivityTaskManagerSingletonObj);
 
 
-            //10.获取IActivityTaskManager接口的类对象
+            //10.android10之后,从mInstanceField中取到的值为null,这里判断如果为null,就再次从get方法中再取一次
+            if (IActivityTaskManager == null) {
+                Method getMethod = singletonClazz.getDeclaredMethod("get");
+                getMethod.setAccessible(true);
+                IActivityTaskManager = getMethod.invoke(IActivityTaskManagerSingletonObj);
+            }
+
+            //11.获取IActivityTaskManager接口的类对象
             //package android.app
             //public interface IActivityTaskManager
             Class<?> IActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager");
 
-            if (mIActivityInvocationHandler == null) {
-                mIActivityInvocationHandler = new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz);
-            } else {
-                mIActivityInvocationHandler.updateStubActivity(subActivityClazz);
-            }
 
-            //11.创建一个IActivityTaskManager接口的代理对象
+            //12.创建一个IActivityTaskManager接口的代理对象
             Object IActivityTaskManagerProxy = Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class[]{IActivityTaskManagerClazz},
-                    mIActivityInvocationHandler
+                    new IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz)
             );
 
-            //11.重新赋值
+            //13.重新赋值
             //给mInstance属性,赋新值
             //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
             mInstanceField.set(IActivityTaskManagerSingletonObj, IActivityTaskManagerProxy);
@@ -167,6 +161,10 @@ public class HookActivity {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
@@ -202,20 +200,14 @@ public class HookActivity {
             //public interface IActivityManager
             Class<?> iActivityManagerClazz = Class.forName("android.app.IActivityManager");
 
-            if (mIActivityInvocationHandlerL == null) {
-                mIActivityInvocationHandlerL = new IActivityInvocationHandler(iActivityManager, context, subActivityClazz);
-            } else {
-                mIActivityInvocationHandlerL.updateStubActivity(subActivityClazz);
-            }
-
             //11.创建一个IActivityManager接口的代理对象
             Object iActivityManagerProxy = Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class[]{iActivityManagerClazz},
-                    mIActivityInvocationHandlerL
+                    new IActivityInvocationHandler(iActivityManager, context, subActivityClazz)
             );
 
-            //11.重新赋值
+            //12.重新赋值
             //给mInstance属性,赋新值
             //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
             mInstanceField.set(IActivityManagerSingletonObj, iActivityManagerProxy);
@@ -235,7 +227,7 @@ public class HookActivity {
     private static class IActivityInvocationHandler implements InvocationHandler {
 
         private final Object mIActivityManager;
-        private Class<?> mSubActivityClazz;
+        private final Class<?> mSubActivityClazz;
         private final Context mContext;
 
 
@@ -243,10 +235,6 @@ public class HookActivity {
             this.mIActivityManager = iActivityManager;
             this.mSubActivityClazz = subActivityClazz;
             this.mContext = context;
-        }
-
-        public void updateStubActivity(Class<?> subActivityClazz) {
-            this.mSubActivityClazz = subActivityClazz;
         }
 
         @Override
@@ -576,16 +564,12 @@ public class HookActivity {
             sPackageManagerField.setAccessible(true);
             Object sPackageManager = sPackageManagerField.get(activityThread);
 
-            if (mPackageManagerProxyHandler == null) {
-                mPackageManagerProxyHandler = new PackageManagerProxyHandler(sPackageManager, getAppPackageName(context), subActivityClazz.getName());
-            }
-
             //3.准备好代理对象, 用来替换原始的对象
             Class<?> iPackageManagerClazz = Class.forName("android.content.pm.IPackageManager");
             Object proxy = Proxy.newProxyInstance(
                     Thread.currentThread().getContextClassLoader(),
                     new Class<?>[]{iPackageManagerClazz},
-                    mPackageManagerProxyHandler);
+                    new PackageManagerProxyHandler(sPackageManager, getAppPackageName(context), subActivityClazz.getName()));
 
             //4.替换掉ActivityThread里面的 sPackageManager 字段
             sPackageManagerField.set(activityThread, proxy);
@@ -635,10 +619,6 @@ public class HookActivity {
                 }
                 ComponentName componentName = new ComponentName(mAppPackageName, mSubActivityClazzName);
                 args[index] = componentName;
-            }
-            if ("getPackageInfo".equals(method.getName())) {
-                Log.d("getPackageInfo", "getPackageInfo:call");
-                return new PackageInfo();
             }
             return method.invoke(mIPackageManagerObj, args);
         }
