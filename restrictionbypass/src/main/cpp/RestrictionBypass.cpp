@@ -8,9 +8,7 @@ JavaVM *_vm;
 
 JNIEnv *attachCurrentThread() {
     JNIEnv *env;
-
-    int res = _vm->AttachCurrentThread(&env, nullptr);
-    __android_log_print(ANDROID_LOG_DEBUG, "native", "Found attached %d", res);
+    _vm->AttachCurrentThread(&env, nullptr);
     return env;
 }
 
@@ -21,25 +19,23 @@ void detachCurrentThread() {
 void printClassName(jobject obj, JNIEnv *env) {
     jclass cls = env->GetObjectClass(obj);
 
-// First get the class object
+    // First get the class object
     jmethodID mid = env->GetMethodID(cls, "getClass", "()Ljava/lang/Class;");
     jobject clsObj = env->CallObjectMethod(obj, mid);
 
-// Now get the class object's class descriptor
+    // Now get the class object's class descriptor
     cls = env->GetObjectClass(clsObj);
 
-// Find the getName() method on the class object
+    // Find the getName() method on the class object
     mid = env->GetMethodID(cls, "getName", "()Ljava/lang/String;");
 
-// Call the getName() to get a jstring object back
+    // Call the getName() to get a jstring object back
     auto strObj = (jstring) env->CallObjectMethod(clsObj, mid);
 
-// Now get the c string from the java jstring object
+    // Now get the c string from the java jstring object
     const char *str = env->GetStringUTFChars(strObj, nullptr);
 
-// Print the class name
-    __android_log_print(ANDROID_LOG_DEBUG, "native", "Calling class is: %s\n", str);
-// Release the memory pinned char array
+    // Release the memory pinned char array
     env->ReleaseStringUTFChars(strObj, str);
 }
 ///////////////////////////////////////////////////////////////////////
@@ -162,7 +158,6 @@ static jobject getDeclaredField_internal(
 
     JNIEnv *env = attachCurrentThread();
 
-
     printClassName(object, env);
     jclass clazz_class = env->GetObjectClass(object);
     jmethodID methodId = env->GetMethodID(clazz_class, "getDeclaredField",
@@ -198,11 +193,7 @@ static jobject Java_getDeclaredField(
     return result;
 }
 
-
-
-
 ////////// JNI STUFF
-
 
 static const JNINativeMethod gMethods[] = {
         {"getDeclaredMethod", "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", (void *) Java_getDeclaredMethod},
@@ -216,13 +207,9 @@ static int registerNativeMethods(JNIEnv *env, const char *className,
     jclass clazz;
     clazz = env->FindClass(className);
     if (clazz == nullptr) {
-        __android_log_print(ANDROID_LOG_DEBUG, "registerNativeMethods",
-                            "Native registration unable to find class '%s'", className);
         return JNI_FALSE;
     }
     if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, "registerNativeMethods",
-                            "Native registration unable to register natives...");
         return JNI_FALSE;
     }
     return JNI_TRUE;
@@ -234,7 +221,6 @@ jint JNI_OnLoad(JavaVM *vm, void * /*reserved*/) {
     if (vm->GetEnv((void **) (&env), JNI_VERSION_1_4) != JNI_OK) {
         return -1;
     }
-
 
     if (!registerNativeMethods(env, classPathName,
                                (JNINativeMethod *) gMethods,
