@@ -2,12 +2,16 @@ package com.malin.hook;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.util.DisplayMetrics;
 
 import androidx.core.content.res.ResourcesCompat;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -47,14 +51,37 @@ public class PluginResourceUtil {
     }
 
 
-    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi"})
     public static Resources getPluginResources(Context context, String pluginPath) {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();
             Method addAssetPathMethod = assetManager.getClass().getMethod("addAssetPath", String.class);
             addAssetPathMethod.invoke(assetManager, pluginPath);
             Resources superRes = context.getResources();
-            return new Resources(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+            if (Build.VERSION.SDK_INT >= 24) {
+                //Resources#public void setImpl(ResourcesImpl impl) {}
+                Class<?> displayAdjustmentsClazz = Class.forName("android.view.DisplayAdjustments");
+                Constructor<?> displayAdjustmentsConstructor = displayAdjustmentsClazz.getDeclaredConstructor();
+                displayAdjustmentsConstructor.setAccessible(true);
+                Object displayAdjustmentsObj = displayAdjustmentsConstructor.newInstance();
+
+                Class<?> resourcesImplClazz = Class.forName("android.content.res.ResourcesImpl");
+                Constructor<?> resourcesImplConstructor = resourcesImplClazz.getDeclaredConstructor(AssetManager.class, DisplayMetrics.class, Configuration.class, displayAdjustmentsClazz);
+                resourcesImplConstructor.setAccessible(true);
+                Object resourcesImplObj = resourcesImplConstructor.newInstance(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration(), displayAdjustmentsObj);
+
+                Class<?> resourcesClazz = Class.forName("android.content.res.Resources");
+                Constructor<?> resourcesConstructor = resourcesClazz.getDeclaredConstructor();
+                resourcesConstructor.setAccessible(true);
+                Object resourcesObj = resourcesConstructor.newInstance();
+
+                Method setImplMethod = resourcesClazz.getDeclaredMethod("setImpl", resourcesImplClazz);
+                setImplMethod.setAccessible(true);
+                setImplMethod.invoke(resourcesObj, resourcesImplObj);
+                return (Resources) resourcesObj;
+            } else {
+                return new Resources(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
