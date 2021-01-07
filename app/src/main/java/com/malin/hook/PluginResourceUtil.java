@@ -34,6 +34,11 @@ public class PluginResourceUtil {
                 resId = getResId3(context, PATH, pluginPackageName, sourceName);
                 break;
             }
+
+            case 4: {
+                resId = getResId4(context, pluginPackageName, sourceName);
+                break;
+            }
         }
         if (resources != null) {
             return ResourcesCompat.getDrawable(resources, resId, context.getTheme());
@@ -82,5 +87,19 @@ public class PluginResourceUtil {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public static int getResId4(Context context, String pluginPackageName, String resName) {
+        int drawableResId = 0;
+        try {
+            drawableResId = context
+                    .getClassLoader()
+                    .loadClass(pluginPackageName + ".R$drawable")
+                    .getDeclaredField(resName)
+                    .getInt(null);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return drawableResId;
     }
 }

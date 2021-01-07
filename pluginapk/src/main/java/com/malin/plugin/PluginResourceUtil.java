@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 
@@ -47,15 +48,30 @@ public class PluginResourceUtil {
     public static void testLayoutId(Context context) {
         int layoutId = 0x7f020000;
         try {
-            int activity_layout = context
+            int activity_layout0 = context
                     .getResources()
                     .getIdentifier("plugin_activity", "layout", "com.malin.plugin");
+
+            int activity_layout1 = getResource(context)
+                    .getIdentifier("plugin_activity", "layout", "com.malin.plugin");
+
             int activity_layout2 = context
                     .getClassLoader()
                     .loadClass("com.malin.plugin.R$layout")
                     .getDeclaredField("plugin_activity")
                     .getInt(null);
-            Log.d(TAG, "getIdentifier:" + (activity_layout == layoutId));
+
+            Class<?> r$LayoutClazz = Class.forName("com.malin.plugin" + ".R$layout");
+            Field resField = r$LayoutClazz.getDeclaredField("plugin_activity");
+            int activity_layout3 = resField.getInt(null);
+
+            Log.d(TAG, "activity_layout0:" + activity_layout0);
+            Log.d(TAG, "activity_layout1:" + activity_layout1);
+            Log.d(TAG, "activity_layout2:" + activity_layout2);
+            Log.d(TAG, "activity_layout3:" + activity_layout3);
+            Log.d(TAG, "getIdentifier0:" + (activity_layout0 == layoutId));
+            Log.d(TAG, "getIdentifier1:" + (activity_layout1 == layoutId));
+            Log.d(TAG, "getIdentifier2:" + (activity_layout3 == layoutId));
             Log.d(TAG, "getInt:" + (activity_layout2 == layoutId));
         } catch (Throwable throwable) {
             throwable.printStackTrace();
