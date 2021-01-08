@@ -58,7 +58,7 @@ public class PluginResourceUtil {
             Method addAssetPathMethod = assetManager.getClass().getMethod("addAssetPath", String.class);
             addAssetPathMethod.invoke(assetManager, pluginPath);
             Resources superRes = context.getResources();
-            if (Build.VERSION.SDK_INT >= 24) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 //Resources#public void setImpl(ResourcesImpl impl) {}
                 Class<?> displayAdjustmentsClazz = Class.forName("android.view.DisplayAdjustments");
                 Constructor<?> displayAdjustmentsConstructor = displayAdjustmentsClazz.getDeclaredConstructor();

@@ -23,4 +23,7 @@ pidcat com.malin.hook \
 -i dalvikvm-heap \
 -i HardwareRenderer \
 -i dalvikvm \
--i Trace
+-i Trace \
+-i Adreno \
+-i vndksupport \
+-i zygote64
