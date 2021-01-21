@@ -51,7 +51,7 @@ public class PluginResourceUtil {
     }
 
 
-    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi"})
+    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi", "deprecation"})
     public static Resources getPluginResources(Context context, String pluginPath) {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();

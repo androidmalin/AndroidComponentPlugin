@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class PluginImpl {
 
-    private static final String PLUGIN_APK_NAME = "pluginapk-debug.apk";
+    public static final String PLUGIN_APK_NAME = "pluginapk-debug.apk";
     private static final String PLUGIN_DEX_NAME = "pluginapk-debug.dex";
 
     private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
@@ -30,8 +30,12 @@ public class PluginImpl {
     }
 
 
-    public void init(Context context) {
-        installActivity(context);
+    public void init(Context context, boolean instrumentation) {
+        unseal();
+        if (instrumentation) {
+            HookInstrumentation.hookInstrumentation(context);
+        }
+        installActivity(context, instrumentation);
     }
 
     private void unseal() {
@@ -43,25 +47,20 @@ public class PluginImpl {
         }
     }
 
-    private void installActivity(Context context) {
-        Runnable patchClassLoaderRunnable = new Runnable() {
-            @Override
-            public void run() {
-                unseal();
-                //插件使用宿主的ClassLoader加载
-                PluginUtils.extractAssets(context, PLUGIN_APK_NAME);
-                File dexFile = context.getFileStreamPath(PLUGIN_APK_NAME);
-                File optDexFile = context.getFileStreamPath(PLUGIN_DEX_NAME);
-                BaseDexClassLoaderHookHelper.patchClassLoader(context.getClassLoader(), dexFile, optDexFile);
+    private void installActivity(Context context, boolean instrumentation) {
+        Runnable patchClassLoaderRunnable = () -> {
+            //插件使用宿主的ClassLoader加载
+            PluginUtils.extractAssets(context, PLUGIN_APK_NAME);
+            File dexFile = context.getFileStreamPath(PLUGIN_APK_NAME);
+            File optDexFile = context.getFileStreamPath(PLUGIN_DEX_NAME);
+            BaseDexClassLoaderHookHelper.patchClassLoader(context.getClassLoader(), dexFile, optDexFile);
+            if (instrumentation) {
+                HookActivity.hookPackageManager(context, StubAppCompatActivity.class);
+            } else {
                 if (Build.VERSION.SDK_INT >= 18) {
                     HookActivityWrapper.hookStartActivity(context, StubAppCompatActivity.class, true);
                 } else {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            HookActivityWrapper.hookStartActivity(context, StubAppCompatActivity.class, true);
-                        }
-                    });
+                    mHandler.post(() -> HookActivityWrapper.hookStartActivity(context, StubAppCompatActivity.class, true));
                 }
             }
         };
