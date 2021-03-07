@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 
 public class RestrictionBypass {
     public static Method getDeclaredMethod(Object clazz, String name, Class<?>... args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= 29) {
             return NativeReflectionBypass.getDeclaredMethod(clazz, name, args);
         } else {
             Method getDeclaredMethod = Class.class.getMethod(
@@ -20,7 +20,7 @@ public class RestrictionBypass {
     }
 
     public static Method getMethod(Object clazz, String name, Class<?>... args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= 29) {
             return NativeReflectionBypass.getMethod(clazz, name, args);
         } else {
             Method getDeclaredMethod = Class.class.getMethod(
@@ -33,7 +33,7 @@ public class RestrictionBypass {
 
 
     public static Field getDeclaredField(Class<?> obj, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= 29) {
             return NativeReflectionBypass.getDeclaredField(obj, name);
         } else {
             Method getDeclaredField = Class.class.getMethod("getDeclaredField", String.class);
