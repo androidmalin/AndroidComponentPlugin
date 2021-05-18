@@ -28,12 +28,16 @@ import dalvik.system.DexClassLoader;
 public class HookInstrumentation {
 
     private static final String TARGET_INTENT_CLASS = "target_intent_class";
+    //插件是否使用单独的classloader
+    private static final boolean USE_SINGLE_CLASS_LOADER = false;
 
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
 
     public static void hookInstrumentation(Context context) {
-
+        //1.from ContextImpl get mMainThread field value (ActivityThread obj)
+        //2.from ActivityThread get mInstrumentation field (Instrumentation obj)
+        //3.replace ActivityThread  mInstrumentation field value use make a Instrumentation instance
         try {
             mContext = context;
             //1.ContextImpl-->mMainThread
@@ -45,7 +49,7 @@ public class HookInstrumentation {
             Field mMainThreadField = contextImplClazz.getDeclaredField("mMainThread");
             mMainThreadField.setAccessible(true);
 
-            //2.ActivityThread Object
+            //2.get ActivityThread Object from ContextImpl
             Object activityThreadObj = mMainThreadField.get(context);
 
             //3.mInstrumentation Object
@@ -73,16 +77,16 @@ public class HookInstrumentation {
 
         private final Instrumentation mInstrumentation;
         private final PackageManager mPackageManager;
-        private final Class<?> mStubActivityClass;
+        private final Class<?> mStubActivityClazz;
 
-        InstrumentationProxy(Instrumentation instrumentation, PackageManager packageManager, Class<?> stubActivityClassName) {
+        InstrumentationProxy(Instrumentation instrumentation, PackageManager packageManager, Class<?> stubActivityClazz) {
             mInstrumentation = instrumentation;
             mPackageManager = packageManager;
-            mStubActivityClass = stubActivityClassName;
+            mStubActivityClazz = stubActivityClazz;
         }
 
         /**
-         * android16-android29
+         * android16-android31
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */
@@ -102,7 +106,7 @@ public class HookInstrumentation {
             Intent finalIntent = intent;
             if (resolveInfoList == null || resolveInfoList.size() == 0) {
                 //目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
-                finalIntent = new Intent(who, mStubActivityClass);
+                finalIntent = new Intent(who, mStubActivityClazz);
                 //public class Intent implements Parcelable;
                 //Intent类已经实现了Parcelable接口
                 finalIntent.putExtra(TARGET_INTENT_CLASS, intent);
@@ -140,7 +144,7 @@ public class HookInstrumentation {
             Intent finalIntent = intent;
             if (resolveInfoList == null || resolveInfoList.size() == 0) {
                 //目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
-                finalIntent = new Intent(who, mStubActivityClass);
+                finalIntent = new Intent(who, mStubActivityClazz);
                 //public class Intent implements Parcelable;
                 //Intent类已经实现了Parcelable接口
                 finalIntent.putExtra(TARGET_INTENT_CLASS, intent);
@@ -174,13 +178,19 @@ public class HookInstrumentation {
             Intent finalIntent = pluginIntentClassNameExist ? pluginIntent : intent;
 
             //3.classLoader
-            File pluginDexFile = mContext.getFileStreamPath(PluginImpl.PLUGIN_APK_NAME);
-            ClassLoader finalClassLoader = pluginIntentClassNameExist ? CustomClassLoader.getPluginClassLoader(mContext, pluginDexFile, "com.malin.plugin") : classLoader;
+            ClassLoader finalClassLoader;
+            if (USE_SINGLE_CLASS_LOADER && pluginIntentClassNameExist) {
+                File pluginDexFile = mContext.getFileStreamPath(PluginImpl.PLUGIN_APK_NAME);
+                finalClassLoader = CustomClassLoader.getPluginClassLoader(mContext, pluginDexFile, "com.malin.plugin");
+            } else {
+                finalClassLoader = classLoader;
+            }
 
             if (Build.VERSION.SDK_INT >= 28) {
                 return mInstrumentation.newActivity(finalClassLoader, finalClassName, finalIntent);
+            } else {
+                return super.newActivity(finalClassLoader, finalClassName, finalIntent);
             }
-            return super.newActivity(finalClassLoader, finalClassName, finalIntent);
         }
     }
 

@@ -19,9 +19,10 @@ import dalvik.system.DexClassLoader;
 
 public class PluginResourceUtil {
 
+    ///data/user/0/com.malin.hook/files/pluginapk-debug.apk
     public static Drawable getPluginDrawableByName(Context context, String pluginApkName, String pluginPackageName, String sourceName) {
-        String PATH = context.getFileStreamPath(pluginApkName).getAbsolutePath();
-        Resources resources = getPluginResources(context, PATH);
+        String plugin_apk_path = context.getFileStreamPath(pluginApkName).getAbsolutePath();
+        Resources resources = getPluginResources(context, plugin_apk_path);
         int resId = 0;
         int mode = 1;
         switch (mode) {
@@ -35,7 +36,7 @@ public class PluginResourceUtil {
             }
 
             case 3: {
-                resId = getResId3(context, PATH, pluginPackageName, sourceName);
+                resId = getResId3(context, plugin_apk_path, pluginPackageName, sourceName);
                 break;
             }
 
@@ -54,9 +55,12 @@ public class PluginResourceUtil {
     @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi", "deprecation"})
     public static Resources getPluginResources(Context context, String pluginPath) {
         try {
+            //1.调用assetManager.addAssetPath(pluginPath);
             AssetManager assetManager = AssetManager.class.newInstance();
-            Method addAssetPathMethod = assetManager.getClass().getMethod("addAssetPath", String.class);
+            Method addAssetPathMethod = assetManager.getClass().getDeclaredMethod("addAssetPath", String.class);
+            addAssetPathMethod.setAccessible(true);
             addAssetPathMethod.invoke(assetManager, pluginPath);
+
             Resources superRes = context.getResources();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 //Resources#public void setImpl(ResourcesImpl impl) {}
@@ -65,18 +69,25 @@ public class PluginResourceUtil {
                 displayAdjustmentsConstructor.setAccessible(true);
                 Object displayAdjustmentsObj = displayAdjustmentsConstructor.newInstance();
 
+                //new ResourcesImpl(AssetManager assets,DisplayMetrics metrics,
+                // Configuration config, DisplayAdjustments displayAdjustments) {}
                 Class<?> resourcesImplClazz = Class.forName("android.content.res.ResourcesImpl");
                 Constructor<?> resourcesImplConstructor = resourcesImplClazz.getDeclaredConstructor(AssetManager.class, DisplayMetrics.class, Configuration.class, displayAdjustmentsClazz);
                 resourcesImplConstructor.setAccessible(true);
                 Object resourcesImplObj = resourcesImplConstructor.newInstance(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration(), displayAdjustmentsObj);
 
+                //private Resources() {}
                 Class<?> resourcesClazz = Class.forName("android.content.res.Resources");
                 Constructor<?> resourcesConstructor = resourcesClazz.getDeclaredConstructor();
                 resourcesConstructor.setAccessible(true);
                 Object resourcesObj = resourcesConstructor.newInstance();
 
+                //Resources
+                //public void setImpl(ResourcesImpl impl) {}
                 Method setImplMethod = resourcesClazz.getDeclaredMethod("setImpl", resourcesImplClazz);
                 setImplMethod.setAccessible(true);
+
+                //resources.setImpl(ResourcesImpl impl){}
                 setImplMethod.invoke(resourcesObj, resourcesImplObj);
                 return (Resources) resourcesObj;
             } else {

@@ -11,7 +11,7 @@
         android:id="@+id/iv_image_plugin"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="50dp"
         android:layout_marginBottom="30dp"
         tools:ignore="ContentDescription" />
 
@@ -21,6 +21,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:text="加载插件资源"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_start_inner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="启动宿主中的其他Activity"
         tools:ignore="HardcodedText" />
 
     <Button

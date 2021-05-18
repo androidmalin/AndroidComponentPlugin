@@ -1,0 +1,101 @@
+
+
+1.Context#startActivity()//[1828]
+public abstract void startActivity(@RequiresPermission Intent intent);//[1828]
+
+由于Context是抽象类, 我们找到他的子类ContextWrapper
+
+ContextWrapper#startActivity(Intent intent) {}方法//[402]
+
+2.ContextWrapper.java
+Context mBase;//[63]
+public void startActivity(Intent intent) {//[402]
+   mBase.startActivity(intent);//[403]
+}
+
+由于这里调用了mBase.startActivity(intent);所以我们需要确定mBase是什么,
+mBase是Context类型的,而Context是一个抽象类.
+我们发现mBase是在ContextWrapper类中的attachBaseContext(Context base)方法中被赋值的.
+
+protected void attachBaseContext(Context base) {
+    mBase = base;
+}
+这时候, 我们需要确定ContextWrapper#attachBaseContext()方法的调用流程.
+现在的流程是通过debug确定的.
+
+
+1.ActivityThread.java
+
+performLaunchActivity()方法[3330]
+
+private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {//[3330]
+   Application app = r.packageInfo.makeApplication(false, mInstrumentation);//[3370]
+}
+
+
+2.LoadedApk.java
+LoadedApk#makeApplication()方法[1196]
+在makeApplication()方法内部,通过ContextImpl#createAppContext()方法,产生ContextImpl的实例对象appContext
+再调用Instrumentation#newApplication(ClassLoader cl, String className, Context context){}方法[1132],将appContext传入
+
+public Application makeApplication(boolean forceDefaultAppClass,Instrumentation instrumentation) {//[1196]
+      ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);//[1232]
+      app = mActivityThread.mInstrumentation.newApplication(cl, appClass, appContext);
+      appContext.setOuterContext(app);
+}
+
+3.Instrumentation.java
+Instrumentation#newApplication(ClassLoader cl, String className, Context context){} [1154]
+
+在newApplication方法中调用了Application#attach(Context context) {};方法[Application.java 350]
+public Application newApplication(ClassLoader cl, String className, Context context){//[1154]
+     Application app = getFactory(context.getPackageName()).instantiateApplication(cl, className);
+     app.attach(context);//[1159]
+     return app;
+}
+
+4.Application.java 350
+
+在Application#attach()方法中调用了Application的父类ContextWrapper的attachBaseContext(方法);
+final void attach(Context context) {//[350]
+   attachBaseContext(context);//[351]
+}
+
+5.ContextWrapper.java
+
+Context mBase;//[63]
+protected void attachBaseContext(Context base) {//[76]
+   mBase = base;
+}
+
+android-30源码分析
+~/sdk/sources/android-30/
+
+1.ActivityThread
+ActivityThread#performLaunchActivity(){//line: [3330]
+    LoadedApk#makeApplication() //line: [3370]
+}
+
+2.LoadedApk
+LoadedApk#makeApplication(boolean x,Instrumentation instrumentation){//line: [1196]
+    ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);//line: [1232]
+    mInstrumentation#newApplication(cl, appClass, appContext);//line: [1236]
+}
+
+3.Instrumentation
+Instrumentation#newApplication(ClassLoader cl, String className, Context context){//line: [1154]
+    Application app = getFactory(context.getPackageName()).instantiateApplication(cl, className);//line: [1157]
+    app.attach(context);//line: [1159]
+}
+
+4.Application
+Application#attach(Context context){//line: [350]
+    //调用父类ContextWrapper#attachBaseContext()方法
+    attachBaseContext(context);//line: [351]
+}
+
+5.ContextWrapper
+ContextWrapper#attachBaseContext(Context base){//line: [76]
+     mBase = base;//line: [80]
+}
+Context mBase;//line: [63]

@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_start_plugin_apk_activity).setOnClickListener(this);
         findViewById(R.id.btn_start_plugin_apk_appcompat_activity).setOnClickListener(this);
         findViewById(R.id.btn_load_img).setOnClickListener(this);
+        findViewById(R.id.btn_start_inner).setOnClickListener(this);
     }
 
 
@@ -41,20 +42,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.btn_start) {
-            startActivity(new Intent(this, TargetActivity.class));
+            startActivity(1, false);
         } else if (id == R.id.btn_start_appcompat) {
-            startActivity(new Intent(this, TargetAppCompatActivity.class));
+            startActivity(2, false);
         } else if (id == R.id.btn_start_plugin_apk_activity) {
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
-            startActivity(intent);
+            startActivity(3, false);
         } else if (id == R.id.btn_start_plugin_apk_appcompat_activity) {
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
-            startActivity(intent);
+            startActivity(4, false);
         } else if (id == R.id.btn_load_img) {
             Drawable drawable = PluginResourceUtil.getPluginDrawableByName(this, "pluginapk-debug.apk", "com.malin.plugin", "plugin_img");
             mImageView.setImageDrawable(drawable);
+        } else if (id == R.id.btn_start_inner) {
+            startActivity(5, false);
         }
     }
+
+
+    private void startActivity(int type, boolean context) {
+        if (type < 1 || type > 5) {
+            return;
+        }
+        Intent intent = null;
+        switch (type) {
+            case 1: {
+                intent = new Intent(this, TargetActivity.class);
+                break;
+            }
+            case 2: {
+                intent = new Intent(this, TargetAppCompatActivity.class);
+                break;
+            }
+            case 3: {
+                intent = new Intent();
+                intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginActivity"));
+                break;
+            }
+            case 4: {
+                intent = new Intent();
+                intent.setComponent(new ComponentName("com.malin.plugin", "com.malin.plugin.PluginAppCompatActivity"));
+                break;
+            }
+            case 5: {
+                intent = new Intent(this, SecondActivity.class);
+                break;
+            }
+        }
+        if (context) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getApplicationContext().startActivity(intent);
+        } else {
+            startActivity(intent);
+        }
+    }
+
 }
