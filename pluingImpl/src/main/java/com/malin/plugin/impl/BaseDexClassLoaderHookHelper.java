@@ -99,7 +99,7 @@ public final class BaseDexClassLoaderHookHelper {
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
             Object elementPluginObj;
             if (Build.VERSION.SDK_INT >= 26) {
-                //26<=API<=R (8.0<=API<=11.0)
+                //26<=API<=R (8.0<=API<=12.0)
                 //7.构造插件Element
                 // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
                 // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){},使用会报错

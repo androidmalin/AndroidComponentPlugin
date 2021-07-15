@@ -1,10 +1,10 @@
 ext {
     android = [
             applicationId    : "com.malin.hook",
-            compileSdkVersion: 30,
+            compileSdkVersion: 31,
             buildToolsVersion: "30.0.3",
             minSdkVersion    : 15,
-            targetSdkVersion : 30,
+            targetSdkVersion : 31,
             ndkVersion       : "22.1.7171670",
             versionCode      : 1,
             versionName      : "1.0",
