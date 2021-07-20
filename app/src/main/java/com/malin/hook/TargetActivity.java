@@ -25,7 +25,7 @@ public class TargetActivity extends Activity {
         relativeLayout.setGravity(Gravity.CENTER);
 
         TextView textView = new TextView(this);
-        textView.setText("未注册的TargetActivity,成功!");
+        textView.setText("宿主中未注册的TargetActivity,启动成功!");
 
         relativeLayout.addView(textView);
         setContentView(relativeLayout);

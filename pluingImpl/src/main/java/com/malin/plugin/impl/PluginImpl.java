@@ -30,12 +30,12 @@ public class PluginImpl {
     }
 
 
-    public void init(Context context, boolean instrumentation) {
+    public void init(Context context, boolean instrumentation, boolean firstMode) {
         unseal();
         if (instrumentation) {
             HookInstrumentation.hookInstrumentation(context);
         }
-        installActivity(context, instrumentation);
+        installActivity(context, instrumentation, firstMode);
     }
 
     private void unseal() {
@@ -47,13 +47,19 @@ public class PluginImpl {
         }
     }
 
-    private void installActivity(Context context, boolean instrumentation) {
+    private void installActivity(Context context, boolean instrumentation, boolean firstMode) {
         Runnable patchClassLoaderRunnable = () -> {
             //插件使用宿主的ClassLoader加载
             PluginUtils.extractAssets(context, PLUGIN_APK_NAME);
             File dexFile = context.getFileStreamPath(PLUGIN_APK_NAME);
             File optDexFile = context.getFileStreamPath(PLUGIN_DEX_NAME);
-            BaseDexClassLoaderHookHelper.patchClassLoader(context.getClassLoader(), dexFile, optDexFile);
+
+            if (firstMode) {
+                BaseDexClassLoaderHookHelper.patchClassLoader(context.getClassLoader(), dexFile, optDexFile);
+            } else {
+                BaseDexClassLoaderHookHelperAnother.patchClassLoader(context.getClassLoader(), context, dexFile);
+            }
+
             if (instrumentation) {
                 HookActivity.hookPackageManager(context, StubAppCompatActivity.class);
             } else {

@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:text="加载插件资源"
+        android:text="宿主中使用插件APK中的资源"
         tools:ignore="HardcodedText" />
 
     <Button
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:text="启动宿主中的其他Activity"
+        android:text="启动宿主中的注册的Activity"
         tools:ignore="HardcodedText" />
 
     <Button
@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:text="Hook AMS 启动未注册的普通Activity"
+        android:text="启动宿主中未注册的Activity"
         tools:ignore="HardcodedText" />
 
 
@@ -44,7 +44,7 @@
         android:id="@+id/btn_start_appcompat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hook AMS 启动未注册的AppCompatActivity"
+        android:text="启动宿主中未注册的AppCompatActivity"
         tools:ignore="HardcodedText" />
 
     <Button
@@ -52,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="启动插件APK中普通Activity"
+        android:text="启动插件APK中的Activity"
         tools:ignore="HardcodedText" />
 
 
@@ -61,6 +61,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="启动插件APK中AppCompatActivity"
+        android:text="启动插件APK中的AppCompatActivity"
         tools:ignore="HardcodedText" />
 </LinearLayout>

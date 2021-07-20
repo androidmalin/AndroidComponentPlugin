@@ -23,7 +23,7 @@ public class SecondActivity extends AppCompatActivity {
         relativeLayout.setGravity(Gravity.CENTER);
 
         TextView textView = new TextView(this);
-        textView.setText("宿主中自带的SecondActivity,启动成功!");
+        textView.setText("宿主中自带的已注册的SecondActivity,启动成功!");
 
         relativeLayout.addView(textView);
         setContentView(relativeLayout);

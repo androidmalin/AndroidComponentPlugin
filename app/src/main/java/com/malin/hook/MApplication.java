@@ -11,6 +11,6 @@ public class MApplication extends Application {
     @Override
     protected void attachBaseContext(Context context) {
         super.attachBaseContext(context);
-        PluginImpl.getInstance().init(context, true);
+        PluginImpl.getInstance().init(context, true, true);
     }
 }

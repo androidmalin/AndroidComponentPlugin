@@ -26,7 +26,7 @@ public class TargetAppCompatActivity extends AppCompatActivity {
         relativeLayout.setGravity(Gravity.CENTER);
 
         TextView textView = new TextView(this);
-        textView.setText("未注册的TargetAppCompatActivity,成功!");
+        textView.setText("宿主中未注册的TargetAppCompatActivity,启动成功!");
 
         relativeLayout.addView(textView);
         setContentView(relativeLayout);
