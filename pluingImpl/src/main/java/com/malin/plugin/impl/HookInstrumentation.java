@@ -34,6 +34,7 @@ public class HookInstrumentation {
     @SuppressLint("StaticFieldLeak")
     private static Context mContext;
 
+    @SuppressLint("DiscouragedPrivateApi")
     public static void hookInstrumentation(Context context) {
         //1.from ContextImpl get mMainThread field value (ActivityThread obj)
         //2.from ActivityThread get mInstrumentation field (Instrumentation obj)

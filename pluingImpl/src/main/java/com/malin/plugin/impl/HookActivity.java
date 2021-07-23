@@ -39,6 +39,7 @@ public class HookActivity {
      * @param subActivityClazz 在AndroidManifest.xml中注册了的Activity
      */
     @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressLint("DiscouragedPrivateApi")
     public static void hookStartActivity(Context context, Class<?> subActivityClazz) {
 
         try {
@@ -170,6 +171,7 @@ public class HookActivity {
     }
 
 
+    @SuppressLint("DiscouragedPrivateApi")
     private static void handleIActivityManager(Context context, Class<?> subActivityClazz, Object IActivityManagerSingletonObj) {
 
         try {
@@ -368,9 +370,7 @@ public class HookActivity {
         try {
             //1.获取ActivityThread的内部类H的Class对象
             //package android.app
-            //public final class ActivityThread{
-            //       private class H extends Handler {}
-            //}
+            //public final class ActivityThread{ private class H extends Handler {} }
             Class<?> hClazz = Class.forName("android.app.ActivityThread$H");
 
             //2.获取LAUNCH_ACTIVITY属性的Field
@@ -458,6 +458,7 @@ public class HookActivity {
             return false;
         }
 
+        @SuppressLint("DiscouragedPrivateApi")
         private void handleActivity(Message msg) {
 
             try {

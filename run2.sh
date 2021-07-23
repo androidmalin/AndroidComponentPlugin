@@ -2,9 +2,10 @@
 #1.java9
 #2.build-tools 30.0.1
 #3.gradle lasted version
-#4.gradle && adb && apksigner envs
+#4.gradle && adb && apksigner env
 #5.android11 devices
 #6.just for mac
+#https://developer.android.com/studio/command-line/apksigner#v4-signing-enabled
 
 packageName="com.malin.hook"
 apkPath="./app/build/outputs/apk/debug/app-debug.apk"

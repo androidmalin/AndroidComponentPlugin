@@ -26,4 +26,12 @@ pidcat com.malin.hook \
 -i Trace \
 -i Adreno \
 -i vndksupport \
--i zygote64
+-i zygote64 \
+-i Choreographer \
+-i GraphicsEnvironment \
+-i TetheringManager \
+-i CompatibilityChangeReporter \
+-i AdrenoGLES-0 \
+-i ProcessState \
+-i hw-ProcessState \
+-i AdrenoUtils

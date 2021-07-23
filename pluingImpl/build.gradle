@@ -9,8 +9,6 @@ android {
         resConfigs "zh", "en"
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
-        versionCode rootProject.ext.android.versionCode
-        versionName rootProject.ext.android.versionName
         consumerProguardFiles "consumer-rules.pro"
     }
 
