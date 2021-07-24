@@ -17,12 +17,48 @@ android {
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
         }
     }
-    buildTypes {
+
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            v1SigningEnabled true
+            v2SigningEnabled true
+            keyAlias "plugin"
+            keyPassword "plugin"
+            storeFile file("../plugin.jks")
+            storePassword "plugin"
+        }
+        debug {
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/*'
+        exclude 'META-INF/CERT.SF'
+        exclude 'META-INF/CERT.RSA'
+        exclude 'META-INF/MANIFEST.MF'
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            crunchPngs false
+        }
+        release {
+            debuggable false
+            shrinkResources true
+            zipAlignEnabled true
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            proguardFile 'proguard-rules.pro'
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
