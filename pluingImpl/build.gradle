@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
@@ -27,4 +28,6 @@ android {
 dependencies {
     implementation rootProject.ext.dependencies["androidx.appcompat"]
     implementation project(path: ':restrictionbypass')
+    implementation rootProject.ext.dependencies["androidx.core-ktx"]
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
