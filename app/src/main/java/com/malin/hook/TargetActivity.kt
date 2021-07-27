@@ -9,7 +9,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 
 /**
- * 普通类型的未注册的Activity
+ * 宿主中未注册的Activity
  */
 @SuppressLint("SetTextI18n", "Registered")
 class TargetActivity : Activity() {

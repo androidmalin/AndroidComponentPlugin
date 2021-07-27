@@ -35,7 +35,7 @@ object PluginUtils {
     /**
      * 待加载插件经过opt优化之后存放odex得路径
      */
-    fun getPluginOptDexDir(context: Context?, packageName: String): File {
+    fun getPluginOptDexDir(context: Context, packageName: String): File {
         return enforceDirExists(File(getPluginBaseDir(context, packageName), "odex"))
     }
 
@@ -58,9 +58,9 @@ object PluginUtils {
     /**
      * 需要加载得插件得基本目录 /data/data/<package>/files/plugin/</package>
      */
-    private fun getPluginBaseDir(context: Context?, packageName: String): File {
+    private fun getPluginBaseDir(context: Context, packageName: String): File {
         if (sBaseDir == null) {
-            sBaseDir = context?.getFileStreamPath("plugin")
+            sBaseDir = context.getFileStreamPath("plugin")
             enforceDirExists(sBaseDir)
         }
         return enforceDirExists(File(sBaseDir, packageName))

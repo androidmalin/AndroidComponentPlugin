@@ -11,37 +11,66 @@ import android.util.DisplayMetrics
 import androidx.core.content.res.ResourcesCompat
 import dalvik.system.DexClassLoader
 
+/**
+ * 将类的声明和定义该类的单例对象结合在一起（即通过object就实现了单例模式）
+ * https://blog.csdn.net/xlh1191860939/article/details/79460601
+ */
 object PluginResourceUtil {
-    ///data/user/0/com.malin.hook/files/pluginapk-debug.apk
+
+    /**
+     * ?: 左侧表达式非空，elvis 操作符就返回其左侧表达式，否则返回右侧表达式。
+     */
     fun getPluginDrawableByName(
         context: Context,
         pluginApkName: String,
         pluginPackageName: String,
-        sourceName: String
+        resourceName: String,
+        loadResourceType: Int
     ): Drawable? {
         val pluginApkPath = context.getFileStreamPath(pluginApkName).absolutePath
-        val resources = getPluginResources(context, pluginApkPath)
+        val resources = getPluginResources(context, pluginApkPath) ?: return null
         var resId = 0
-        var mode = 4
-        when (mode) {
+        when (loadResourceType) {
             1 -> {
-                resId = getResId(pluginPackageName, sourceName)
+                resId = getResId(pluginPackageName = pluginPackageName, resName = resourceName)
             }
             2 -> {
-                resId = getResId2(resources, pluginPackageName, sourceName)
+                resId = getResId2(
+                    resources = resources,
+                    pluginPackageName = pluginPackageName,
+                    resName = resourceName
+                )
             }
             3 -> {
-                resId = getResId3(context, pluginApkPath, pluginPackageName, sourceName)
+                resId = getResId3(
+                    context = context,
+                    pluginPath = pluginApkPath,
+                    pluginPackageName = pluginPackageName,
+                    resName = resourceName
+                )
             }
             4 -> {
-                resId = getResId4(context, pluginPackageName, sourceName)
+                resId =
+                    getResId4(
+                        context = context,
+                        pluginPackageName = pluginPackageName,
+                        resName = resourceName
+                    )
             }
         }
-        return if (resources != null) {
-            ResourcesCompat.getDrawable(resources, resId, context.theme)
-        } else null
+        return ResourcesCompat.getDrawable(resources, resId, context.theme)
     }
 
+    /**
+     * 1. :: 创建一个成员引用或者一个类引用
+     * https://www.kotlincn.net/docs/reference/keyword-reference.html
+     *
+     * 2. if 的分支可以是代码块，最后的表达式作为该块的值：
+     * https://www.kotlincn.net/docs/reference/control-flow.html
+     *
+     * 3. 为了避免抛出异常，可以使用安全转换操作符 as?，它可以在失败时返回 null：
+     * 4. Kotlin 类引用与 Java 类引用不同。要获得 Java 类引用， 请在 KClass 实例上使用 .java 属性
+     */
     @SuppressLint("DiscouragedPrivateApi", "PrivateApi")
     private fun getPluginResources(context: Context, pluginPath: String?): Resources? {
         try {
@@ -111,16 +140,16 @@ object PluginResourceUtil {
     }
 
     private fun getResId2(
-        resources: Resources?,
-        pluginPackageName: String?,
-        resName: String?
+        resources: Resources,
+        pluginPackageName: String,
+        resName: String
     ): Int {
-        return resources!!.getIdentifier(resName, "drawable", pluginPackageName)
+        return resources.getIdentifier(resName, "drawable", pluginPackageName)
     }
 
     private fun getResId3(
         context: Context,
-        pluginPath: String?,
+        pluginPath: String,
         pluginPackageName: String,
         resName: String
     ): Int {

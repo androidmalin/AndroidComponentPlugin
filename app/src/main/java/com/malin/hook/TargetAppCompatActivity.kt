@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 /**
- * AppCompatActivity类型的未注册的Activity
+ * 宿主中未注册的AppCompatActivity类型的Activity
  */
 @SuppressLint("SetTextI18n", "Registered")
 class TargetAppCompatActivity : AppCompatActivity() {

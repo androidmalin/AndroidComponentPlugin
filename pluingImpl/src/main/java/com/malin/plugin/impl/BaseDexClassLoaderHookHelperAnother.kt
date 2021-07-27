@@ -6,7 +6,6 @@ import dalvik.system.PathClassLoader
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
-import java.util.*
 
 /**
  * 由于应用程序使用的ClassLoader为PathClassLoader 最终继承自 BaseDexClassLoader
@@ -46,7 +45,7 @@ object BaseDexClassLoaderHookHelperAnother {
      * 因此我们在Context环境中直接getClassLoader()获取到的就是宿主程序唯一的ClassLoader.
      * @param apkFile            apkFile
      */
-    fun patchClassLoader(baseDexClassLoader: ClassLoader?, context: Context?, apkFile: File) {
+    fun patchClassLoader(baseDexClassLoader: ClassLoader, context: Context, apkFile: File) {
 
         // -->PathClassLoader
         // -->BaseDexClassLoader
@@ -54,8 +53,7 @@ object BaseDexClassLoaderHookHelperAnother {
         // -->DexPathList中 Element[] dexElements
         try {
             //0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
-            val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass
-                ?: return
+            val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass ?: return
 
             //1.获取BaseDexClassLoader的成员DexPathList pathList
             //private final DexPathList pathList;
@@ -64,7 +62,7 @@ object BaseDexClassLoaderHookHelperAnother {
             pathListField.isAccessible = true
 
             //2.获取DexPathList pathList实例;
-            val dexPathList = pathListField[baseDexClassLoader] ?: return
+            val dexPathList = pathListField.get(baseDexClassLoader) ?: return
 
 
             //3.获取DexPathList的成员: Element[] dexElements 的Field
@@ -75,7 +73,7 @@ object BaseDexClassLoaderHookHelperAnother {
 
             //4.获取DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
-            val dexElements = dexElementsField[dexPathList] as Array<Any>
+            val dexElements = dexElementsField.get(dexPathList) as Array<*>
 
             //5.获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
@@ -86,16 +84,19 @@ object BaseDexClassLoaderHookHelperAnother {
             val hostAndPluginElements = java.lang.reflect.Array.newInstance(
                 elementClazz,
                 dexElements.size + 1
-            ) as Array<Any>
+            ) as Array<*>
 
 
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
-            val optimizedDirectory = PluginUtils.getPluginOptDexDir(context, "com.malin.plugin")
-            val pluginElements: Array<Any>
+            val optimizedDirectory =
+                PluginUtils.getPluginOptDexDir(context = context, packageName = "com.malin.plugin")
+            val pluginElements: Array<*>
 
             //7.创建插件element数组
+            val apiLevel = Build.VERSION.SDK_INT
             when {
-                Build.VERSION.SDK_INT >= 23 -> {
+                apiLevel >= 23 -> {
+
                     //1.
                     val files: MutableList<File> = ArrayList()
                     files.add(apkFile)
@@ -117,9 +118,9 @@ object BaseDexClassLoaderHookHelperAnother {
                         files,
                         optimizedDirectory,
                         suppressedExceptions
-                    ) as Array<Any>
+                    ) as Array<*>
                 }
-                Build.VERSION.SDK_INT >= 19 -> {
+                apiLevel >= 19 -> {
                     //1.
                     val files = ArrayList<File>()
                     files.add(apkFile)
@@ -141,7 +142,7 @@ object BaseDexClassLoaderHookHelperAnother {
                         files,
                         optimizedDirectory,
                         suppressedExceptions
-                    ) as Array<Any>
+                    ) as Array<*>
                 }
                 else -> {
                     //1.
@@ -157,10 +158,9 @@ object BaseDexClassLoaderHookHelperAnother {
                     )
                     makeDexElementsMethod.isAccessible = true
                     pluginElements =
-                        makeDexElementsMethod.invoke(null, files, optimizedDirectory) as Array<Any>
+                        makeDexElementsMethod.invoke(null, files, optimizedDirectory) as Array<*>
                 }
             }
-            if (pluginElements == null) return
 
             //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
             //* @param      src      the source array.
@@ -183,7 +183,7 @@ object BaseDexClassLoaderHookHelperAnother {
             )
 
             //10.替换
-            dexElementsField[dexPathList] = hostAndPluginElements
+            dexElementsField.set(dexPathList, hostAndPluginElements)
 
             // 简要总结一下这种方式的原理:
             // 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的ClassLoader加载所有的类;

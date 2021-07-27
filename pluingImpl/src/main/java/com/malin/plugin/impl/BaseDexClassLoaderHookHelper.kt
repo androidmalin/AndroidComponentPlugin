@@ -9,6 +9,10 @@ import java.lang.reflect.InvocationTargetException
 import java.util.zip.ZipFile
 
 /**
+ * [] 被进行了操作符的重载
+ * [] 运算符代表调用成员函数 get()
+ */
+/**
  * 由于应用程序使用的ClassLoader为PathClassLoader 最终继承自 BaseDexClassLoader
  * 查看源码得知,这个BaseDexClassLoader加载代码根据一个叫做dexElements的数组进行,
  * 因此我们把包含代码的dex文件插入这个数组. 系统的classLoader就能帮助我们找到这个类
@@ -49,7 +53,7 @@ object BaseDexClassLoaderHookHelper {
      * @param optDexFile         optDexFile
      */
     @JvmStatic
-    fun patchClassLoader(baseDexClassLoader: ClassLoader?, apkFile: File, optDexFile: File) {
+    fun patchClassLoader(baseDexClassLoader: ClassLoader, apkFile: File, optDexFile: File) {
 
         // -->PathClassLoader
         // -->BaseDexClassLoader
@@ -66,7 +70,7 @@ object BaseDexClassLoaderHookHelper {
             pathListField.isAccessible = true
 
             //2.获取DexPathList pathList实例;
-            val dexPathList = pathListField[baseDexClassLoader] ?: return
+            val dexPathList = pathListField.get(baseDexClassLoader) ?: return
 
 
             //3.获取DexPathList的成员: Element[] dexElements 的Field
@@ -77,7 +81,7 @@ object BaseDexClassLoaderHookHelper {
 
             //4.获取DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
-            val dexElements = dexElementsField[dexPathList] as Array<*>
+            val dexElements = dexElementsField.get(dexPathList) as Array<*>
 
             //5.获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
@@ -88,11 +92,11 @@ object BaseDexClassLoaderHookHelper {
             val hostAndPluginElements =
                 java.lang.reflect.Array.newInstance(elementClazz, dexElements.size + 1) as Array<*>
 
-
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
+            val apiLevel = Build.VERSION.SDK_INT
             val elementPluginObj: Any = when {
-                Build.VERSION.SDK_INT >= 26 -> {
-                    //26<=API<=R (8.0<=API<=12.0)
+                apiLevel >= 26 -> {
+                    //26<=API<=31 (8.0<=API<=12.0)
                     //7.构造插件Element
                     // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
                     // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){},使用会报错
@@ -116,7 +120,7 @@ object BaseDexClassLoaderHookHelper {
                         DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
                     elementConstructor.newInstance(dexFile, apkFile)
                 }
-                Build.VERSION.SDK_INT >= 18 -> {
+                apiLevel >= 18 -> {
                     //18<=API<=25 (4.3<=API<=7.1.1)
                     //7.构造插件Element
                     // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
@@ -133,7 +137,7 @@ object BaseDexClassLoaderHookHelper {
                         DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
                     elementConstructor.newInstance(apkFile, false, apkFile, dexFile)
                 }
-                Build.VERSION.SDK_INT == 17 -> {
+                apiLevel == 17 -> {
                     //API=17  (API=4.2)
                     //7.构造插件Element
                     // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
@@ -187,7 +191,7 @@ object BaseDexClassLoaderHookHelper {
             )
 
             //12.替换
-            dexElementsField[dexPathList] = hostAndPluginElements
+            dexElementsField.set(dexPathList, hostAndPluginElements)
 
             // 简要总结一下这种方式的原理:
             // 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的ClassLoader加载所有的类;

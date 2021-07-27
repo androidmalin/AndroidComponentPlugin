@@ -13,11 +13,14 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "$TAG:onCreate")
+
         val relativeLayout = RelativeLayout(this)
         relativeLayout.gravity = Gravity.CENTER
+
         val textView = TextView(this)
         textView.text = "宿主中自带的已注册的SecondActivity,启动成功!"
         relativeLayout.addView(textView)
+
         setContentView(relativeLayout)
     }
 
