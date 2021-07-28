@@ -71,6 +71,6 @@ dependencies {
     implementation rootProject.ext.dependencies["androidx.appcompat"]
     implementation project(path: ':pluingImpl')
     implementation rootProject.ext.dependencies["androidx.core-ktx"]
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation rootProject.ext.dependencies["kotlin-stdlib-jdk7"]
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }
