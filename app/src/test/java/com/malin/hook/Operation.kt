@@ -25,12 +25,65 @@ class Operation {
             ArrayList::class.java == java.util.ArrayList::class.java && ArrayList::class.java === java.util.ArrayList::class.java
         Assertions.assertTrue(eq)
         Assertions.assertTrue(eq2)
-
     }
+
+    /**
+     * https://stackoverflow.com/questions/41888269/intclass-javaprimitivetype-kotlin-reference-not-equal-to-intclass-javaobject
+     */
+    @Test
+    fun test1() {
+        val result =
+            Int::class.javaPrimitiveType!!.kotlin == Int::class.javaObjectType.kotlin // true
+
+        val result2 =
+            Int::class.javaPrimitiveType!!.kotlin === Int::class.javaObjectType.kotlin // false
+        println(result)
+        println(result2)
+    }
+
+    /**
+     * 当我们调用 vararg-函数时，我们可以一个接一个地传参，
+     * 例如 asList(1, 2, 3)，
+     * 或者，如果我们已经有一个数组并希望将其内容传给该函数，
+     * 我们使用伸展（spread）操作符（在数组前面加 *）：
+     */
+    @Test
+    fun test2() {
+        val a = arrayOf(1, 2, 3)
+        val list = listOf(-1, 0, *a, 4)
+        println(list)
+    }
+
+    /**
+     * 可变数量的参数（Varargs）
+     * 函数的参数（通常是最后一个）可以用 vararg 修饰符标记：
+     */
+    private fun <T> asList(vararg ts: T): List<T> {
+        val result = ArrayList<T>()
+        for (t in ts) // ts is an Array
+            result.add(t)
+        return result
+    }
+
+    /**
+     * 在函数内部，类型 T 的 vararg 参数的可见方式是作为 T 数组，
+     * 即上例中的 ts 变量具有类型 Array <out T>。
+     * 只有一个参数可以标注为 vararg。
+     * 如果 vararg 参数不是列表中的最后一个参数，
+     * 可以使用具名参数语法传递其后的参数的值，
+     * 或者，如果参数具有函数类型，则通过在括号外部传一个 lambda。
+     */
+    @Test
+    fun test4() {
+        //允许将可变数量的参数传递给函数：
+        val list = asList(1, 2, 3)
+        println(list)
+    }
+
 
     @Test
     fun test() {
-        val name = ".R\$drawable"
+        val name = "R\$drawable"
         println(name)
     }
 
@@ -39,7 +92,7 @@ class Operation {
      */
     @Test
     fun testNull() {
-        val b: String? = "Kotlin"
+        val b: String? = "123456"
         if (b != null && b.isNotEmpty()) {
             print("String of length ${b.length}")
         } else {
@@ -58,12 +111,12 @@ class Operation {
     fun testSafeOperation() {
         val b: String? = null
         val result = b?.length
-        println(result)
+        println("b?.length = $result")
         Assertions.assertNull(result)
 
         val a: String? = "12345"
         val length = a?.length
-        println(length)
+        println("a?.length = $length")
         Assertions.assertEquals(5, length)
     }
 
@@ -122,12 +175,11 @@ class Operation {
 
     @Test
     fun testElvisOperation2() {
-        val foo = foo("1")
-        println(foo)
+        val result = elvisHandleException("12345")
+        println(result)
         Assertions.assertThrows(IllegalArgumentException::class.java) {
-            foo(null)
+            elvisHandleException(null)
         }
-
     }
 
     /**
@@ -135,9 +187,9 @@ class Operation {
      * 所以它们也可以用在 elvis 操作符右侧。
      * 这可能会非常方便，例如，检测函数参数：
      */
-    private fun foo(name: String?): String {
+    private fun elvisHandleException(name: String?): String {
         val length = name?.length ?: throw IllegalArgumentException("name is null")
-        return name + length
+        return "$name length: $length"
     }
 
     /**
@@ -150,7 +202,9 @@ class Operation {
     @Test
     fun testOperation() {
         val b: String? = null
-        val l = b!!.length
+        Assertions.assertThrows(NullPointerException::class.java) {
+            val l = b!!.length
+        }
     }
 
     /**
@@ -164,6 +218,7 @@ class Operation {
     fun testSafeTypeConversion() {
         val a = null
         val result: Int? = a as? Int
+        println("result = $result")
         Assertions.assertNull(result)
     }
 
@@ -171,6 +226,7 @@ class Operation {
     fun testSafeTypeConversion2() {
         val a = 100
         val result: Int? = a as? Int
+        println("result = $result")
         Assertions.assertEquals(100, result)
     }
 

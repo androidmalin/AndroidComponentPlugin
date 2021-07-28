@@ -30,74 +30,80 @@ object HookActivity {
      * @param context          context
      * @param subActivityClazz 在AndroidManifest.xml中注册了的Activity
      */
-    @JvmStatic
     @SuppressLint("DiscouragedPrivateApi")
     fun hookStartActivity(context: Context, subActivityClazz: Class<*>) {
         try {
-            if (Build.VERSION.SDK_INT >= 29) {
-                //1.获取ActivityTaskManager的Class对象
-                //package android.app;
-                //public class ActivityTaskManager
-                val activityTaskManagerClazz = Class.forName("android.app.ActivityTaskManager")
+            val apiLevel = Build.VERSION.SDK_INT
+            when {
+                apiLevel >= 29 -> {
+                    //1.获取ActivityTaskManager的Class对象
+                    //package android.app;
+                    //public class ActivityTaskManager
+                    val activityTaskManagerClazz = Class.forName("android.app.ActivityTaskManager")
 
-                //2.获取ActivityTaskManager的私有静态成员变量IActivityTaskManagerSingleton
-                // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
-                val iActivityTaskManagerSingletonField =
-                    activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton")
+                    //2.获取ActivityTaskManager的私有静态成员变量IActivityTaskManagerSingleton
+                    // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                    val iActivityTaskManagerSingletonField =
+                        activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton")
 
-                //3.取消Java的权限检查
-                iActivityTaskManagerSingletonField.isAccessible = true
+                    //3.取消Java的权限检查
+                    iActivityTaskManagerSingletonField.isAccessible = true
 
-                //4.获取IActivityManagerSingleton的实例对象
-                //private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
-                //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-                val IActivityTaskManagerSingletonObj = iActivityTaskManagerSingletonField[null]
+                    //4.获取IActivityManagerSingleton的实例对象
+                    //private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                    //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+                    val iActivityTaskManagerSingletonObj =
+                        iActivityTaskManagerSingletonField.get(null)
 
-                //5.
-                handleIActivityTaskManager(
-                    context,
-                    subActivityClazz,
-                    IActivityTaskManagerSingletonObj
-                )
-            } else if (Build.VERSION.SDK_INT >= 26) {
-                //1.获取ActivityManager的Class对象
-                //package android.app
-                //public class ActivityManager
-                val activityManagerClazz = Class.forName("android.app.ActivityManager")
+                    //5.
+                    handleIActivityTaskManager(
+                        context,
+                        subActivityClazz,
+                        iActivityTaskManagerSingletonObj
+                    )
+                }
+                apiLevel >= 26 -> {
+                    //1.获取ActivityManager的Class对象
+                    //package android.app
+                    //public class ActivityManager
+                    val activityManagerClazz = Class.forName("android.app.ActivityManager")
 
-                //2.获取ActivityManager的私有静态属性IActivityManagerSingleton
-                //private static final Singleton<IActivityManager> IActivityManagerSingleton
-                val iActivityManagerSingletonField =
-                    activityManagerClazz.getDeclaredField("IActivityManagerSingleton")
+                    //2.获取ActivityManager的私有静态属性IActivityManagerSingleton
+                    //private static final Singleton<IActivityManager> IActivityManagerSingleton
+                    val iActivityManagerSingletonField =
+                        activityManagerClazz.getDeclaredField("IActivityManagerSingleton")
 
-                //3.取消Java的权限检查
-                iActivityManagerSingletonField.isAccessible = true
+                    //3.取消Java的权限检查
+                    iActivityManagerSingletonField.isAccessible = true
 
-                //4.获取IActivityManagerSingleton的实例对象
-                //private static final Singleton<IActivityManager> IActivityManagerSingleton
-                //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
-                handleIActivityManager(
-                    context,
-                    subActivityClazz,
-                    iActivityManagerSingletonField[null]
-                )
-            } else {
-                //1.获取ActivityManagerNative的Class对象
-                //package android.app
-                //public abstract class ActivityManagerNative
-                val activityManagerNativeClazz = Class.forName("android.app.ActivityManagerNative")
+                    //4.获取IActivityManagerSingleton的实例对象
+                    //private static final Singleton<IActivityManager> IActivityManagerSingleton
+                    //所有静态对象的反射可以通过传null获取,如果是非静态必须传实例
+                    handleIActivityManager(
+                        context,
+                        subActivityClazz,
+                        iActivityManagerSingletonField[null]
+                    )
+                }
+                else -> {
+                    //1.获取ActivityManagerNative的Class对象
+                    //package android.app
+                    //public abstract class ActivityManagerNative
+                    val activityManagerNativeClazz =
+                        Class.forName("android.app.ActivityManagerNative")
 
-                //2.获取 ActivityManagerNative的 私有属性gDefault
-                // private static final Singleton<IActivityManager> gDefault
-                val singletonField = activityManagerNativeClazz.getDeclaredField("gDefault")
+                    //2.获取 ActivityManagerNative的 私有属性gDefault
+                    // private static final Singleton<IActivityManager> gDefault
+                    val singletonField = activityManagerNativeClazz.getDeclaredField("gDefault")
 
-                //3.对私有属性gDefault,解除私有限定
-                singletonField.isAccessible = true
+                    //3.对私有属性gDefault,解除私有限定
+                    singletonField.isAccessible = true
 
-                //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
-                //所有静态对象的反射可以通过传null获取
-                //private static final Singleton<IActivityManager> gDefault
-                handleIActivityManager(context, subActivityClazz, singletonField[null])
+                    //4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
+                    //所有静态对象的反射可以通过传null获取
+                    //private static final Singleton<IActivityManager> gDefault
+                    handleIActivityManager(context, subActivityClazz, singletonField[null])
+                }
             }
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
@@ -108,11 +114,14 @@ object HookActivity {
         }
     }
 
+    /**
+     * just for apiLevel >= 29
+     */
     @SuppressLint("DiscouragedPrivateApi")
     private fun handleIActivityTaskManager(
         context: Context,
         subActivityClazz: Class<*>,
-        IActivityTaskManagerSingletonObj: Any
+        IActivityTaskManagerSingletonObj: Any?
     ) {
         try {
             //5.获取private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton对象中的属性private T mInstance的值
@@ -134,32 +143,32 @@ object HookActivity {
 
             //9.获取mInstance属性的值,既IActivityTaskManager的实例
             //从private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityTaskManager
-            var IActivityTaskManager = mInstanceField[IActivityTaskManagerSingletonObj]
+            var iActivityTaskManager = mInstanceField[IActivityTaskManagerSingletonObj]
 
 
             //10.android10之后,从mInstanceField中取到的值为null,这里判断如果为null,就再次从get方法中再取一次
-            if (IActivityTaskManager == null) {
+            if (iActivityTaskManager == null) {
                 val getMethod = singletonClazz.getDeclaredMethod("get")
                 getMethod.isAccessible = true
-                IActivityTaskManager = getMethod.invoke(IActivityTaskManagerSingletonObj)
+                iActivityTaskManager = getMethod.invoke(IActivityTaskManagerSingletonObj)
             }
 
             //11.获取IActivityTaskManager接口的类对象
             //package android.app
             //public interface IActivityTaskManager
-            val IActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager")
+            val iActivityTaskManagerClazz = Class.forName("android.app.IActivityTaskManager")
 
 
             //12.创建一个IActivityTaskManager接口的代理对象
-            val IActivityTaskManagerProxy = Proxy.newProxyInstance(
-                Thread.currentThread().contextClassLoader, arrayOf(IActivityTaskManagerClazz),
-                IActivityInvocationHandler(IActivityTaskManager, context, subActivityClazz)
+            val iActivityTaskManagerProxy = Proxy.newProxyInstance(
+                Thread.currentThread().contextClassLoader, arrayOf(iActivityTaskManagerClazz),
+                IActivityInvocationHandler(iActivityTaskManager, context, subActivityClazz)
             )
 
             //13.重新赋值
             //给mInstance属性,赋新值
             //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
-            mInstanceField[IActivityTaskManagerSingletonObj] = IActivityTaskManagerProxy
+            mInstanceField[IActivityTaskManagerSingletonObj] = iActivityTaskManagerProxy
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
         } catch (e: NoSuchFieldException) {
@@ -173,11 +182,14 @@ object HookActivity {
         }
     }
 
+    /**
+     *  for 15<= apiLevel <= 28
+     */
     @SuppressLint("DiscouragedPrivateApi")
     private fun handleIActivityManager(
         context: Context,
         subActivityClazz: Class<*>,
-        IActivityManagerSingletonObj: Any
+        iActivityManagerSingletonObj: Any?
     ) {
         try {
             //5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
@@ -199,7 +211,7 @@ object HookActivity {
 
             //9.获取mInstance属性的值,既IActivityManager的实例
             //从private static final Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
-            val iActivityManager = mInstanceField[IActivityManagerSingletonObj]
+            val iActivityManager = mInstanceField[iActivityManagerSingletonObj]
 
 
             //10.获取IActivityManager接口的类对象
@@ -216,7 +228,7 @@ object HookActivity {
             //12.重新赋值
             //给mInstance属性,赋新值
             //给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
-            mInstanceField[IActivityManagerSingletonObj] = iActivityManagerProxy
+            mInstanceField[iActivityManagerSingletonObj] = iActivityManagerProxy
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
         } catch (e: NoSuchFieldException) {
@@ -233,7 +245,6 @@ object HookActivity {
      * @param subActivityClazz 注册了的Activity的Class对象
      * @param isAppCompat      是否是AppCompatActivity的子类
      */
-    @JvmStatic
     @SuppressLint("DiscouragedPrivateApi")
     fun hookLauncherActivity(context: Context, subActivityClazz: Class<*>, isAppCompat: Boolean) {
         try {
@@ -279,7 +290,7 @@ object HookActivity {
             //8.给mH增加mCallback
             //给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
             if (Build.VERSION.SDK_INT >= 28) {
-                //android 9.0
+                //>=android 9.0
                 mCallbackField[mHObj] = HandlerCallbackP(context, subActivityClazz, isAppCompat)
             } else {
                 mCallbackField[mHObj] = HandlerCallback(context, subActivityClazz, isAppCompat)
@@ -303,7 +314,7 @@ object HookActivity {
         subActivityClazz: Class<*>,
         isAppCompat: Boolean
     ) {
-        var LAUNCH_ACTIVITY = 100
+        var launchActivity = 100
         try {
             //1.获取ActivityThread的内部类H的Class对象
             //package android.app
@@ -312,17 +323,17 @@ object HookActivity {
 
             //2.获取LAUNCH_ACTIVITY属性的Field
             // public static final int LAUNCH_ACTIVITY = 100;
-            val launch_activity_field = hClazz.getField("LAUNCH_ACTIVITY")
+            val launchActivityField = hClazz.getField("LAUNCH_ACTIVITY")
 
             //3.获取LAUNCH_ACTIVITY的值
-            val `object` = launch_activity_field[null]
-            if (`object` is Int) {
-                LAUNCH_ACTIVITY = `object`
+            val launchActivityValue = launchActivityField[null]
+            if (launchActivityValue is Int) {
+                launchActivity = launchActivityValue
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        if (msg.what != LAUNCH_ACTIVITY) return
+        if (msg.what != launchActivity) return
         // private class H extends Handler {
         // public void handleMessage(Message msg) {
         //            switch (msg.what) {
@@ -345,12 +356,10 @@ object HookActivity {
             safeIntentField.isAccessible = true
 
             //3.获取ActivityClientRecord的intent属性的值,既安全的Intent
-            val safeIntent = safeIntentField[activityClientRecordObj] as Intent
-                ?: return
+            val safeIntent = safeIntentField[activityClientRecordObj] as? Intent ?: return
 
             //4.获取原始的Intent
-            val originIntent = safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT)
-                ?: return
+            val originIntent = safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT) ?: return
 
             //5.将安全的Intent,替换为原始的Intent,以启动我们要启动的未注册的Activity
             safeIntent.component = originIntent.component
@@ -367,8 +376,7 @@ object HookActivity {
      * 获取包名
      */
     private fun getAppPackageName(context: Context): String {
-        val applicationContext = context.applicationContext
-        return applicationContext.packageName
+        return context.applicationContext.packageName
     }
 
     /**
@@ -381,7 +389,6 @@ object HookActivity {
      * @param context          context
      * @param subActivityClazz 注册了的Activity的class对象
      */
-    @JvmStatic
     @SuppressLint("DiscouragedPrivateApi")
     fun hookPackageManager(context: Context, subActivityClazz: Class<*>) {
         try {
@@ -444,7 +451,7 @@ object HookActivity {
         private val mSubActivityClazz: Class<*>
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
             if (method.name == "startActivity") {
                 var intentIndex = 2
                 for (i in args.indices) {
@@ -516,7 +523,6 @@ object HookActivity {
                 //1.获取ClientTransaction对象
                 val clientTransactionObj = msg.obj ?: return
 
-
                 //2.获取ClientTransaction类中属性mActivityCallbacks的Field
                 //private List<ClientTransactionItem> mActivityCallbacks;
                 val mActivityCallbacksField =
@@ -526,8 +532,8 @@ object HookActivity {
                 mActivityCallbacksField.isAccessible = true
 
                 //4.获取ClientTransaction类中mActivityCallbacks属性的值,既List<ClientTransactionItem>
-                val mActivityCallbacks = mActivityCallbacksField[clientTransactionObj] as List<*>
-                if (mActivityCallbacks.isEmpty()) return
+                val mActivityCallbacks = mActivityCallbacksField[clientTransactionObj] as? List<*>
+                if (mActivityCallbacks == null || mActivityCallbacks.isEmpty()) return
                 if (mActivityCallbacks[0] == null) return
 
 
@@ -542,8 +548,7 @@ object HookActivity {
 
                 //7.获取LaunchActivityItem的实例
                 // public class LaunchActivityItem extends ClientTransactionItem
-                val launchActivityItem = mActivityCallbacks[0]!!
-
+                val launchActivityItem = mActivityCallbacks[0]
 
                 //8.ClientTransactionItem的mIntent属性的mIntent的Field
                 //private Intent mIntent;
@@ -554,14 +559,12 @@ object HookActivity {
 
                 //10.获取mIntent属性的值,既桩Intent(安全的Intent)
                 //从LaunchActivityItem中获取属性mIntent的值
-                val safeIntent = mIntentField[launchActivityItem] as Intent
-                    ?: return
+                val safeIntent = mIntentField[launchActivityItem] as? Intent ?: return
 
                 //11.获取原始的Intent
-                val originIntent = safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT)
-                    ?: return
-
                 //12.需要判断originIntent != null
+                val originIntent =
+                    safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT) ?: return
 
                 //13.将原始的Intent,赋值给clientTransactionItem的mIntent属性
                 safeIntent.component = originIntent.component
@@ -576,12 +579,12 @@ object HookActivity {
     }
 
     private class PackageManagerProxyHandler(
-        private val mIPackageManagerObj: Any,
+        private val mIPackageManagerObj: Any?,
         private val mAppPackageName: String,
         private val mSubActivityClazzName: String
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
             //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo" == method.name) {
                 var index = 0
