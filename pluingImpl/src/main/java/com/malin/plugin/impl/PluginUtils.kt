@@ -5,30 +5,29 @@ import java.io.*
 
 
 object PluginUtils {
-    private var sBaseDir: File? = null
 
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
      */
-    fun extractAssets(context: Context, sourceName: String?) {
-        val am = context.assets
-        var `is`: InputStream? = null
-        var fos: FileOutputStream? = null
+    fun extractAssets(context: Context, sourceName: String) {
+        val assetManager = context.assets
+        var inputStream: InputStream? = null
+        var outputStream: FileOutputStream? = null
         try {
-            `is` = am.open(sourceName!!)
+            inputStream = assetManager.open(sourceName)
             val extractFile = context.getFileStreamPath(sourceName)
-            fos = FileOutputStream(extractFile)
+            outputStream = FileOutputStream(extractFile)
             val buffer = ByteArray(1024)
             var count: Int
-            while (`is`.read(buffer).also { count = it } > 0) {
-                fos.write(buffer, 0, count)
+            while (inputStream.read(buffer).also { count = it } > 0) {
+                outputStream.write(buffer, 0, count)
             }
-            fos.flush()
+            outputStream.flush()
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
-            closeSilently(`is`)
-            closeSilently(fos)
+            closeSilently(inputStream)
+            closeSilently(outputStream)
         }
     }
 
@@ -47,9 +46,8 @@ object PluginUtils {
     }
 
     private fun closeSilently(closeable: Closeable?) {
-        if (closeable == null) return
         try {
-            closeable.close()
+            closeable?.close() ?: return
         } catch (e: Throwable) {
             e.printStackTrace()
         }
@@ -59,16 +57,13 @@ object PluginUtils {
      * 需要加载得插件得基本目录 /data/data/<package>/files/plugin/</package>
      */
     private fun getPluginBaseDir(context: Context, packageName: String): File {
-        if (sBaseDir == null) {
-            sBaseDir = context.getFileStreamPath("plugin")
-            enforceDirExists(sBaseDir)
-        }
+        val sBaseDir = enforceDirExists(context.getFileStreamPath("plugin"))
         return enforceDirExists(File(sBaseDir, packageName))
     }
 
     @Synchronized
-    private fun enforceDirExists(sBaseDir: File?): File {
-        if (!sBaseDir!!.exists()) {
+    private fun enforceDirExists(sBaseDir: File): File {
+        if (!sBaseDir.exists()) {
             val ret = sBaseDir.mkdir()
             if (!ret) {
                 throw RuntimeException("create dir " + sBaseDir + "failed")

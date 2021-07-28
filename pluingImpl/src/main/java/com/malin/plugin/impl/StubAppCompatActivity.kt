@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 /**
  * AppCompatActivity类型的桩Activity
  */
-@SuppressLint("SetTextI18n")
 class StubAppCompatActivity : AppCompatActivity() {
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val textView = TextView(this)

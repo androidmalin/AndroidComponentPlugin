@@ -7,12 +7,11 @@ import com.malin.plugin.impl.HookActivity.hookPackageManager
 import com.malin.plugin.impl.HookActivity.hookStartActivity
 
 object HookActivityWrapper {
-    @JvmStatic
-    fun hookStartActivity(context: Context?, subActivityClass: Class<*>?, isAppCompat: Boolean) {
+    fun hookStartActivity(context: Context, subActivityClass: Class<*>, isAppCompat: Boolean) {
         if (Build.VERSION.SDK_INT <= 18) {
-            hookPackageManager(context!!, subActivityClass!!)
+            hookPackageManager(context, subActivityClass)
         }
-        hookStartActivity(context!!, subActivityClass!!)
+        hookStartActivity(context, subActivityClass)
         hookLauncherActivity(context, subActivityClass, isAppCompat)
     }
 }

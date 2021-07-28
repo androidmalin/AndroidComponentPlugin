@@ -23,13 +23,10 @@ object HookInstrumentation {
     private const val TARGET_INTENT_CLASS = "target_intent_class"
 
     //插件是否使用单独的classloader
-    @SuppressLint("StaticFieldLeak")
     private const val USE_SINGLE_CLASS_LOADER = false
 
-    @SuppressLint("StaticFieldLeak")
     private lateinit var mContext: Context
 
-    @JvmStatic
     @SuppressLint("DiscouragedPrivateApi")
     fun hookInstrumentation(context: Context) {
         //1.from ContextImpl get mMainThread field value (ActivityThread obj)
@@ -47,7 +44,7 @@ object HookInstrumentation {
             mMainThreadField.isAccessible = true
 
             //2.get ActivityThread Object from ContextImpl
-            val activityThreadObj = mMainThreadField[context]
+            val activityThreadObj = mMainThreadField.get(context)
 
             //3.mInstrumentation Object
             val activityThreadClazz = Class.forName("android.app.ActivityThread")
@@ -55,7 +52,8 @@ object HookInstrumentation {
             //Instrumentation mInstrumentation;
             val mInstrumentationField = activityThreadClazz.getDeclaredField("mInstrumentation")
             mInstrumentationField.isAccessible = true
-            val mInstrumentationObj = mInstrumentationField[activityThreadObj] as Instrumentation
+            val mInstrumentationObj =
+                mInstrumentationField.get(activityThreadObj) as Instrumentation
 
             //4.reset set value
             mInstrumentationField[activityThreadObj] = InstrumentationProxy(
@@ -94,7 +92,7 @@ object HookInstrumentation {
             requestCode: Int,
             options: Bundle?
         ): ActivityResult? {
-            var resolveInfoList: List<ResolveInfo?>? = null
+            var resolveInfoList: List<ResolveInfo>? = null
             try {
                 var flags = 0
                 if (Build.VERSION.SDK_INT >= 23) {
@@ -159,7 +157,7 @@ object HookInstrumentation {
             requestCode: Int
         ): ActivityResult? {
             if (Build.VERSION.SDK_INT != 15) return null
-            var resolveInfoList: List<ResolveInfo?>? = null
+            var resolveInfoList: List<ResolveInfo>? = null
             try {
                 val flags = 0
                 resolveInfoList = mPackageManager.queryIntentActivities(intent, flags)
@@ -219,28 +217,29 @@ object HookInstrumentation {
         ): Activity {
             val pluginIntent = intent.getParcelableExtra<Intent>(TARGET_INTENT_CLASS)
             val pluginIntentClassNameExist = pluginIntent != null && !TextUtils.isEmpty(
-                pluginIntent.component!!.className
+                pluginIntent.component?.className
             )
 
             //1.className
-            val finalClassName = if (pluginIntentClassNameExist) pluginIntent!!.component!!
-                .className else className
+            val finalClassName =
+                if (pluginIntentClassNameExist) pluginIntent?.component?.className else className
 
             //2.intent
             val finalIntent = if (pluginIntentClassNameExist) pluginIntent else intent
 
             //3.classLoader
-            val finalClassLoader: ClassLoader = if (USE_SINGLE_CLASS_LOADER && pluginIntentClassNameExist) {
-                val pluginDexFile =
-                    mContext.getFileStreamPath(PluginImpl.PLUGIN_APK_NAME)
-                CustomClassLoader.getPluginClassLoader(
-                    mContext,
-                    pluginDexFile,
-                    "com.malin.plugin"
-                )
-            } else {
-                classLoader
-            }
+            val finalClassLoader: ClassLoader =
+                if (USE_SINGLE_CLASS_LOADER && pluginIntentClassNameExist) {
+                    val pluginDexFile =
+                        mContext.getFileStreamPath(PluginImpl.PLUGIN_APK_NAME)
+                    CustomClassLoader.getPluginClassLoader(
+                        mContext,
+                        pluginDexFile,
+                        "com.malin.plugin"
+                    )
+                } else {
+                    classLoader
+                }
             return if (Build.VERSION.SDK_INT >= 28) {
                 mInstrumentation.newActivity(finalClassLoader, finalClassName, finalIntent)
             } else {
@@ -250,10 +249,10 @@ object HookInstrumentation {
     }
 
     private class CustomClassLoader(
-        dexPath: String?,
-        optimizedDirectory: String?,
-        libraryPath: String?,
-        parent: ClassLoader?
+        dexPath: String,
+        optimizedDirectory: String,
+        libraryPath: String,
+        parent: ClassLoader
     ) : DexClassLoader(dexPath, optimizedDirectory, libraryPath, parent) {
         companion object {
             /**
@@ -267,8 +266,11 @@ object HookInstrumentation {
                 //String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent
                 return CustomClassLoader(
                     plugin.path,
-                    PluginUtils.getPluginOptDexDir(context, packageName).path,
-                    PluginUtils.getPluginLibDir(context, packageName).path,
+                    PluginUtils.getPluginOptDexDir(
+                        context = context,
+                        packageName = packageName
+                    ).path,
+                    PluginUtils.getPluginLibDir(context = context, packageName = packageName).path,
                     context.classLoader
                 )
             }

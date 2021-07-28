@@ -9,8 +9,8 @@ import android.widget.TextView
 /**
  * 普通的桩Activity
  */
-@SuppressLint("SetTextI18n")
 class StubActivity : Activity() {
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val textView = TextView(this)
