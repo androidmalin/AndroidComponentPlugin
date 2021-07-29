@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.guardsquare.proguard'
 
 android {
 
@@ -50,19 +51,29 @@ android {
             crunchPngs false
         }
         release {
-            debuggable false
-            shrinkResources true
-            zipAlignEnabled true
-            minifyEnabled true
             signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
-            proguardFile 'proguard-rules.pro'
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+
+    proguard {
+        configurations {
+            release {
+                defaultConfiguration 'proguard-android-optimize.txt'
+                configuration 'proguard-rules.pro'
+            }
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    // For Kotlin projects
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 

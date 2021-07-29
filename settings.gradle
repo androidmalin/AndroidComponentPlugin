@@ -1,3 +1,4 @@
+rootProject.name='hook'
 include ':app'
 include ':pluingImpl'
 include ':restrictionbypass'
