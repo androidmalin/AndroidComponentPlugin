@@ -1,0 +1,9 @@
+Activity的启动流程
+Context.startActivity启动,其实现是ContextImpl的startActivity,
+然后内部会通过Instrumentation来尝试启动Activity,它会调用ams的startActivity方法,
+这是一个跨进程过程,当ams校验完activity的合法性后,
+会通过ApplicationThread回调到我们的进程,这也是一次跨进程过程.
+而applicationThread就是一个binder,回调逻辑是在binder线程池中完成的,
+所以需要通过Handler H 将其切换到UI线程,
+第一个消息是LAUNCH_ACTIVITY,它对应handleLaunchActivity,
+在这个方法里完成了Activity的创建和启动.
