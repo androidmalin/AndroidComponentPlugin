@@ -5,7 +5,6 @@ import android.os.Build
 import dalvik.system.PathClassLoader
 import java.io.File
 import java.io.IOException
-import java.lang.reflect.InvocationTargetException
 
 /**
  * 由于应用程序使用的ClassLoader为PathClassLoader 最终继承自 BaseDexClassLoader
@@ -53,7 +52,7 @@ object BaseDexClassLoaderHookHelperAnother {
         // -->DexPathList中 Element[] dexElements
         try {
             //0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
-            val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass ?: return
+            val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass
 
             //1.获取BaseDexClassLoader的成员DexPathList pathList
             //private final DexPathList pathList;
@@ -62,8 +61,7 @@ object BaseDexClassLoaderHookHelperAnother {
             pathListField.isAccessible = true
 
             //2.获取DexPathList pathList实例;
-            val dexPathList = pathListField.get(baseDexClassLoader) ?: return
-
+            val dexPathList = pathListField[baseDexClassLoader]
 
             //3.获取DexPathList的成员: Element[] dexElements 的Field
             //private Element[] dexElements;
@@ -73,16 +71,16 @@ object BaseDexClassLoaderHookHelperAnother {
 
             //4.获取DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
-            val dexElements = dexElementsField.get(dexPathList) as Array<*>
+            val dexElements = dexElementsField[dexPathList] as Array<*>
 
             //5.获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
-            val elementClazz = dexElements.javaClass.componentType ?: return
+            val elementClazz = dexElements.javaClass.componentType
 
             //6.创建一个数组, 用来替换原始的数组
             //通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
             val hostAndPluginElements = java.lang.reflect.Array.newInstance(
-                elementClazz,
+                elementClazz!!,
                 dexElements.size + 1
             ) as Array<*>
 
@@ -98,7 +96,7 @@ object BaseDexClassLoaderHookHelperAnother {
                 apiLevel >= 23 -> {
 
                     //1.
-                    val files: MutableList<File> = ArrayList()
+                    val files = ArrayList<File>()
                     files.add(apkFile)
                     val suppressedExceptions: List<IOException> = ArrayList()
 
@@ -106,9 +104,9 @@ object BaseDexClassLoaderHookHelperAnother {
                     //private static Element[] makePathElements(List<File> files, File optimizedDirectory, List<IOException> suppressedExceptions)
                     val makePathElementsMethod = dexPathList.javaClass.getDeclaredMethod(
                         "makePathElements",
-                        MutableList::class.java,
+                        List::class.java,
                         File::class.java,
-                        MutableList::class.java
+                        List::class.java
                     )
                     makePathElementsMethod.isAccessible = true
 
@@ -183,7 +181,7 @@ object BaseDexClassLoaderHookHelperAnother {
             )
 
             //10.替换
-            dexElementsField.set(dexPathList, hostAndPluginElements)
+            dexElementsField[dexPathList] = hostAndPluginElements
 
             // 简要总结一下这种方式的原理:
             // 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的ClassLoader加载所有的类;
@@ -191,15 +189,7 @@ object BaseDexClassLoaderHookHelperAnother {
             // 宿主程序的ClassLoader最终继承自BaseDexClassLoader,BaseDexClassLoader通过DexPathList进行类的查找过程;
             // 而这个查找通过遍历一个dexElements的数组完成;
             // 我们通过把插件dex添加进这个数组就让宿主ClassLoader获取了加载插件类的能力.
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: NullPointerException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }

@@ -1,4 +1,4 @@
-package com.malin.hook
+package com.example.lib
 
 import org.junit.jupiter.api.Test
 
@@ -17,8 +17,6 @@ class Lambda {
      * 它接受一个初始累加器值和一个组合函数，
      * 并通过将当前累加器值与每个集合元素连续组合来构建其返回值，每次替换累加器值：
      */
-
-
     private fun <T, R> Collection<T>.fold(
         initial: R,
         combine: (acc: R, nextElement: T) -> R

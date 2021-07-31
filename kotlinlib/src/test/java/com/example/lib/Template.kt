@@ -1,4 +1,4 @@
-package com.malin.hook
+package com.example.lib
 
 fun execute(task: () -> Unit) {
     val startTime = System.currentTimeMillis()

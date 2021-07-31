@@ -1,11 +1,13 @@
 package com.malin.hook
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 
 /**
@@ -19,28 +21,35 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      * 通过 lateinit 关键字，可以避免在构建对象时初始化属性。
      * 如果在属性进行初始化之前对其进行了引用，Kotlin 会抛出 UninitializedPropertyAccessException，因此请务必尽快初始化属性。
      */
-    private lateinit var mImageView: ImageView
+    private lateinit var mIvPluginRes: ImageView
+    private val mBtnStartHostRegisterAct: Button by bindView(R.id.btn_start_host_register_act)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "$TAG:onCreate")
         initView()
         initListener()
         initLoadPluginResourceImg()
     }
 
     private fun initView() {
-        mImageView = findViewById(R.id.iv_image_plugin)
+        mIvPluginRes = findViewById(R.id.iv_plugin_img)
+    }
+
+
+    private fun <T : View> Activity.bindView(@IdRes res: Int): Lazy<T> {
+        return lazy { findViewById(res) }
     }
 
     private fun initListener() {
-        mImageView.setOnClickListener(this)
-        findViewById<View>(R.id.btn_start).setOnClickListener(this)
-        findViewById<View>(R.id.btn_start_appcompat).setOnClickListener(this)
+        mIvPluginRes.setOnClickListener(this)
+        mBtnStartHostRegisterAct.setOnClickListener {
+            startActivity(startActType = Type.HOST_EXIST_ACTIVITY, isApplicationContext = true)
+        }
+        findViewById<View>(R.id.btn_start_host_unregister_act).setOnClickListener(this)
+        findViewById<View>(R.id.btn_start_host_unregister_appcompat_act).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_plugin_apk_activity).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_plugin_apk_appcompat_activity).setOnClickListener(this)
-        findViewById<View>(R.id.btn_start_inner).setOnClickListener(this)
     }
 
     /**
@@ -56,18 +65,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      * https://kotlinlang.org/docs/java-interop.html#sam-conversions
      *
      * Kotlin中的单个感叹号
+     * 带有标记的类型!称为平台类型，它是一种来自 Java的类型，
+     * 因此很可能是null. 这是 Kotlin 编译器在调用 Java 时默认推断的内容
      * https://stackoverflow.com/questions/43826699/single-exclamation-mark-in-kotlin
      */
     private fun initLoadPluginResourceImg() {
-        findViewById<View>(R.id.btn_load_img).setOnClickListener {
-            val drawable = PluginResourceUtil.getPluginDrawableByName(
-                context = this,
-                pluginApkName = "pluginapk-debug.apk",
-                pluginPackageName = "com.malin.plugin",
-                resourceName = "plugin_img",
+        findViewById<View>(R.id.btn_load_plugin_img).setOnClickListener {
+            val drawableImg = PluginResourceUtil.getPluginDrawableByName(
+                context = applicationContext,
+                pluginApkFileName = PLUGIN_APK_FILE_NAME,
+                pluginPackageName = PLUGIN_PACKAGE_NAME,
+                resourceName = PLUGIN_IMG_NAME,
                 loadResourceType = 1
             )
-            mImageView.setImageDrawable(drawable)
+            mIvPluginRes.setImageDrawable(drawableImg)
         }
     }
 
@@ -76,30 +87,41 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      */
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.btn_start -> {
-                startActivity(type = Type.HOST_UNREGISTER_ACTIVITY, isContext = false)
+            R.id.btn_start_host_unregister_act -> {
+                startActivity(
+                    startActType = Type.HOST_UNREGISTER_ACTIVITY,
+                    isApplicationContext = false
+                )
             }
-            R.id.btn_start_appcompat -> {
-                startActivity(type = Type.HOST_UNREGISTER_APPCOMPAT_ACTIVITY, isContext = false)
+            R.id.btn_start_host_unregister_appcompat_act -> {
+                startActivity(
+                    startActType = Type.HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
+                    isApplicationContext = false
+                )
             }
             R.id.btn_start_plugin_apk_activity -> {
-                startActivity(type = Type.PLUGIN_ACTIVITY, isContext = false)
+                startActivity(startActType = Type.PLUGIN_ACTIVITY, isApplicationContext = false)
             }
             R.id.btn_start_plugin_apk_appcompat_activity -> {
-                startActivity(type = Type.PLUGIN_APPCOMPAT_ACTIVITY, isContext = false)
-            }
-            R.id.btn_start_inner -> {
-                startActivity(type = Type.HOST_EXIST_ACTIVITY, isContext = true)
+                startActivity(
+                    startActType = Type.PLUGIN_APPCOMPAT_ACTIVITY,
+                    isApplicationContext = false
+                )
             }
         }
     }
 
     /**
-     * https://www.kotlincn.net/docs/reference/ranges.html
+     * when
+     * https://www.kotlincn.net/docs/reference/control-flow.html
      */
-    private fun startActivity(type: Type, isContext: Boolean) {
+    private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
         lateinit var intent: Intent
-        when (type) {
+        when (startActType) {
+
+            Type.HOST_EXIST_ACTIVITY -> {
+                intent = Intent(this, HostRegisterActivity::class.java)
+            }
 
             Type.HOST_UNREGISTER_ACTIVITY -> {
                 intent = Intent(this, TargetActivity::class.java)
@@ -120,37 +142,39 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 intent.component =
                     ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_APPCOMPAT_ACTIVITY_NAME)
             }
-
-            Type.HOST_EXIST_ACTIVITY -> {
-                intent = Intent(this, SecondActivity::class.java)
-            }
         }
-        if (isContext) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            applicationContext.startActivity(intent)
-        } else {
-            startActivity(intent)
+
+        when {
+            isApplicationContext -> {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                applicationContext.startActivity(intent)
+            }
+            else -> {
+                this.startActivity(intent)
+            }
         }
     }
 
     /**
      * 伴生对象提供了一种机制，用于定义在概念上与某个类型相关但不与某个特定对象关联的变量或函数。
      * 伴生对象类似于对变量和方法使用 Java 的 static 关键字。
-     * 在以下代码中，TAG 是一个 String 常量。
+     * 在以下代码中，PLUGIN_PACKAGE_NAME 是一个 String 常量。
      * 你不需要为每个 MainActivity 实例定义一个唯一的 String 实例，
      * 因此你应在伴生对象中定义它：
-     * 你可以在文件的顶级定义 TAG，但文件中可能有大量的变量、函数和类也是在顶级定义的。
+     * 你可以在文件的顶级定义 PLUGIN_PACKAGE_NAME，但文件中可能有大量的变量、函数和类也是在顶级定义的。
      * 伴生对象有助于连接变量、函数和类定义，而无需引用该类的任何特定实例。
      */
-    companion object {
-        private const val TAG = "MainActivity"
+    private companion object {
         private const val PLUGIN_PACKAGE_NAME = "com.malin.plugin"
         private const val PLUGIN_ACTIVITY_NAME = "com.malin.plugin.PluginActivity"
         private const val PLUGIN_APPCOMPAT_ACTIVITY_NAME =
             "com.malin.plugin.PluginAppCompatActivity"
+        private const val PLUGIN_APK_FILE_NAME = "pluginapk-debug.apk"
+        private const val PLUGIN_IMG_NAME = "plugin_img"
+
     }
 
-    enum class Type {
+    private enum class Type {
         HOST_UNREGISTER_ACTIVITY,
         HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
         PLUGIN_ACTIVITY,

@@ -13,13 +13,12 @@ import com.malin.plugin.impl.HookInstrumentation.hookInstrumentation
 import org.chickenhook.restrictionbypass.Unseal
 import java.util.concurrent.Executors
 
-class PluginImpl {
+object PluginImpl {
+
+    const val PLUGIN_APK_NAME = "pluginapk-debug.apk"
+    private const val PLUGIN_DEX_NAME = "pluginapk-debug.dex"
     private val mSingleThreadExecutor = Executors.newSingleThreadExecutor()
     private val mHandler = Handler(Looper.getMainLooper())
-
-    private object Holder {
-        val instance = PluginImpl()
-    }
 
     fun init(context: Context, instrumentation: Boolean, firstMode: Boolean) {
         unseal()
@@ -32,7 +31,7 @@ class PluginImpl {
     private fun unseal() {
         try {
             Unseal.unseal()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             Log.e(PluginImpl::class.java.simpleName, "Unable to unseal hidden api access", e)
         }
@@ -40,39 +39,52 @@ class PluginImpl {
 
     private fun installActivity(context: Context, instrumentation: Boolean, firstMode: Boolean) {
         val patchClassLoaderRunnable = Runnable {
-
             //插件使用宿主的ClassLoader加载
             PluginUtils.extractAssets(context, PLUGIN_APK_NAME)
             val dexFile = context.getFileStreamPath(PLUGIN_APK_NAME)
             val optDexFile = context.getFileStreamPath(PLUGIN_DEX_NAME)
-            if (firstMode) {
-                patchClassLoader(context.classLoader, dexFile, optDexFile)
-            } else {
-                patchClassLoader(context.classLoader, context, dexFile)
+            when {
+                firstMode -> {
+                    patchClassLoader(
+                        baseDexClassLoader = context.classLoader,
+                        apkFile = dexFile,
+                        optDexFile = optDexFile
+                    )
+                }
+                else -> {
+                    patchClassLoader(
+                        baseDexClassLoader = context.classLoader,
+                        context = context,
+                        apkFile = dexFile
+                    )
+                }
             }
-            if (instrumentation) {
-                hookPackageManager(context, StubAppCompatActivity::class.java)
-            } else {
-                if (Build.VERSION.SDK_INT >= 18) {
-                    hookStartActivity(context, StubAppCompatActivity::class.java, true)
-                } else {
-                    mHandler.post {
-                        hookStartActivity(
-                            context,
-                            StubAppCompatActivity::class.java,
-                            true
-                        )
+            when {
+                instrumentation -> {
+                    hookPackageManager(context, StubAppCompatActivity::class.java)
+                }
+                else -> {
+                    when {
+                        Build.VERSION.SDK_INT >= 18 -> {
+                            hookStartActivity(
+                                context = context,
+                                subActivityClass = StubAppCompatActivity::class.java,
+                                isAppCompat = true
+                            )
+                        }
+                        else -> {
+                            mHandler.post {
+                                hookStartActivity(
+                                    context = context,
+                                    subActivityClass = StubAppCompatActivity::class.java,
+                                    isAppCompat = true
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
         mSingleThreadExecutor.execute(patchClassLoaderRunnable)
-    }
-
-    companion object {
-        const val PLUGIN_APK_NAME = "pluginapk-debug.apk"
-        private const val PLUGIN_DEX_NAME = "pluginapk-debug.dex"
-        val instance: PluginImpl
-            get() = Holder.instance
     }
 }

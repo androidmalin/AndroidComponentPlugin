@@ -1,4 +1,4 @@
-package com.malin.hook
+package com.example.lib
 
 class Task {
     fun run(step2: () -> Unit, step3: () -> Unit) {

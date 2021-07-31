@@ -1,6 +1,7 @@
 package com.malin.hook
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -9,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 @SuppressLint("SetTextI18n")
-class SecondActivity : AppCompatActivity() {
+class HostRegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "$TAG:onCreate")
@@ -18,7 +19,8 @@ class SecondActivity : AppCompatActivity() {
         relativeLayout.gravity = Gravity.CENTER
 
         val textView = TextView(this)
-        textView.text = "宿主中自带的已注册的SecondActivity,启动成功!"
+        textView.text = "宿主中自带的已注册的HostRegisterActivity,启动成功!"
+        textView.setTextColor(Color.parseColor("#000000"))
         relativeLayout.addView(textView)
 
         setContentView(relativeLayout)
@@ -55,6 +57,6 @@ class SecondActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "SecondActivity"
+        private const val TAG = "HostRegisterActivity"
     }
 }

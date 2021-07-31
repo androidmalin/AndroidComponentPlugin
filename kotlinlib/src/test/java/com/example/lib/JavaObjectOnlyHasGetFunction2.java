@@ -1,4 +1,4 @@
-package com.malin.hook;
+package com.example.lib;
 
 
 public class JavaObjectOnlyHasGetFunction2 {

@@ -22,12 +22,12 @@ object PluginResourceUtil {
      */
     fun getPluginDrawableByName(
         context: Context,
-        pluginApkName: String,
+        pluginApkFileName: String,
         pluginPackageName: String,
         resourceName: String,
         loadResourceType: Int
     ): Drawable? {
-        val pluginApkPath = context.getFileStreamPath(pluginApkName).absolutePath
+        val pluginApkPath = context.getFileStreamPath(pluginApkFileName).absolutePath
         val resources = getPluginResources(context, pluginApkPath) ?: return null
         var resId = 0
         when (loadResourceType) {

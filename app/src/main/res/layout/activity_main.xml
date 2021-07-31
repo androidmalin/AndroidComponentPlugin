@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/iv_image_plugin"
+        android:id="@+id/iv_plugin_img"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="50dp"
@@ -16,7 +16,7 @@
         tools:ignore="ContentDescription" />
 
     <Button
-        android:id="@+id/btn_load_img"
+        android:id="@+id/btn_load_plugin_img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
@@ -24,7 +24,7 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/btn_start_inner"
+        android:id="@+id/btn_start_host_register_act"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
@@ -32,7 +32,7 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/btn_start"
+        android:id="@+id/btn_start_host_unregister_act"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
@@ -41,7 +41,7 @@
 
 
     <Button
-        android:id="@+id/btn_start_appcompat"
+        android:id="@+id/btn_start_host_unregister_appcompat_act"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="启动宿主中未注册的AppCompatActivity"

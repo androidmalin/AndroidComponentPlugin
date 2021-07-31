@@ -1,7 +1,12 @@
-package com.malin.hook
+package com.example.lib
 
 import org.junit.jupiter.api.Assertions
+import java.io.File
+import java.lang.Integer.parseInt
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import org.junit.jupiter.api.Test
+
 
 /**
  * 空安全
@@ -9,6 +14,22 @@ import org.junit.jupiter.api.Test
  * https://www.kotlincn.net/docs/reference/null-safety.html#%E5%9C%A8%E6%9D%A1%E4%BB%B6%E4%B8%AD%E6%A3%80%E6%B5%8B-null
  */
 class Operation {
+
+    /**
+     * try 是一个表达式，即它可以有一个返回值：
+     * try-表达式的返回值是 try 块中的最后一个表达式或者是（所有）catch 块中的最后一个表达式。
+     * finally 块中的内容不会影响表达式的结果。
+     */
+    @Test
+    fun test00() {
+        val result: Int? = try {
+            parseInt("xx")
+        } catch (e: NumberFormatException) {
+            null
+        }
+        println(result)
+        Assertions.assertNull(result)
+    }
 
     @Test
     fun test0() {
@@ -163,7 +184,7 @@ class Operation {
      * Elvis 操作符
      */
     private fun testElvis(b: String?): Int {
-        //当我们有一个可空的引用 b 时，我们可以说“如果 b 非空，我使用它；否则使用某个非空的值”：
+        //当我们有一个可空的引用 b 时，我们可以说"如果 b 非空，我使用它；否则使用某个非空的值"：
         //val l: Int = if (b != null) b.length else -1
 
         // 除了完整的 if-表达式，这还可以通过 Elvis 操作符表达，写作 ?:
@@ -243,4 +264,237 @@ class Operation {
             println(num)
         }
     }
+
+
+    /**
+     * 一个解构声明同时创建多个变量，并且可以单独使用这些变量。
+     * 对于每一个解构的变量，
+     * 在访问时，实际最终都会调用解构对象的componentN()方法，
+     * 而N就是声明时括号里变量的位置，从1开始。
+     */
+    //Deconstruction
+    @Test
+    fun testDeconstruction() {
+        val p = Point(10, 20)
+        val (x, y) = p
+        print(x)    //10
+        print(y)    //20
+    }
+
+    /**
+     * 解构
+     * https://www.jianshu.com/p/e943c7b2bfce
+     */
+    @Test
+    fun testDeconstruction1() {
+        val list = listOf(
+            Point(10, 20),
+            Point(30, 40),
+            Point(50, 60)
+        )
+        for ((a, b) in list) {
+            println(a * b)        //200，1200，3000
+        }
+    }
+
+    @Test
+    fun testDeconstruction2() {
+        // 现在，使用该函数：
+        val (result, status) = function()
+        println(result)
+        println(status)
+    }
+
+    private fun function(): Result {
+        // 各种计算
+        return Result(200, "success")
+    }
+
+    @Test
+    fun testDeconstruction3() {
+        testPair()
+    }
+
+    private fun testPair() {
+        val (a, b) = getPair()
+        println(a)
+        println(b)
+        val (x, y, z) = getTriple()
+        println(x)
+        println(y)
+        println(z)
+    }
+
+    private fun getPair(): Pair<String, Int> {
+        return Pair("hhh", 666)
+    }
+
+    private fun getTriple(): Triple<String, Int, Float> {
+        return Triple("hhh", 233, 2.33f)
+    }
+
+    /**
+     * lay
+     * by lazy只能作用于val关键字标注的属性。
+     * 当属性用到的时候才会初始化"lazy{}"里面的内容
+     * 而且再次调用属性的时候，只会得到结果，而不会再次执行lazy{}的运行过程
+     */
+    @Test
+    fun layFunctionTest() {
+        val lazyValue: String by lazy {
+            println("computed!")
+            println("computed!")
+            println("computed!")
+            println("computed!")
+            println("computed!")
+            "Hello"
+        }
+        println(lazyValue)
+        println(lazyValue)
+    }
+
+    /**
+     * apply
+     *
+     * 有了apply函数，你就不用显式地在menuFile变量上调用每个属性设置函数了，
+     * 因为都在lambda表达式里隐式调用了。
+     *
+     * 这里apply函数施展的黑魔法就是通过带接收者的函数字面量实现的。
+     * 再仔细看一下apply的定义，注意看叫block的函数参数是如何定义的：
+     * private inline fun <T> T.apply(block: T.() -> Unit): T {
+     *      block()
+     *      return this
+     * }
+     *
+     *
+     * block函数参数不仅是个lambda表达式，它还是个泛型类型的扩展T: T.() -> Unit。
+     * 这就是你定义的lambda表达式能隐式访问接收者实例的属性和函数的奥秘。
+     *
+     * 通过定义为一个扩展，lambda表达式的接收者同时也是apply函数的接收者实例
+     * ——允许在lambda表达式里访问接收者实例的函数和属性。
+     *
+     * 使用这样的编程范式，就可以写出业界知名的"领域特定语言"（DSL）——一种API编程范式，
+     * 暴露接收者的函数和特性，以便于使用你定义的lambda表达式来读取和配置它们。
+     */
+    @Test
+    fun applyFunctionTest() {
+        val menuFile = File("../app/data/menu-file.txt").apply {
+            setReadable(true)
+            setWritable(true)
+            setExecutable(false)
+        }.readText().split("\n")
+
+        println(menuFile)
+    }
+
+    @Test
+    fun test222() {
+        val nullList: List<Any>? = null
+        val b1 = nullList.isNullOrEmpty() // true
+        println(b1)
+
+        val empty: List<Any> = emptyList()
+        val b2 = empty.isNullOrEmpty() // true
+        println(b2)
+
+        val collection: List<Char> = listOf('a', 'b', 'c')
+        val b3 = collection.isNullOrEmpty() // false
+        println(b3)
+    }
+
+
+    /**
+     * Contract 契约 极简教程
+     * https://www.jianshu.com/p/a35f99adf365
+     */
+    fun f0(s: String?): Int {
+        return if (s != null) {
+            s.length
+        } else 0
+    }
+    //compile error
+    //private fun f1(s: String?): Int {
+    //    return if (isNotEmpty(s)) {
+    //     s.length
+    //     } else 0
+    // }
+
+    private fun f1(s: String?): Int {
+        return if (isNotEmpty(s)) {
+            s?.length ?: 0
+        } else 0
+    }
+
+    private fun isNotEmpty(s: String?): Boolean {
+        return s != null && s != ""
+    }
+
+    //由于Contract契约API还是Experimental，所以需要使用ExperimentalContracts注解声明
+    @ExperimentalContracts
+    private fun isNotEmptyWithContract(s: String?): Boolean {
+        // val a = 1
+        // 这里契约的意思是: 调用 isNotEmptyWithContract 函数，会产生这样的效果:
+        // 如果返回值是true, 那就意味着 s != null.
+        // 把这个契约行为告知到给编译器，编译器就知道了下次碰到这种情形，你的 s 就是非空的，自然就smart cast了。
+        contract {
+            returns(true) implies (s != null)
+        }
+        return s != null && s != ""
+    }
+
+    @ExperimentalContracts
+    private fun getLengthWithContract(s: String?): Int {
+        return if (isNotEmptyWithContract(s)) {
+            s.length
+        } else 0
+    }
+
+    @Test
+    @ExperimentalContracts
+    fun contractTest() {
+        val length = getLengthWithContract("abc")
+        val length2 = getLengthWithContract("123")
+        Assertions.assertEquals(3, length)
+        Assertions.assertEquals(3, length2)
+    }
+
+    /**
+     * closeable use
+     *
+     * 实现了Closeable接口的对象可调用use函数
+     * use函数会自动关闭调用者（无论中间是否出现异常）
+     * Kotlin的File对象和IO流操作变得行云流水
+     * https://blog.csdn.net/qq_33215972/article/details/79762878
+     */
+    @Test
+    fun closeableUseTest() {
+        File("../app/data/menu-file.txt")
+            .readLines()
+            .forEach { println(it) }
+    }
+
+    /**
+     * also函数
+     * also函数和let函数功能相似。
+     * 和let一样，also也是把接收者作为值参传给lambda。
+     * 但有一点不同：also返回接收者对象，而let返回lambda结果。
+     *
+     * 因为这个差异，also尤其适合针对同一原始对象，利用副作用做事。
+     * 例如，在下面这个例子里，also被调用了两次，
+     * 每次做一件事：打印文件名一次，把文件内容赋值给fileContents变量一次。
+     * 既然also返回的是接收者对象，你就可以基于原始接收者对象执行额外的链式调用。
+     */
+    @Test
+    fun alsoTest() {
+        var fileContents: List<String>
+        val file = File("path")
+            .also {
+                println("alsoFunction:" + it.name)
+            }.also {
+                fileContents = it.readLines()
+            }
+        println("alsoFunction:$file")
+        println("alsoFunction:$fileContents")
+    }
+
 }

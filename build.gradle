@@ -3,6 +3,7 @@ apply from: 'config.gradle'
 
 buildscript {
     ext.kotlin_version = '1.5.30-M1'
+    ext.proguard_version = '7.1.1'
     repositories {
         google()
         mavenCentral()
@@ -12,7 +13,8 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.0.0'
         //noinspection DifferentKotlinGradleVersion
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.guardsquare:proguard-gradle:7.1.0'
+        classpath "com.guardsquare:proguard-gradle:$proguard_version"
+        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1'
         //classpath 'com.android.tools.build:gradle:7.1.0-alpha04'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -23,7 +25,7 @@ buildscript {
             // 接收一系列替换规则，允许你通过substitute函数为项目中的依赖替换为你希望的依赖项
             // Override the default version of ProGuard with the most recent one.
             dependencySubstitution {
-                substitute module('net.sf.proguard:proguard-gradle') with module('com.guardsquare:proguard-gradle:7.1.0')
+                substitute module('net.sf.proguard:proguard-gradle') with module("com.guardsquare:proguard-gradle:$proguard_version")
             }
         }
     }
