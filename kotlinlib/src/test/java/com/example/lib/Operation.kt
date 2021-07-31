@@ -378,7 +378,7 @@ class Operation {
      */
     @Test
     fun applyFunctionTest() {
-        val menuFile = File("../app/data/menu-file.txt").apply {
+        val menuFile = File("../app/.gitignore").apply {
             setReadable(true)
             setWritable(true)
             setExecutable(false)
@@ -468,7 +468,7 @@ class Operation {
      */
     @Test
     fun closeableUseTest() {
-        File("../app/data/menu-file.txt")
+        File("../app/.gitignore")
             .readLines()
             .forEach { println(it) }
     }
@@ -487,7 +487,7 @@ class Operation {
     @Test
     fun alsoTest() {
         var fileContents: List<String>
-        val file = File("path")
+        val file = File("../app/.gitignore")
             .also {
                 println("alsoFunction:" + it.name)
             }.also {
