@@ -63,17 +63,15 @@ object BaseDexClassLoaderHookHelper {
             //1.获取BaseDexClassLoader的成员DexPathList pathList
             //private final DexPathList pathList;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
-            val pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList")
-            pathListField.isAccessible = true
-
             //2.获取DexPathList pathList实例;
-            val dexPathList = pathListField[baseDexClassLoader]
+            val dexPathList = baseDexClassLoaderClazz.getDeclaredField("pathList")
+                .apply { isAccessible = true }[baseDexClassLoader]
 
             //3.获取DexPathList的成员: Element[] dexElements 的Field
             //private Element[] dexElements;
             //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
-            val dexElementsField = dexPathList.javaClass.getDeclaredField("dexElements")
-            dexElementsField.isAccessible = true
+            val dexElementsField =
+                dexPathList.javaClass.getDeclaredField("dexElements").apply { isAccessible = true }
 
             //4.获取DexPathList的成员 Element[] dexElements 的值
             //Element是DexPathList的内部类
@@ -93,6 +91,10 @@ object BaseDexClassLoaderHookHelper {
 
             //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
             val apiLevel = Build.VERSION.SDK_INT
+
+            val dexFile =
+                DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
+
             val elementPluginObj: Any = when {
                 apiLevel >= 26 -> {
                     //26<=API<=31 (8.0<=API<=12.0)
@@ -102,10 +104,6 @@ object BaseDexClassLoaderHookHelper {
                     // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#637
                     // 注意getConstructor vs getDeclaredConstructor 的区别
                     // public Element(File dir, boolean isDirectory, File zip, DexFile dexFile) {
-                    val elementConstructor = elementClazz.getDeclaredConstructor(
-                        DexFile::class.java, File::class.java
-                    )
-                    elementConstructor.isAccessible = true
 
                     //8. 生成Element的实例对象
                     //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
@@ -115,54 +113,39 @@ object BaseDexClassLoaderHookHelper {
                     //  @param outputPathName File that will hold the optimized form of the DEX data.
                     //  @param flags Enable optional features.  (Currently none defined.)
                     // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
-                    val dexFile =
-                        DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
-                    elementConstructor.newInstance(dexFile, apkFile)
+                    elementClazz.getDeclaredConstructor(
+                        DexFile::class.java, File::class.java
+                    ).apply { isAccessible = true }.newInstance(dexFile, apkFile)
                 }
                 apiLevel >= 18 -> {
                     //18<=API<=25 (4.3<=API<=7.1.1)
                     //7.构造插件Element
                     // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
-                    val elementConstructor = elementClazz.getDeclaredConstructor(
+                    //8. 生成Element的实例对象
+                    elementClazz.getDeclaredConstructor(
                         File::class.java,
                         Boolean::class.javaPrimitiveType,
                         File::class.java,
                         DexFile::class.java
-                    )
-                    elementConstructor.isAccessible = true
-
-                    //8. 生成Element的实例对象
-                    val dexFile =
-                        DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
-                    elementConstructor.newInstance(apkFile, false, apkFile, dexFile)
+                    ).apply { isAccessible = true }.newInstance(apkFile, false, apkFile, dexFile)
                 }
                 apiLevel == 17 -> {
                     //API=17  (API=4.2)
                     //7.构造插件Element
                     // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
-                    val elementConstructor = elementClazz.getDeclaredConstructor(
-                        File::class.java, File::class.java, DexFile::class.java
-                    )
-                    elementConstructor.isAccessible = true
-
                     //8. 生成Element的实例对象
-                    val dexFile =
-                        DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
-                    elementConstructor.newInstance(apkFile, apkFile, dexFile)
+                    elementClazz.getDeclaredConstructor(
+                        File::class.java, File::class.java, DexFile::class.java
+                    ).apply { isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
                 }
                 else -> {
                     //15~16 (4.0.3=<API=4.1)
                     //7.构造插件Element
                     // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
-                    val elementConstructor = elementClazz.getDeclaredConstructor(
-                        File::class.java, ZipFile::class.java, DexFile::class.java
-                    )
-                    elementConstructor.isAccessible = true
-
                     //8. 生成Element的实例对象
-                    val dexFile =
-                        DexFile.loadDex(apkFile.canonicalPath, optDexFile.canonicalPath, 0)
-                    elementConstructor.newInstance(apkFile, ZipFile(apkFile), dexFile)
+                    elementClazz.getDeclaredConstructor(
+                        File::class.java, ZipFile::class.java, DexFile::class.java
+                    ).apply { isAccessible = true }.newInstance(apkFile, ZipFile(apkFile), dexFile)
                 }
             }
 

@@ -7,17 +7,12 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0'
         //noinspection DifferentKotlinGradleVersion
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.guardsquare:proguard-gradle:$proguard_version"
-        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1'
-        //classpath 'com.android.tools.build:gradle:7.1.0-alpha04'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
     configurations.all {
         resolutionStrategy {
@@ -35,7 +30,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-
     }
 
     gradle.projectsEvaluated {
