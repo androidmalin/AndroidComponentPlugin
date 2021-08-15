@@ -2,11 +2,12 @@
 apply from: 'config.gradle'
 
 buildscript {
-    ext.kotlin_version = '1.5.30-M1'
+    ext.kotlin_version = '1.5.30-RC'
     ext.proguard_version = '7.1.1'
     repositories {
         google()
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0'
@@ -30,6 +31,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        jcenter()
     }
 
     gradle.projectsEvaluated {

@@ -27,7 +27,6 @@ android {
 
 dependencies {
     implementation rootProject.ext.dependencies["androidx.appcompat"]
-    implementation project(path: ':restrictionbypass')
     implementation rootProject.ext.dependencies["androidx.core-ktx"]
     implementation rootProject.ext.dependencies["kotlin-stdlib-jdk7"]
 }

@@ -4,7 +4,7 @@
     package="com.malin.hook">
 
     <application
-        android:name=".MApplication"
+        android:name="com.malin.hook.MApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

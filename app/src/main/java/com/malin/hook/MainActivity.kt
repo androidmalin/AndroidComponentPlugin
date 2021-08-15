@@ -1,5 +1,6 @@
 package com.malin.hook
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 
 /**
  * https://developer.android.com/kotlin/common-patterns?hl=zh-cn
@@ -24,12 +26,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var mIvPluginRes: ImageView
     private val mBtnStartHostRegisterAct: Button by bindView(R.id.btn_start_host_register_act)
 
+    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        initView()
-        initListener()
-        initLoadPluginResourceImg()
+        AsyncLayoutInflater(this@MainActivity).inflate(
+            R.layout.activity_main,
+            null
+        ) { view, _, _ ->
+            setContentView(view)
+            initView()
+            initListener()
+            initLoadPluginResourceImg()
+        }
     }
 
     private fun initView() {

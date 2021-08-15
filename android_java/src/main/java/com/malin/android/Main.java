@@ -1,11 +1,8 @@
 package com.malin.android;
 
-import org.junit.jupiter.api.Test;
-
 public class Main {
 
-    @Test
-    public void main() {
+    public static void main(String[] args) {
         ActivityThread thread = new ActivityThread();
         thread.attach();
 

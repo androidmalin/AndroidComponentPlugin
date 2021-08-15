@@ -4,13 +4,11 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.malin.plugin.impl.BaseDexClassLoaderHookHelper.patchClassLoader
 import com.malin.plugin.impl.BaseDexClassLoaderHookHelperAnother.patchClassLoader
 import com.malin.plugin.impl.HookActivity.hookPackageManager
 import com.malin.plugin.impl.HookActivityWrapper.hookStartActivity
 import com.malin.plugin.impl.HookInstrumentation.hookInstrumentation
-import org.chickenhook.restrictionbypass.Unseal
 import java.util.concurrent.Executors
 
 object PluginImpl {
@@ -21,20 +19,10 @@ object PluginImpl {
     private val mHandler = Handler(Looper.getMainLooper())
 
     fun init(context: Context, instrumentation: Boolean, firstMode: Boolean) {
-        unseal()
         if (instrumentation) {
             hookInstrumentation(context)
         }
         installActivity(context, instrumentation, firstMode)
-    }
-
-    private fun unseal() {
-        try {
-            Unseal.unseal()
-        } catch (e: Throwable) {
-            e.printStackTrace()
-            Log.e(PluginImpl::class.java.simpleName, "Unable to unseal hidden api access", e)
-        }
     }
 
     private fun installActivity(context: Context, instrumentation: Boolean, firstMode: Boolean) {
