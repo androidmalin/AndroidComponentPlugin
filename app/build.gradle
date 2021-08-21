@@ -84,7 +84,6 @@ dependencies {
     implementation rootProject.ext.dependencies["kotlin-stdlib-jdk7"]
     implementation "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
     implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
     implementation project(path: ':pluingImpl')
     implementation project(path: ':hiddenapibypass')
     implementation project(path: ':restrictionbypass')

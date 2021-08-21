@@ -1,6 +1,7 @@
 package com.malin.hook
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -20,6 +21,7 @@ class TargetAppCompatActivity : AppCompatActivity() {
         relativeLayout.gravity = Gravity.CENTER
         val textView = TextView(this)
         textView.text = "宿主中未注册的TargetAppCompatActivity,启动成功!"
+        textView.setTextColor(Color.parseColor("#000000"))
         relativeLayout.addView(textView)
         setContentView(relativeLayout)
     }

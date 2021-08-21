@@ -451,8 +451,8 @@ object HookActivity {
         private val mSubActivityClazz: Class<*>
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
-            if (method.name == "startActivity") {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
+            if (method.name == "startActivity" && args != null && args.isNotEmpty()) {
                 var intentIndex = 2
                 for (i in args.indices) {
                     if (args[i] is Intent) {
@@ -477,7 +477,7 @@ object HookActivity {
             }
             //public abstract int android.app.IActivityManager.startActivity(android.app.IApplicationThread,java.lang.String,android.content.Intent,java.lang.String,android.os.IBinder,java.lang.String,int,int,android.app.ProfilerInfo,android.os.Bundle) throws android.os.RemoteException
             //public abstract int android.app.IActivityTaskManager.startActivity(whoThread, who.getBasePackageName(), intent,intent.resolveTypeIfNeeded(who.getContentResolver()),token, target != null ? target.mEmbeddedID : null,requestCode, 0, null, options);
-            return method.invoke(mIActivityManager, *args)
+            return method.invoke(mIActivityManager, *(args ?: arrayOfNulls<Any>(0)))
         }
     }
 
@@ -584,9 +584,9 @@ object HookActivity {
         private val mSubActivityClazzName: String
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>): Any? {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
             //public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
-            if ("getActivityInfo" == method.name) {
+            if ("getActivityInfo" == method.name && args != null && args.isNotEmpty()) {
                 var index = 0
                 for (i in args.indices) {
                     if (args[i] is ComponentName) {
@@ -597,7 +597,11 @@ object HookActivity {
                 val componentName = ComponentName(mAppPackageName, mSubActivityClazzName)
                 args[index] = componentName
             }
-            return method.invoke(mIPackageManagerObj, *args)
+            //https://blog.csdn.net/skeeing/article/details/96122977
+            //https://stackoverflow.com/questions/41774450/why-is-kotlin-throw-illegalargumentexception-when-using-proxy
+            //* is also used to pass an array to a vararg parameter
+            //method!!.invoke(worker, *(args ?: arrayOfNulls<Any>(0)))
+            return method.invoke(mIPackageManagerObj, *(args ?: arrayOfNulls<Any>(0)))
         }
     }
 }

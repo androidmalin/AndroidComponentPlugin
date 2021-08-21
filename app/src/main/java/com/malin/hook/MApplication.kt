@@ -11,13 +11,12 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass
 class MApplication : Application() {
     override fun attachBaseContext(context: Context) {
         super.attachBaseContext(context)
-        unseal()
+        unseal(false)
     }
 
     override fun onCreate() {
         super.onCreate()
-        PluginImpl.init(context = baseContext, instrumentation = true, firstMode = true)
-        xcrash.XCrash.init(this)
+        PluginImpl.init(context = baseContext, instrumentation = false, firstMode = true)
     }
 
     private fun unseal(boolean: Boolean = true) {
