@@ -1,53 +1,253 @@
-### Android ams hook, 启动未在AndroidManifest.xml中注册的Activity
+### Android 启动未在AndroidManifest.xml中注册的Activity
 
-适配了Android4-9,要彻底搞清楚代码,需要提前掌握的知识点如下:
-1. [反射的使用](https://blog.csdn.net/gdutxiaoxu/article/details/68947735)
-2. [泛型](https://blog.csdn.net/s10461/article/details/53941091)
-3. [动态代理](https://blog.csdn.net/u011784767/article/details/78281384)
-4. [AIDL通信](https://blog.csdn.net/luoyanglizi/article/details/51980630)
-5. [Activity启动流程以及其中涉及到的两次跨进程通信](https://blog.csdn.net/jiangwei0910410003/article/details/52549333)
-6. [Handler消息处理机制](https://blog.csdn.net/guolin_blog/article/details/9991569)
-7. [Activity启动拦截](https://blog.csdn.net/jiangwei0910410003/article/details/52550147)
+### 测试代码为 develop_kotlin分支
+### wetest设备兼容测试情况如下:
+### 测试设备数量247, 通过245(99.2%), 2台未通过.
 
-
-### 问题思考
-1. 如何确保我们启动的未注册的Activity,有正常的Activity的生命周期?
-
-[源码探索系列29---插件化基础之启动插件的Activity](http://sanjay-f.github.io/2016/04/01/%E6%BA%90%E7%A0%81%E6%8E%A2%E7%B4%A2%E7%B3%BB%E5%88%9729---%E6%8F%92%E4%BB%B6%E5%8C%96%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%90%AF%E5%8A%A8%E6%8F%92%E4%BB%B6%E7%9A%84Activity/)
-
-2. 从整体宏观的角度看,我们到底做了什么?
-
-3. 对PackageManager的hook,为什么要hook两个地方
-
-[hook技术(三)对AMS&PMS进行Hook](https://blog.csdn.net/wangwei708846696/article/details/79525467)
-
-```java
-@Override
-public PackageManager getPackageManager() {
-    if (mPackageManager != null) {
-        return mPackageManager;
-    }
-    IPackageManager pm = ActivityThread.getPackageManager();
-    if (pm != null) {
-        return (mPackageManager = new ApplicationPackageManager(this, pm));
-    }
-    return null;
-}
-```
-
-由于系统的执行肯定在我们代码之前，所以系统先生成了一个pm，这个是原生的pm然后保存在ApplicationPackageManager中，
-使得以后使用ContextImp.getPackageManager()都返回这个IPackageManager 对象。
-就算我们后来替换了ActivityThread.getPackageManager()，但是也不影响mPackageManager 里面之前包装好的。
-所以我们还需要改变mPackageManager 里面的原来的pm对象。
-
-4. Hook AMS和Hook Instrumentation两种方式的区别?
-
-
-### 参考文章列表
-1. [Android：学习AIDL，这一篇文章就够了(上)](https://blog.csdn.net/luoyanglizi/article/details/51980630)
-2. [Android：学习AIDL，这一篇文章就够了(下)](https://blog.csdn.net/luoyanglizi/article/details/52029091)
-3. [大白话说Java反射：入门、使用、原理](https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html)
-4. [Android 插件化原理解析——Hook机制之AMS&PMS](http://weishu.me/2016/03/07/understand-plugin-framework-ams-pms-hook/)
-5. [Android系统篇之----Hook系统的AMS服务实现应用启动的拦截功能](https://blog.csdn.net/jiangwei0910410003/article/details/52550147)
-6. [Android插件化的兼容性（中）：Android P的适配](https://www.cnblogs.com/Jax/p/9521305.html)
-7. [Android Hook Activity 的几种姿势](https://blog.csdn.net/gdutxiaoxu/article/details/81459910)
+| 设备品牌     | 设备型号                    | 设备别名               | 系统版本    |通过|
+|:-:         |:-:                         |:-:                    |:-:       |:-:|
+| Xiaomi     | M2011K2C                   | 小米11 5G              | 11    |  ✅  |
+| Xiaomi     | M2012K11AC                 | 红米 K40               | 11    |  ✅  |
+| vivo       | V1986A                     | VIVO iQOO Z1          | 11    |  ✅  |
+| OPPO       | PDPM00                     | oppo Reno4 5G         | 11    |  ✅  |
+| vivo       | V2054A                     | iQOO                  | 11    |  ✅  |
+| vivo       | V1916A                     | VIVO iQOO Pro 5G      | 11    |  ✅  |
+| OnePlus    | KB2000                     | OnePlus 8T 5G         | 11    |  ✅  |
+| XIAOMI     | M2102J2SC                  | 小米10S                | 11    |  ✅  |
+| Xiaomi     | Redmi K30 Pro Zoom Edition | K30 Pro               | 11    |  ✅  |
+| XIAOMI     | M2102K1AC                  | 小米11 Pro             | 11    |  ✅  |
+| OPPO       | PEGT00                     | Reno 5                | 11    |  ✅  |
+| vivo       | V1824BA                    | VIVO iQOO             | 11    |  ✅  |
+| OnePlus    | IN2020                     | 8 Pro                 | 11    |  ✅  |
+| ONEPLUS    | IN2010                     | 一加8                  | 11    |  ✅  |
+| REALME     | RMX3121                    | realmeV11             | 11    |  ✅  |
+| SAMSUNG    | SM-G9730                   | Galaxy S10            | 11    |  ✅  |
+| realme     | RMX2202                    | realme GT             | 11    |  ✅  |
+| ONEPLUS    | LE2110                     | 一加9                  | 11    |  ✅  |
+| SAMSUNG    | SM-N9760                   | SM-N9760              | 11    |  ✅  |
+| OPPO       | PDEM30                     | Find X2 Pro           | 11    |  ✅  |
+| ONEPLUS    | HD1910                     | OnePlus 7T            | 11    |  ✅  |
+| samsung    | SM-G9860                   | 三星Galaxy S20+ 5G     | 11    |  ✅  |
+| SAMSUNG    | SM-G9880                   | Galaxy S20 Ultra 5G   | 11    |  ✅  |
+| REALME     | RMX3041                    | realme V13            | 11    |  ✅  |
+| GOOGLE     | Pixel 5                    | PIXEL 5               | 11    |  ✅  |
+| GOOGLE     | Pixel 4                    | PIXEL 4               | 11    |  ✅  |
+| HUAWEI     | SEA-AL10                   | 华为nova 5 Pro         | 10    |  ✅  |
+| OPPO       | PBEM00                     | OPPO R17              | 10    |  ✅  |
+| HUAWEI     | ELE-AL00                   | 华为 P30              | 10    |  ✅  |
+| HUAWEI     | LIO-AN00                   | 华为 Mate 30 Pro      | 10    |  ✅  |
+| HUAWEI     | TAS-AN00                   | 华为 Mate 30 5G       | 10    |  ✅  |
+| Xiaomi     | Mi 10                      | 小米10                | 10    |  ✅  |
+| HUAWEI     | ELS-AN00                   | 华为 P40 Pro 5G       | 10    |  ✅  |
+| HUAWEI     | STK-AL00                   | 华为畅享10 Plus        | 10    |  ✅  |
+| vivo       | V1981A                     | VIVO iQOO Neo3        | 10    |  ✅  |
+| HUAWEI     | ANA-AN00                   | 华为P40               | 10    |  ✅  |
+| HUAWEI     | JEF-AN00                   | 华为 nova7 5G         | 10    |  ✅  |
+| vivo       | V1838A                     | VIVO X27             | 10    |  ✅  |
+| HUAWEI     | YAL-AL00                   | 荣耀20                | 10    |  ✅  |
+| vivo       | V1831A                     | VIVO S1              | 10    |  ✅  |
+| HUAWEI     | HMA-AL00                   | 华为 Mate 20          | 10    |  ✅  |
+| HUAWEI     | NOH-AN00                   | HUAWEI Mate 40 Pro  | 10    |  ✅  |
+| HUAWEI     | VOG-AL00                   | 华为P30 Pro           | 10    |  ✅  |
+| Xiaomi     | Redmi Note 8 Pro           | Redmi Note 8 Pro    | 10    |  ✅  |
+| HUAWEI     | PCT-AL10                   | 荣耀V20               | 10    |  ✅  |
+| HUAWEI     | TAS-AL00                   | Mate 30             | 10    |  ✅  |
+| HUAWEI     | CDY-AN00                   | 华为nova 7 SE         | 10    |  ✅  |
+| Xiaomi     | Redmi K30 5G               | Redmi K30 5G        | 10    |  ✅  |
+| HUAWEI     | JEF-AN20                   | 华为nova 7            | 10    |  ✅  |
+| HUAWEI     | LYA-AL00                   | 华为 Mate 20 Pro      | 10    |  ✅  |
+| vivo       | V1986A                     | VIVO iQOO Z1        | 10    |  ✅  |
+| HUAWEI     | EML-AL00                   | 华为 P20              | 10    |  ✅  |
+| Xiaomi     | M2007J22C                  | Redmi Note 9 5G     | 10    |  ✅  |
+| HUAWEI     | DVC-AN20                   | 华为畅享20 Pro          | 10    |  ✅  |
+| vivo       | V1938CT                    | VIVO X30            | 10    |  ✅  |
+| Xiaomi     | Redmi K20 Pro              | 红米 K20 Pro          | 10    |  ✅  |
+| vivo       | V2012A                     | VIVO iQOO Z1x       | 10    |  ✅  |
+| OPPO       | PDAM10                     | OPPO A52            | 10    |  ✅  |
+| HUAWEI     | TEL-AN00a                  | 荣耀X10               | 10    |  ✅  |
+| OPPO       | PDPM00                     | oppo Reno4 5G       | 10    |  ✅  |
+| Xiaomi     | Redmi K30 Pro              | 红米 K30 Pro          | 10    |  ✅  |
+| HUAWEI     | JER-AN10                   | 华为nova 7 Pro        | 10    |  ✅  |
+| XIAOMI     | M2004J7AC                  | Redmi 10X           | 10    |  ✅  |
+| vivo       | V2001A                     | VIVO X50            | 10    |  ✅  |
+| HUAWEI     | ANG-AN00                   | nova 8              | 10    |  ✅  |
+| HUAWEI     | CDY-AN90                   | 荣耀30s               | 10    |  ✅  |
+| OPPO       | PCKM00                     | OPPO Reno2          | 10    |  ✅  |
+| OPPO       | PCLM50                     | OPPO Reno3元气版       | 10    |  ✅  |
+| vivo       | V1965A                     | VIVO Y50            | 10    |  ✅  |
+| OPPO       | PAAM00                     | R15 梦镜版             | 10    |  ✅  |
+| OPPO       | PCNM00                     | OPPO K5             | 10    |  ✅  |
+| HUAWEI     | OXF-AN00                   | 荣耀V30               | 10    |  ✅  |
+| HUAWEI     | BMH-AN10                   | 荣耀30                | 10    |  ✅  |
+| HUAWEI     | EBG-AN00                   | 荣耀30 Pro            | 10    |  ✅  |
+| HUAWEI     | HRY-AL00Ta                 | 荣耀20i               | 10    |  ✅  |
+| HUAWEI     | YAL-AL50                   | 荣耀20S               | 10    |  ✅  |
+| HUAWEI     | OXF-AN10                   | 荣耀V30 PRO           | 10    |  ✅  |
+| vivo       | V1955A                     | VIVO iQOO 3         | 10    |  ✅  |
+| HUAWEI     | HLK-AL10                   | 荣耀 9X Pro           | 10    |  ✅  |
+| HUAWEI     | LIO-AN00m                  | Mate 30E Pro 5G     | 10    |  ✅  |
+| OPPO       | PDNM00                     | OPPO Reno4 Pro      | 10    |  ✅  |
+| HUAWEI     | TNY-AL00                   | 荣耀Magic2            | 10    |  ✅  |
+| Xiaomi     | M2003J15SC                 | Redmi 10X 4G        | 10    |  ✅  |
+| HUAWEI     | FRL-AN00a                  | 畅享20 Plus           | 10    |  ✅  |
+| OPPO       | PERM00                     | K7x                 | 10    |  ✅  |
+| XIAOMI     | M2010J19SC                 | Redmi Note 9 4G     | 10    |  ✅  |
+| Xiaomi     | MI 8 UD                    | MI 8 UD             | 10    |  ✅  |
+| Xiaomi     | M2004J19C                  | Redmi 9             | 10    |  ✅  |
+| HUAWEI     | OCE-AN10                   | Mate 40             | 10    |  ✅  |
+| OPPO       | PBCM30                     | OPPO K1             | 10    |  ✅  |
+| HUAWEI     | AKA-AL10                   | 荣耀Play4T            | 10    |  ✅  |
+| HUAWEI     | WKG-AN00                   | 畅享20 5G             | 10    |  ✅  |
+| OPPO       | PDHM00                     | OPPO Ace2           | 10    |  ✅  |
+| HONOR      | YOK-AN10                   | 荣耀V40               | 10    |  ✅  |
+| realme     | RMX2121                    | realme X7 Pro       | 10    |  ✅  |
+| vivo       | V2005A                     | VIVO X50 Pro        | 10    |  ✅  |
+| HUAWEI     | MOA-AL00                   | 荣耀畅玩9A              | 10    |  ✅  |
+| ONEPLUS    | IN2010                     | 一加8                 | 10    |  ✅  |
+| OPPO       | PDEM10                     | OPPO FIND X2        | 10    |  ✅  |
+| vivo       | V1821A                     | VIVO NEX 双屏版        | 10    |  ✅  |
+| HUAWEI     | OCE-AN50                   | Mate 40E            | 10    |  ✅  |
+| OnePlus    | HD1900                     | 一加7T                | 10    |  ✅  |
+| SAMSUNG    | SM-G9650                   | 三星 Galaxy S9+       | 10    |  ✅  |
+| HUAWEI     | JSC-AN00                   | nova 8 SE           | 10    |  ✅  |
+| VIVO       | V1950A                     | VIVO NEX 3S         | 10    |  ✅  |
+| vivo       | V2023A                     | iQOO U1             | 10    |  ✅  |
+| MEIZU      | meizu 17 Pro               | 17 Pro              | 10    |  ✅  |
+| HUAWEI     | EBG-AN10                   | Honor 30 Pro+       | 10    |  ✅  |
+| HUAWEI     | TNNH-AN00                  | Play4               | 10    |  ✅  |
+| HUAWEI     | TNN-AN00                   | 麦芒9                 | 10    |  ✅  |
+| OPPO       | PDEM30                     | Find X2 Pro         | 10    |  ✅  |
+| REALME     | RMX2201                    | Realme V3 5G        | 10    |  ✅  |
+| HUAWEI     | OXP-AN00                   | Play4 Pro           | 10    |  ✅  |
+| ASUS       | ASUS_I003DD                | ROG Phone 3         | 10    |  ✅  |
+| realme     | RMX1931                    | X2 Pro              | 10    |  ✅  |
+| vivo       | V2011A                     | X50 Pro+            | 10    |  ✅  |
+| SAMSUNG    | SM-G9810                   | 三星Galaxy S20 5G     | 10    |  ✅  |
+| samsung    | SM-G9860                   | 三星Galaxy S20+ 5G    | 10    |  ✅  |
+| VIVO       | V1923A                     | NEX 3               | 10    |  ✅  |
+| HUAWEI     | HMA-TL00                   | Mate20              | 10    |  ✅  |
+| HUAWEI     | EVR-AN00                   | HUAWEI Mate 20 X 5G | 10    |  ✅  |
+| BLACKSHARK | SHARK MBU-A0               | 游戏手机3 Pro           | 10    |  ✅  |
+| HUAWEI     | ALP-TL00                   | 华为Mate10            | 10    |  ✅  |
+| samsung    | SM-A6060                   | Galaxy A60          | 10    |  ✅  |
+| SAMSUNG    | SM-G7810                   | Galaxy S20 FE 5G    | 10    |  ✅  |
+| XIAOMI     | MI 8 Explorer Edition      | 8 透明探索版             | 10    |  ✅  |
+| SAMSUNG    | SM-A9200                   | Galaxy A9s          | 10    |  ✅  |
+| HUAWEI     | EBG-TN00                   | 30 Pro              | 10    |  ✅  |
+| GOOGLE     | Pixel 2 XL                 | 2 XL                | 10    |  ✅  |
+| ZTE        | ZTE A2121                  |  Axon 20 5G         | 10    |  ✅  |
+| GOOGLE     | Pixel 3a                   | Pixel 3A            | 10    |  ✅  |
+| SAMSUNG    | SM-F7000                   | Galaxy Z Flip       | 10    |  ✅  |
+| GOOGLE     | Pixel 4 XL                 | PIXEL 4 XL          | 10    |  ✅  |
+| ZTE        | ZTE 8010                   | 中兴Blade V2020 Smart | 10    |  ✅  |
+| HUAWEI     | NEO-AL00                   | 华为Mate RS 保时捷版      | 10    |  ✅  |
+| vivo       | V1901A                     | VIVO Y3             | 9    |  ✅  |
+| OPPO       | PBEM00                     | OPPO R17            | 9    |  ✅  |
+| OPPO       | PCAM10                     | OPPO A9             | 9    |  ✅  |
+| vivo       | V1934A                     | VIVO Y5s            | 9    |  ✅  |
+| OPPO       | PACM00                     | OPPO R15            | 9    |  ✅  |
+| OPPO       | PCAM00                     | OPPO Reno           | 9    |  ✅  |
+| vivo       | vivo X21A                  | VIVO X21A           | 9    |  ✅  |
+| vivo       | V1838A                     | VIVO X27            | 9    |  ✅  |
+| HUAWEI     | YAL-AL00                   | 荣耀20                | 9    |  ✅  |
+| vivo       | V1831A                     | VIVO S1             | 9    |  ✅  |
+| HUAWEI     | HMA-AL00                   | 华为 Mate 20          | 9    |  ✅  |
+| HUAWEI     | VOG-AL00                   | 华为P30 Pro           | 9    |  ✅  |
+| HUAWEI     | JSN-AL00a                  | 荣耀8X                | 9    |  ✅  |
+| HUAWEI     | GLK-AL00                   | Nova 5i             | 9    |  ✅  |
+| OPPO       | OPPO R11s                  | OPPO R11s           | 9    |  ✅  |
+| HUAWEI     | EML-AL00                   | 华为 P20              | 9    |  ✅  |
+| OPPO       | PADM00                     | OPPO A3             | 9    |  ✅  |
+| Xiaomi     | Redmi K20 Pro              | 红米 K20 Pro          | 9    |  ✅  |
+| HUAWEI     | COL-AL10                   | 荣耀10                | 9    |  ✅  |
+| vivo       | V1816A                     | VIVO X23 炫彩版        | 9    |  ✅  |
+| HUAWEI     | PAR-AL00                   | 华为 nova 3           | 9    |  ✅  |
+| HUAWEI     | JKM-AL00b                  | 华为畅享9 Plus          | 9    |  ✅  |
+| HUAWEI     | HRY-AL00a                  | 华为 荣耀10 青春版         | 9    |  ✅  |
+| OPPO       | PBCM10                     | OPPO R15x           | 9    |  ✅  |
+| OPPO       | PCGM00                     | OPPO K3             | 9    |  ✅  |
+| HUAWEI     | HRY-AL00Ta                 | 荣耀20i               | 9    |  ✅  |
+| vivo       | V1916A                     | VIVO iQOO Pro 5G    | 9    |  ✅  |
+| Xiaomi     | Redmi Note 7               | 红米Note 7            | 9    |  ✅  |
+| vivo       | V1945A                     | VIVO Y9s            | 9    |  ✅  |
+| OPPO       | PACT00                     | R15                 | 9    |  ✅  |
+| VIVO       | vivo NEX A                 | VIVO NEX A          | 9    |  ✅  |
+| HUAWEI     | BKL-AL20                   | 荣耀V10               | 9    |  ✅  |
+| Xiaomi     | Redmi Note 7 Pro           | 红米Note 7 Pro        | 9    |  ✅  |
+| HUAWEI     | INE-AL00                   | 华为 nova3i           | 9    |  ✅  |
+| HUAWEI     | MHA-AL00                   | 华为 Mate 9           | 9    |  ✅  |
+| HUAWEI     | BLA-AL00                   | Mate 10 Pro         | 9    |  ✅  |
+| HUAWEI     | COR-AL10                   | 荣耀Play              | 9    |  ✅  |
+| OPPO       | PAFM00                     | OPPO Find X         | 9    |  ✅  |
+| OPPO       | PBBT00                     | A7x                 | 9    |  ✅  |
+| VIVO       | vivo X21UD A               | VIVO X21 屏幕指纹版      | 9    |  ✅  |
+| vivo       | V1813BT                    | VIVO Z3             | 9    |  ✅  |
+| HUAWEI     | BND-AL10                   | 荣耀畅玩 7X             | 9    |  ✅  |
+| XIAOMI     | MIX 2S                     | 小米 MIX2S            | 9    |  ✅  |
+| Xiaomi     | MI 8 SE                    | 小米8 SE              | 9    |  ✅  |
+| Xiaomi     | Redmi Note 5               | 红米Note 5            | 9    |  ✅  |
+| OPPO       | OPPO R11s Plus             | OPPO R11s Plus      | 9    |  ✅  |
+| XIAOMI     | Redmi 7                    | 红米 7                | 9    |  ✅  |
+| HUAWEI     | VTR-AL00                   | P10                 | 9    |  ✅  |
+| HUAWEI     | VKY-AL00                   | P10 Plus            | 9    |  ✅  |
+| vivo       | V1821A                     | VIVO NEX 双屏版        | 9    |  ✅  |
+| XIAOMI     | MI 9 Transparent Edition   | 小米9 透明尊享版           | 9    |  ✅  |
+| SAMSUNG    | SM-G9650                   | 三星 Galaxy S9+       | 9    |  ✅  |
+| HUAWEI     | LON-AL00                   | 华为 Mate 9 pro       | 9    |  ✅  |
+| BLACKSHARK | SKR-A0                     | 黑鲨1代                | 9    |  ✅  |
+| XIAOMI     | Redmi 8                    | 红米 8                | 9    |  ✅  |
+| ONEPLUS    | ONEPLUS A6010              | 一加6T                | 9    |  ✅  |
+| HUAWEI     | LLD-AL10                   | 荣耀9青春版              | 9    |  ✅  |
+| HUAWEI     | JKM-AL00a                  | 为畅享9 Plus           | 9    |  ✅  |
+| HUAWEI     | BKL-AL00                   | 荣耀 V10              | 9    |  ✅  |
+| VIVO       | V1923A                     | NEX 3               | 9    |  ✅  |
+| HUAWEI     | DUK-TL30                   | V9 移动全网通            | 9    |  ✅  |
+| GOOGLE     | Pixel 3a                   | Pixel 3A            | 9    |  ✅  |
+| HISENSE    | HNR550T                    | Hisense F50         | 9    |  ✅  |
+| SAMSUNG    | SM-A705F                   | Galaxy A70          | 9    |  ✅  |
+| OPPO       | PBAM00                     | OPPO A5             | 8.1.0    |  ✅  |
+| VIVO       | V1818A                     | VIVO Y93            | 8.1.0    |  ✅  |
+| VIVO       | V1813A                     | VIVO Y97            | 8.1.0    |  ✅  |
+| Xiaomi     | MI 8                       | 小米8                 | 8.1.0    |  ✅  |
+| vivo       | vivo X20A                  | VIVO X20 A          | 8.1.0    |  ✅  |
+| HUAWEI     | JSN-AL00a                  | 荣耀8X                | 8.1.0    |  ✅  |
+| OPPO       | OPPO R11s                  | OPPO R11s           | 8.1.0    |  ✅  |
+| OPPO       | PADM00                     | OPPO A3             | 8.1.0    |  ✅  |
+| vivo       | V1816A                     | VIVO X23 炫彩版        | 8.1.0    |  ✅  |
+| OPPO       | PAAM00                     | R15 梦镜版             | 8.1.0    |  ✅  |
+| HUAWEI     | DUB-AL00                   | 华为畅享9               | 8.1.0    |  ✅  |
+| OPPO       | PACT00                     | R15                 | 8.1.0    |  ✅  |
+| Xiaomi     | MI 6X                      | 小米6X                | 8.1.0    |  ✅  |
+| Xiaomi     | MI 8 Lite                  | 小米8 Lite            | 8.1.0    |  ✅  |
+| HUAWEI     | BLA-AL00                   | Mate 10 Pro         | 8.1.0    |  ✅  |
+| Xiaomi     | Redmi 5 Plus               | 红米5 Plus            | 8.1.0    |  ✅  |
+| OPPO       | PBCM30                     | OPPO K1             | 8.1.0    |  ✅  |
+| Xiaomi     | MI 8 SE                    | 小米8 SE              | 8.1.0    |  ✅  |
+| Xiaomi     | MI 5X                      | 5X                  | 8.1.0    |  ✅  |
+| OPPO       | OPPO R11s Plus             | OPPO R11s Plus      | 8.1.0    |  ✅  |
+| OnePlus    | ONEPLUS A6000              | 一加手机6               | 8.1.0    |  ✅  |
+| vivo       | vivo X9s L                 | VIVO X9s L          | 8.1.0    |  ✅  |
+| XIAOMI     | Redmi 6                    | Redmi 6             | 8.1.0    |  ✅  |
+| OPPO       | OPPO R11 Pluskt            | R11 Plus kt         | 8.1.0    |  ✅  |
+| BLACKSHARK | SKR-A0                     | 黑鲨1代                | 8.1.0    |  ✅  |
+| OPPO       | OPPO R11 Plusk             | R11 Plusk           | 8.1.0    |  ✅  |
+| XIAOMI     | MI 8 Explorer Edition      | 8 透明探索版             | 8.1.0    |  ✅  |
+| HUAWEI     | COL-L29                    | 10 国际版              | 8.1.0    |  ✅  |
+| HUAWEI     | CLT-L29                    | P20 Pro             | 8.1.0    |  ✅  |
+| vivo       | vivo X9                    | VIVO X9             | 7.1.2    |  ✅  |
+| vivo       | vivo X9Plus                | VIVO X9Plus         | 7.1.2    |  ✅  |
+| Xiaomi     | Redmi 5 Plus               | 红米5 Plus            | 7.1.2    |  ✅  |
+| Xiaomi     | MI 5X                      | 5X                  | 7.1.2    |  ✅  |
+| vivo       | vivo X9L                   | VIVO X9L            | 7.1.2    |  ✅  |
+| MEIZU      | M6 Note                    | M6 Note             | 7.1.2    |  ✅  |
+| XIAOMI     | Redmi Note 5A              | 红米Note 5A           | 7.1.2    |  ✅  |
+| XIAOMI     | Redmi 5A                   | 红米5A                | 7.1.2    |  ✅  |
+| vivo       | vivo Y66                   | VIVO Y66            | 6.0.1    |  ✅  |
+| OPPO       | OPPO R9sk                  | OPPO R9sk           | 6.0.1    |  ✅  |
+| OPPO       | OPPO R9s Plus              | OPPO R9s Plus       | 6.0.1    |  ✅  |
+| Xiaomi     | Redmi Note 4X              | 红米 Note 4X          | 6.0.1    |  ✅  |
+| SAMSUNG    | SM-G9350                   | Galaxy S7 edge      | 6.0.1    |  ✅  |
+| XIAOMI     | Redmi 4X                   | 红米Note 4X           | 6.0.1    |  ✅  |
+| MEIZU      | M2 E                       | 魅族魅蓝E2              | 6.0.1    |  ✅  |
+| vivo       | vivo X7                    | VIVO X7             | 5.1.1    |  ✅  |
+| VIVO       | vivo Xplay5A               | VIVO Xplay 5        | 5.1.1    |  ✅  |

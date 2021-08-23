@@ -1,0 +1,14 @@
+pidcat com.malin.hook \
+-i MIUIInput \
+-i SpannableStringBuilder \
+-i ViewContentFactory \
+-i ViewContentFactory \
+-i ViewContentFactory \
+-i ContentCatcher \
+-i Timeline \
+-i Perf \
+-i AdrenoGLES-0 \
+-i NetworkSecurityConfig \
+-i NetworkSecurityConfig \
+-i Zygote \
+-i MiuiFrameworkFactory
