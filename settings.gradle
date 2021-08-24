@@ -1,8 +1,0 @@
-rootProject.name='hook'
-include ':app'
-include ':pluingImpl'
-include ':restrictionbypass'
-include ':pluginapk'
-include ':hiddenapibypass'
-include ':hiddenapibypass_stub'
-include ':android_java'

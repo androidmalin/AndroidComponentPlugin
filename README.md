@@ -1,8 +1,8 @@
 ### Android 启动未在AndroidManifest.xml中注册的Activity
 
-### 测试代码为 develop_kotlin分支
+### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12
 ### wetest设备兼容测试情况如下:
-### 测试设备数量247, 通过245(99.2%), 2台未通过.
+### 测试设备数量247, 通过245(99.2%), 2台未通过
 
 | 设备品牌     | 设备型号                    | 设备别名               | 系统版本    |通过|
 |:-:         |:-:                         |:-:                    |:-:       |:-:|
@@ -251,3 +251,6 @@
 | MEIZU      | M2 E                       | 魅族魅蓝E2              | 6.0.1    |  ✅  |
 | vivo       | vivo X7                    | VIVO X7             | 5.1.1    |  ✅  |
 | VIVO       | vivo Xplay5A               | VIVO Xplay 5        | 5.1.1    |  ✅  |
+| VIVO       | vivo Xplay5A               | VIVO Xplay 5        | 5.1.1    |  ✅  |
+| OPPO       | OPPO R9 Plustm A           | VIVO Xplay 5        | 5.1.1    |  ❌  |
+| OPPO       | A37f                       | A37f                | 5.1.1    |  ❌  |
