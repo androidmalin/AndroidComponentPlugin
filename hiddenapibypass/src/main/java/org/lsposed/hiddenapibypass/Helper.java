@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Member;
 
+@SuppressWarnings("all")
 public class Helper {
     static public class MethodHandle {
         private final MethodType type = null;

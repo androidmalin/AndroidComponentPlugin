@@ -22,40 +22,40 @@ import java.io.File
 object HookInstrumentation {
     private const val TARGET_INTENT_CLASS = "target_intent_class"
 
-    //插件是否使用单独的classloader
+    // 插件是否使用单独的classloader
     private const val USE_SINGLE_CLASS_LOADER = false
 
     private lateinit var mContext: Context
 
     @SuppressLint("DiscouragedPrivateApi")
     fun hookInstrumentation(context: Context) {
-        //1.from ContextImpl get mMainThread field value (ActivityThread obj)
-        //2.from ActivityThread get mInstrumentation field (Instrumentation obj)
-        //3.replace ActivityThread  mInstrumentation field value use make a Instrumentation instance
+        // 1.from ContextImpl get mMainThread field value (ActivityThread obj)
+        // 2.from ActivityThread get mInstrumentation field (Instrumentation obj)
+        // 3.replace ActivityThread  mInstrumentation field value use make a Instrumentation instance
         try {
             mContext = context
-            //1.ContextImpl-->mMainThread
-            //package android.app
-            //class ContextImpl
+            // 1.ContextImpl-->mMainThread
+            // package android.app
+            // class ContextImpl
             val contextImplClazz = Class.forName("android.app.ContextImpl")
 
-            //final @NonNull ActivityThread mMainThread;
+            // final @NonNull ActivityThread mMainThread;
             val mMainThreadField =
                 contextImplClazz.getDeclaredField("mMainThread").also { it.isAccessible = true }
 
-            //2.get ActivityThread Object from ContextImpl
+            // 2.get ActivityThread Object from ContextImpl
             val activityThreadObj = mMainThreadField.get(context)
 
-            //3.mInstrumentation Object
+            // 3.mInstrumentation Object
             val activityThreadClazz = Class.forName("android.app.ActivityThread")
 
-            //Instrumentation mInstrumentation;
+            // Instrumentation mInstrumentation;
             val mInstrumentationField = activityThreadClazz.getDeclaredField("mInstrumentation")
                 .also { it.isAccessible = true }
             val mInstrumentationObj =
                 mInstrumentationField.get(activityThreadObj) as Instrumentation
 
-            //4.reset set value
+            // 4.reset set value
             mInstrumentationField[activityThreadObj] = InstrumentationProxy(
                 mInstrumentationObj,
                 context.packageManager,
@@ -104,14 +104,14 @@ object HookInstrumentation {
             }
             var finalIntent = intent
             if (resolveInfoList == null || resolveInfoList.isEmpty()) {
-                //目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
+                // 目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
                 finalIntent = Intent(who, mStubActivityClazz)
-                //public class Intent implements Parcelable;
-                //Intent类已经实现了Parcelable接口
+                // public class Intent implements Parcelable;
+                // Intent类已经实现了Parcelable接口
                 finalIntent.putExtra(TARGET_INTENT_CLASS, intent)
             }
             try {
-                //通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
+                // 通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
                 val execStartActivityMethod = Instrumentation::class.java.getDeclaredMethod(
                     "execStartActivity",
                     Context::class.java,
@@ -165,15 +165,15 @@ object HookInstrumentation {
             }
             var finalIntent = intent
             if (resolveInfoList == null || resolveInfoList.isEmpty()) {
-                //目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
+                // 目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
                 finalIntent = Intent(who, mStubActivityClazz)
-                //public class Intent implements Parcelable;
-                //Intent类已经实现了Parcelable接口
+                // public class Intent implements Parcelable;
+                // Intent类已经实现了Parcelable接口
                 finalIntent.putExtra(TARGET_INTENT_CLASS, intent)
             }
             try {
-                //just for android-15
-                //通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
+                // just for android-15
+                // 通过反射调用execStartActivity方法,这样就可以用桩Activity通过AMS的验证.
                 val execStartActivityMethod = Instrumentation::class.java.getDeclaredMethod(
                     "execStartActivity",
                     Context::class.java,
@@ -218,14 +218,14 @@ object HookInstrumentation {
                 pluginIntent.component?.className
             )
 
-            //1.className
+            // 1.className
             val finalClassName =
                 if (pluginIntentClassNameExist) pluginIntent?.component?.className else className
 
-            //2.intent
+            // 2.intent
             val finalIntent = if (pluginIntentClassNameExist) pluginIntent else intent
 
-            //3.classLoader
+            // 3.classLoader
             val finalClassLoader: ClassLoader =
                 if (USE_SINGLE_CLASS_LOADER && pluginIntentClassNameExist) {
                     val pluginDexFile =
@@ -261,7 +261,7 @@ object HookInstrumentation {
                 plugin: File,
                 packageName: String
             ): CustomClassLoader {
-                //String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent
+                // String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent
                 return CustomClassLoader(
                     plugin.path,
                     PluginUtils.getPluginOptDexDir(

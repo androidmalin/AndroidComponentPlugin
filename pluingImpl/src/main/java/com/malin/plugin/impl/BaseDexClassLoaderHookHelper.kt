@@ -57,39 +57,39 @@ object BaseDexClassLoaderHookHelper {
         // -->BaseDexClassLoader中DexPathList pathList
         // -->DexPathList中 Element[] dexElements
         try {
-            //0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
+            // 0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
             val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass
 
-            //1.获取BaseDexClassLoader的成员DexPathList pathList
-            //private final DexPathList pathList;
-            //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
-            //2.获取DexPathList pathList实例;
+            // 1.获取BaseDexClassLoader的成员DexPathList pathList
+            // private final DexPathList pathList;
+            // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
+            // 2.获取DexPathList pathList实例;
             val dexPathList = baseDexClassLoaderClazz.getDeclaredField("pathList")
                 .apply { isAccessible = true }[baseDexClassLoader]
 
-            //3.获取DexPathList的成员: Element[] dexElements 的Field
-            //private Element[] dexElements;
-            //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
+            // 3.获取DexPathList的成员: Element[] dexElements 的Field
+            // private Element[] dexElements;
+            // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
             val dexElementsField =
                 dexPathList.javaClass.getDeclaredField("dexElements").apply { isAccessible = true }
 
-            //4.获取DexPathList的成员 Element[] dexElements 的值
-            //Element是DexPathList的内部类
+            // 4.获取DexPathList的成员 Element[] dexElements 的值
+            // Element是DexPathList的内部类
             val dexElements = dexElementsField[dexPathList] as Array<*>
 
-            //5.获取dexElements数组的类型 (Element)
+            // 5.获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
             val elementClazz = dexElements.javaClass.componentType
 
-            //6.创建一个数组, 用来替换原始的数组
-            //通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
+            // 6.创建一个数组, 用来替换原始的数组
+            // 通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
             val hostAndPluginElements =
                 java.lang.reflect.Array.newInstance(
                     elementClazz!!,
                     dexElements.size + 1
                 ) as Array<*>
 
-            //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
+            // 根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
             val apiLevel = Build.VERSION.SDK_INT
 
             val dexFile =
@@ -97,18 +97,18 @@ object BaseDexClassLoaderHookHelper {
 
             val elementPluginObj: Any = when {
                 apiLevel >= 26 -> {
-                    //26<=API<=31 (8.0<=API<=12.0)
-                    //7.构造插件Element
+                    // 26<=API<=31 (8.0<=API<=12.0)
+                    // 7.构造插件Element
                     // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
                     // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){},使用会报错
                     // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#637
                     // 注意getConstructor vs getDeclaredConstructor 的区别
                     // public Element(File dir, boolean isDirectory, File zip, DexFile dexFile) {
 
-                    //8. 生成Element的实例对象
-                    //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
+                    // 8. 生成Element的实例对象
+                    // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexFile.java
 
-                    //DexFile.loadDex(String sourcePathName,String outputPathName,int flag){}
+                    // DexFile.loadDex(String sourcePathName,String outputPathName,int flag){}
                     //  @param sourcePathName Jar or APK file with "classes.dex".  (May expand this to include "raw DEX" in the future.)
                     //  @param outputPathName File that will hold the optimized form of the DEX data.
                     //  @param flags Enable optional features.  (Currently none defined.)
@@ -118,10 +118,10 @@ object BaseDexClassLoaderHookHelper {
                     ).apply { isAccessible = true }.newInstance(dexFile, apkFile)
                 }
                 apiLevel >= 18 -> {
-                    //18<=API<=25 (4.3<=API<=7.1.1)
-                    //7.构造插件Element
+                    // 18<=API<=25 (4.3<=API<=7.1.1)
+                    // 7.构造插件Element
                     // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
-                    //8. 生成Element的实例对象
+                    // 8. 生成Element的实例对象
                     elementClazz.getDeclaredConstructor(
                         File::class.java,
                         Boolean::class.javaPrimitiveType,
@@ -130,40 +130,40 @@ object BaseDexClassLoaderHookHelper {
                     ).apply { isAccessible = true }.newInstance(apkFile, false, apkFile, dexFile)
                 }
                 apiLevel == 17 -> {
-                    //API=17  (API=4.2)
-                    //7.构造插件Element
+                    // API=17  (API=4.2)
+                    // 7.构造插件Element
                     // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
-                    //8. 生成Element的实例对象
+                    // 8. 生成Element的实例对象
                     elementClazz.getDeclaredConstructor(
                         File::class.java, File::class.java, DexFile::class.java
                     ).apply { isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
                 }
                 else -> {
-                    //15~16 (4.0.3=<API=4.1)
-                    //7.构造插件Element
+                    // 15~16 (4.0.3=<API=4.1)
+                    // 7.构造插件Element
                     // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
-                    //8. 生成Element的实例对象
+                    // 8. 生成Element的实例对象
                     elementClazz.getDeclaredConstructor(
                         File::class.java, ZipFile::class.java, DexFile::class.java
                     ).apply { isAccessible = true }.newInstance(apkFile, ZipFile(apkFile), dexFile)
                 }
             }
 
-            //9.创建插件element数组
+            // 9.创建插件element数组
             val pluginElements = arrayOf(elementPluginObj)
 
-            //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
-            //* @param      src      the source array.
-            //* @param      srcPos   starting position in the source array.
-            //* @param      dest     the destination array.
-            //* @param      destPos  starting position in the destination data.
-            //* @param      length   the number of array elements to be copied.
-            //https://blog.csdn.net/wenzhi20102321/article/details/78444158
+            // public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
+            // * @param      src      the source array.
+            // * @param      srcPos   starting position in the source array.
+            // * @param      dest     the destination array.
+            // * @param      destPos  starting position in the destination data.
+            // * @param      length   the number of array elements to be copied.
+            // https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
-            //10.把插件的element数组复制进去
+            // 10.把插件的element数组复制进去
             System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.size)
 
-            //11.把宿主的elements复制进去
+            // 11.把宿主的elements复制进去
             System.arraycopy(
                 dexElements,
                 0,
@@ -172,7 +172,7 @@ object BaseDexClassLoaderHookHelper {
                 dexElements.size
             )
 
-            //12.替换
+            // 12.替换
             dexElementsField[dexPathList] = hostAndPluginElements
 
             // 简要总结一下这种方式的原理:

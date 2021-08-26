@@ -27,7 +27,7 @@ object PluginImpl {
 
     private fun installActivity(context: Context, instrumentation: Boolean, firstMode: Boolean) {
         val patchClassLoaderRunnable = Runnable {
-            //插件使用宿主的ClassLoader加载
+            // 插件使用宿主的ClassLoader加载
             PluginUtils.extractAssets(context, PLUGIN_APK_NAME)
             val dexFile = context.getFileStreamPath(PLUGIN_APK_NAME)
             val optDexFile = context.getFileStreamPath(PLUGIN_DEX_NAME)

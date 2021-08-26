@@ -26,32 +26,32 @@ class TargetActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
-        Log.d(TAG, "${TAG}:onStart")
+        Log.d(TAG, "$TAG:onStart")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "${TAG}:onResume")
+        Log.d(TAG, "$TAG:onResume")
     }
 
     override fun onRestart() {
         super.onRestart()
-        Log.d(TAG, "${TAG}:onRestart")
+        Log.d(TAG, "$TAG:onRestart")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(TAG, "${TAG}:onPause")
+        Log.d(TAG, "$TAG:onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d(TAG, "${TAG}:onStop")
+        Log.d(TAG, "$TAG:onStop")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "${TAG}:onDestroy")
+        Log.d(TAG, "$TAG:onDestroy")
     }
 
     companion object {

@@ -74,7 +74,7 @@ object PluginResourceUtil {
     @SuppressLint("DiscouragedPrivateApi", "PrivateApi")
     private fun getPluginResources(context: Context, pluginPath: String?): Resources? {
         try {
-            //1.调用assetManager.addAssetPath(pluginPath);
+            // 1.调用assetManager.addAssetPath(pluginPath);
             val assetManager = AssetManager::class.java.newInstance()
             val addAssetPathMethod =
                 assetManager.javaClass.getDeclaredMethod("addAssetPath", String::class.java)
@@ -82,13 +82,13 @@ object PluginResourceUtil {
             addAssetPathMethod.invoke(assetManager, pluginPath)
             val superRes = context.resources
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                //Resources#public void setImpl(ResourcesImpl impl) {}
+                // Resources#public void setImpl(ResourcesImpl impl) {}
                 val displayAdjustmentsClazz = Class.forName("android.view.DisplayAdjustments")
                 val displayAdjustmentsConstructor = displayAdjustmentsClazz.getDeclaredConstructor()
                 displayAdjustmentsConstructor.isAccessible = true
                 val displayAdjustmentsObj = displayAdjustmentsConstructor.newInstance()
 
-                //new ResourcesImpl(AssetManager assets,DisplayMetrics metrics,
+                // new ResourcesImpl(AssetManager assets,DisplayMetrics metrics,
                 // Configuration config, DisplayAdjustments displayAdjustments) {}
                 val resourcesImplClazz = Class.forName("android.content.res.ResourcesImpl")
                 val resourcesImplConstructor = resourcesImplClazz.getDeclaredConstructor(
@@ -105,18 +105,18 @@ object PluginResourceUtil {
                     displayAdjustmentsObj
                 )
 
-                //private Resources() {}
+                // private Resources() {}
                 val resourcesClazz = Class.forName("android.content.res.Resources")
                 val resourcesConstructor = resourcesClazz.getDeclaredConstructor()
                 resourcesConstructor.isAccessible = true
                 val resourcesObj = resourcesConstructor.newInstance()
 
-                //Resources
-                //public void setImpl(ResourcesImpl impl) {}
+                // Resources
+                // public void setImpl(ResourcesImpl impl) {}
                 val setImplMethod = resourcesClazz.getDeclaredMethod("setImpl", resourcesImplClazz)
                 setImplMethod.isAccessible = true
 
-                //resources.setImpl(ResourcesImpl impl){}
+                // resources.setImpl(ResourcesImpl impl){}
                 setImplMethod.invoke(resourcesObj, resourcesImplObj)
                 resourcesObj as Resources
             } else {

@@ -51,57 +51,56 @@ object BaseDexClassLoaderHookHelperAnother {
         // -->BaseDexClassLoader中DexPathList pathList
         // -->DexPathList中 Element[] dexElements
         try {
-            //0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
+            // 0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
             val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass
 
-            //1.获取BaseDexClassLoader的成员DexPathList pathList
-            //private final DexPathList pathList;
-            //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
+            // 1.获取BaseDexClassLoader的成员DexPathList pathList
+            // private final DexPathList pathList;
+            // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
             val pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList")
             pathListField.isAccessible = true
 
-            //2.获取DexPathList pathList实例;
+            // 2.获取DexPathList pathList实例;
             val dexPathList = pathListField[baseDexClassLoader]
 
-            //3.获取DexPathList的成员: Element[] dexElements 的Field
-            //private Element[] dexElements;
-            //http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
+            // 3.获取DexPathList的成员: Element[] dexElements 的Field
+            // private Element[] dexElements;
+            // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
             val dexElementsField = dexPathList.javaClass.getDeclaredField("dexElements")
             dexElementsField.isAccessible = true
 
-            //4.获取DexPathList的成员 Element[] dexElements 的值
-            //Element是DexPathList的内部类
+            // 4.获取DexPathList的成员 Element[] dexElements 的值
+            // Element是DexPathList的内部类
             val dexElements = dexElementsField[dexPathList] as Array<*>
 
-            //5.获取dexElements数组的类型 (Element)
+            // 5.获取dexElements数组的类型 (Element)
             // 数组的 class 对象的getComponentType()方法可以取得一个数组的Class对象
             val elementClazz = dexElements.javaClass.componentType
 
-            //6.创建一个数组, 用来替换原始的数组
-            //通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
+            // 6.创建一个数组, 用来替换原始的数组
+            // 通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
             val hostAndPluginElements = java.lang.reflect.Array.newInstance(
                 elementClazz!!,
                 dexElements.size + 1
             ) as Array<*>
 
-
-            //根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
+            // 根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
             val optimizedDirectory =
                 PluginUtils.getPluginOptDexDir(context = context, packageName = "com.malin.plugin")
             val pluginElements: Array<*>
 
-            //7.创建插件element数组
+            // 7.创建插件element数组
             val apiLevel = Build.VERSION.SDK_INT
             when {
                 apiLevel >= 23 -> {
 
-                    //1.
+                    // 1.
                     val files = ArrayList<File>()
                     files.add(apkFile)
                     val suppressedExceptions: List<IOException> = ArrayList()
 
-                    //2.
-                    //private static Element[] makePathElements(List<File> files, File optimizedDirectory, List<IOException> suppressedExceptions)
+                    // 2.
+                    // private static Element[] makePathElements(List<File> files, File optimizedDirectory, List<IOException> suppressedExceptions)
                     val makePathElementsMethod = dexPathList.javaClass.getDeclaredMethod(
                         "makePathElements",
                         List::class.java,
@@ -110,7 +109,7 @@ object BaseDexClassLoaderHookHelperAnother {
                     )
                     makePathElementsMethod.isAccessible = true
 
-                    //3.
+                    // 3.
                     pluginElements = makePathElementsMethod.invoke(
                         null,
                         files,
@@ -119,13 +118,13 @@ object BaseDexClassLoaderHookHelperAnother {
                     ) as Array<*>
                 }
                 apiLevel >= 19 -> {
-                    //1.
+                    // 1.
                     val files = ArrayList<File>()
                     files.add(apkFile)
                     val suppressedExceptions = ArrayList<IOException>()
 
-                    //2.
-                    //private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory,ArrayList<IOException> suppressedExceptions)
+                    // 2.
+                    // private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory,ArrayList<IOException> suppressedExceptions)
                     val makeDexElementsMethod = dexPathList.javaClass.getDeclaredMethod(
                         "makeDexElements",
                         ArrayList::class.java,
@@ -134,7 +133,7 @@ object BaseDexClassLoaderHookHelperAnother {
                     )
                     makeDexElementsMethod.isAccessible = true
 
-                    //3.
+                    // 3.
                     pluginElements = makeDexElementsMethod.invoke(
                         null,
                         files,
@@ -143,12 +142,12 @@ object BaseDexClassLoaderHookHelperAnother {
                     ) as Array<*>
                 }
                 else -> {
-                    //1.
+                    // 1.
                     val files = ArrayList<File>()
                     files.add(apkFile)
 
-                    //2.
-                    //private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory)
+                    // 2.
+                    // private static Element[] makeDexElements(ArrayList<File> files,File optimizedDirectory)
                     val makeDexElementsMethod = dexPathList.javaClass.getDeclaredMethod(
                         "makeDexElements",
                         ArrayList::class.java,
@@ -160,18 +159,18 @@ object BaseDexClassLoaderHookHelperAnother {
                 }
             }
 
-            //public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
-            //* @param      src      the source array.
-            //* @param      srcPos   starting position in the source array.
-            //* @param      dest     the destination array.
-            //* @param      destPos  starting position in the destination data.
-            //* @param      length   the number of array elements to be copied.
-            //https://blog.csdn.net/wenzhi20102321/article/details/78444158
+            // public static native void arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)
+            // * @param      src      the source array.
+            // * @param      srcPos   starting position in the source array.
+            // * @param      dest     the destination array.
+            // * @param      destPos  starting position in the destination data.
+            // * @param      length   the number of array elements to be copied.
+            // https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
-            //8.把插件的element数组复制进去
+            // 8.把插件的element数组复制进去
             System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.size)
 
-            //9.把宿主的elements复制进去
+            // 9.把宿主的elements复制进去
             System.arraycopy(
                 dexElements,
                 0,
@@ -180,7 +179,7 @@ object BaseDexClassLoaderHookHelperAnother {
                 dexElements.size
             )
 
-            //10.替换
+            // 10.替换
             dexElementsField[dexPathList] = hostAndPluginElements
 
             // 简要总结一下这种方式的原理:

@@ -3,7 +3,6 @@ plugins {
     kotlin("android")
 }
 
-
 android {
     compileSdk = AppConfig.compileSdkVersion
     buildToolsVersion = AppConfig.buildToolsVersion

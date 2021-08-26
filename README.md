@@ -1,5 +1,17 @@
 ### Android 启动未在AndroidManifest.xml中注册的Activity
 
+0. 支持2种方式.第一种,hook Instrument实现;第二种,hook Handler实现.
+
+1. 兼容android4.1 ~ android12
+
+2. kotlin 实现
+
+3. 增加了代码混淆配置
+
+4. 使用最新gradle,apg版本
+
+5. 采用gradle kotlin dsl
+
 ### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12
 ### wetest设备兼容测试情况如下:
 ### 测试设备数量247, 通过245(99.2%), 2台未通过

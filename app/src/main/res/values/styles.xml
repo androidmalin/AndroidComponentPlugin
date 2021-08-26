@@ -8,9 +8,4 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
-    <!-- Base application theme. -->
-    <style name="AppThemeNotAppCompat" parent="android:Theme.Holo.Light">
-        <!-- Customize your theme here. -->
-    </style>
-
 </resources>

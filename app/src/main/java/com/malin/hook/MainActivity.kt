@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mIvPluginRes = findViewById(R.id.iv_plugin_img)
     }
 
-
     private fun <T : View> Activity.bindView(@IdRes res: Int): Lazy<T> {
         return lazy { findViewById(res) }
     }
@@ -179,7 +178,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             "com.malin.plugin.PluginAppCompatActivity"
         private const val PLUGIN_APK_FILE_NAME = "pluginapk-debug.apk"
         private const val PLUGIN_IMG_NAME = "plugin_img"
-
     }
 
     private enum class Type {

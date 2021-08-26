@@ -1,5 +1,6 @@
 package sun.misc;
 
+@SuppressWarnings("all")
 public class Unsafe {
     public native long getLong(Object obj, long offset);
 

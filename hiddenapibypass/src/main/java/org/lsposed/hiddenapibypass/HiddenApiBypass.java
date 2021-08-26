@@ -22,7 +22,6 @@ import sun.misc.Unsafe;
 
 @RequiresApi(Build.VERSION_CODES.P)
 public final class HiddenApiBypass {
-    private static final String TAG = "HiddenApiBypass";
     private static final Unsafe unsafe;
     private static final long artOffset;
     private static final long infoOffset;

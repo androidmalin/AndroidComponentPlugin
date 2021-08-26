@@ -1,8 +1,8 @@
 package org.chickenhook.restrictionbypass;
 
-import java.lang.reflect.Method;
-
 import static android.os.Build.VERSION.SDK_INT;
+
+import java.lang.reflect.Method;
 
 public class Unseal {
 
