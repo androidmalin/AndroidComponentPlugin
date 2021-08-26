@@ -40,8 +40,8 @@ object HookInstrumentation {
             val contextImplClazz = Class.forName("android.app.ContextImpl")
 
             //final @NonNull ActivityThread mMainThread;
-            val mMainThreadField = contextImplClazz.getDeclaredField("mMainThread")
-            mMainThreadField.isAccessible = true
+            val mMainThreadField =
+                contextImplClazz.getDeclaredField("mMainThread").also { it.isAccessible = true }
 
             //2.get ActivityThread Object from ContextImpl
             val activityThreadObj = mMainThreadField.get(context)
@@ -51,7 +51,7 @@ object HookInstrumentation {
 
             //Instrumentation mInstrumentation;
             val mInstrumentationField = activityThreadClazz.getDeclaredField("mInstrumentation")
-            mInstrumentationField.isAccessible = true
+                .also { it.isAccessible = true }
             val mInstrumentationObj =
                 mInstrumentationField.get(activityThreadObj) as Instrumentation
 
@@ -121,8 +121,7 @@ object HookInstrumentation {
                     Intent::class.java,
                     Int::class.javaPrimitiveType,
                     Bundle::class.java
-                )
-                execStartActivityMethod.isAccessible = true
+                ).also { it.isAccessible = true }
                 return execStartActivityMethod.invoke(
                     mInstrumentation,
                     who,
@@ -183,8 +182,7 @@ object HookInstrumentation {
                     Activity::class.java,
                     Intent::class.java,
                     Int::class.javaPrimitiveType
-                )
-                execStartActivityMethod.isAccessible = true
+                ).also { it.isAccessible = true }
                 return execStartActivityMethod.invoke(
                     mInstrumentation,
                     who,

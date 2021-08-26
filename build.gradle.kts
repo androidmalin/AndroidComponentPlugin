@@ -33,8 +33,6 @@ allprojects {
     }
 }
 
-tasks {
-    val clean by registering(Delete::class) {
-        delete(buildDir)
-    }
+tasks.create("clean", Delete::class.java) {
+    delete(rootProject.buildDir)
 }
