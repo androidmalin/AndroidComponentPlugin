@@ -11,15 +11,8 @@ import android.util.DisplayMetrics
 import androidx.core.content.res.ResourcesCompat
 import dalvik.system.DexClassLoader
 
-/**
- * 将类的声明和定义该类的单例对象结合在一起（即通过object就实现了单例模式）
- * https://blog.csdn.net/xlh1191860939/article/details/79460601
- */
 object PluginResourceUtil {
 
-    /**
-     * ?: 左侧表达式非空，elvis 操作符就返回其左侧表达式，否则返回右侧表达式。
-     */
     fun getPluginDrawableByName(
         context: Context,
         pluginApkFileName: String,
@@ -61,16 +54,6 @@ object PluginResourceUtil {
         return ResourcesCompat.getDrawable(resources, resId, context.theme)
     }
 
-    /**
-     * 1. :: 创建一个成员引用或者一个类引用
-     * https://www.kotlincn.net/docs/reference/keyword-reference.html
-     *
-     * 2. if 的分支可以是代码块，最后的表达式作为该块的值：
-     * https://www.kotlincn.net/docs/reference/control-flow.html
-     *
-     * 3. 为了避免抛出异常，可以使用安全转换操作符 as?，它可以在失败时返回 null：
-     * 4. Kotlin 类引用与 Java 类引用不同。要获得 Java 类引用， 请在 KClass 实例上使用 .java 属性
-     */
     @SuppressLint("DiscouragedPrivateApi", "PrivateApi")
     private fun getPluginResources(context: Context, pluginPath: String?): Resources? {
         try {
