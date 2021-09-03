@@ -54,19 +54,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
+            // https://www.guardsquare.com/manual/setup/gradleplugin
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
-        }
-    }
-
-    // https://www.guardsquare.com/manual/setup/upgrading
-    proguard {
-        configurations {
-            register("release") {
-                defaultConfiguration("proguard-android-optimize.txt")
-                configuration("proguard-rules.pro")
-            }
         }
     }
 
@@ -82,6 +73,17 @@ android {
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         // Target version of the generated JVM bytecode. It is used for type resolution.
         this.jvmTarget = "11"
+    }
+}
+
+// 下载最新版本的 ProGuard 去替换 SDK 里面的 Proguard 以支持新特性。SDK 中 Proguard 的路径是 ANDROID_SDK/tools/proguard
+// https://www.guardsquare.com/manual/setup/upgrading
+proguard {
+    configurations {
+        register("release") {
+            defaultConfiguration("proguard-android-optimize.txt")
+            configuration("proguard-rules.pro")
+        }
     }
 }
 

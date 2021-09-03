@@ -22,15 +22,21 @@
 #https://github.com/ysrc/AndroidObfuseDictionary
 #https://github.com/WrBug/FrenziedProguard
 # ----------------------------------------------------------------------------
-# 混淆的压缩比例，0-7
+# 混淆的压缩比例，0-7 表示对代码进行迭代优化的次数，optimization可以对代码进行各种优化，每次优化后还可以继续优化，故称之迭代优化
 -optimizationpasses 7
+
+# https://blog.csdn.net/wmadao11/article/details/102613078
 -allowaccessmodification
+
+# 不做预校验，预校验是作用在Java平台上的，Android平台上不需要这项功能，去掉之后还可以加快混淆速度
 -dontpreverify
 
 # 指定不去忽略非公共的库的类的成员
 -dontskipnonpubliclibraryclassmembers
+
 # 指定混淆是采用的算法
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+
 # 指定外部模糊字典 dic.txt 改为混淆文件名，下同
 -obfuscationdictionary dic.txt
 # 指定class模糊字典
@@ -40,15 +46,20 @@
 
 #-------------------------------common-------------------------------
 
+# 混淆后类型都为小写
 -dontusemixedcaseclassnames
+
+# 不跳过非公共的库的类
 -dontskipnonpubliclibraryclasses
+
+# 混淆时记录日志
 -verbose
 
-#保留Annotation不混淆,避免混淆泛型;抛出异常时保留代码行号
+# 保留Annotation不混淆,避免混淆泛型;抛出异常时保留代码行号;避免混淆注解、内部类、泛型、匿名类
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod,LocalVariableTable,*JavascriptInterface*
-###keepattributes###
 
-#hide the original source file name.
+# 将源码中有意义的类名转换成SourceFile，用于混淆具体崩溃代码
+# hide the original source file name.
 -renamesourcefileattribute SourceFile
 
 #==============proguard6.2.2/gradle/src/proguard/gradle/proguard-android-common.pro start======
@@ -165,38 +176,9 @@
 
 #-------------------------------common-------------------------------
 
-#-------------------------------androidx-------------------------------
-#https://stackoverflow.com/a/52592334/3326683
-#noinspection ShrinkerUnresolvedReference
--keep class com.google.android.material.** {*;}
--dontwarn com.google.android.material.**
--dontnote com.google.android.material.**
-#noinspection ShrinkerUnresolvedReference
--keep class androidx.** {*;}
--keep interface androidx.** {*;}
--dontwarn androidx.**
--dontnote androidx.**
--keep public class * extends androidx.**
-#-------------------------------androidx-------------------------------
-
-#-------------------------------androidx Understand the @Keep support annotation.-------------------------------
-#noinspection ShrinkerUnresolvedReference
--keep,allowobfuscation @interface androidx.annotation.Keep
-
--keep @androidx.annotation.Keep class * {*;}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <methods>;
-}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <fields>;
-}
-
--keepclasseswithmembers class * {
-    @androidx.annotation.Keep <init>(...);
-}
-#-------------------------------androidx Understand the @Keep support annotation.-------------------------------
+##-------------------------------androidx-------------------------------
+-keep class androidx.appcompat.view.ContextThemeWrapper {*;}
+##-------------------------------androidx-------------------------------
 
 
 #proguard6.2.2/examples/android/proguard-project.txt
