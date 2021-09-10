@@ -7,3 +7,5 @@ Context.startActivity启动,其实现是ContextImpl的startActivity,
 所以需要通过Handler H 将其切换到UI线程,
 第一个消息是LAUNCH_ACTIVITY,它对应handleLaunchActivity,
 在这个方法里完成了Activity的创建和启动.
+
+[源码阅读之Activity启动与App启动流程 - Android 9.0](https://juejin.cn/post/6844903779926540296)

@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("com.guardsquare.proguard")
     kotlin("android")
-    id("io.gitlab.arturbosch.detekt") version "1.18.0"
+    id("io.gitlab.arturbosch.detekt") version "1.18.1"
 }
 
 android {
@@ -61,6 +61,21 @@ android {
         }
     }
 
+    android.applicationVariants.all {
+        val buildType = this.buildType.name
+        outputs.all {
+            if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
+                if (buildType == "debug") {
+                    this.outputFileName =
+                        "app-${buildType}.apk"
+                } else if (buildType == "release") {
+                    this.outputFileName =
+                        "app-${buildType}.apk"
+                }
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -90,7 +105,7 @@ proguard {
 detekt {
     // Version of Detekt that will be used. When unspecified the latest detekt
     // version found will be used. Override to stay on the same version.
-    toolVersion = "1.18.0"
+    toolVersion = "1.18.1"
 
     // The directories where detekt looks for source files.
     // Defaults to `files("src/main/java", "src/test/java", "src/main/kotlin", "src/test/kotlin")`.
