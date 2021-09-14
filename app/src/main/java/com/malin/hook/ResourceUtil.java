@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * https://www.zybuluo.com/dodola/note/814116
+ * 插件可以访问宿主的资源.
+ * 插件调用宿主资源则需要将宿主的APK和插件的APK一起添加到同一个AssetManager里.
  * <p>
- * http://www.zircon.me/05-07-2018/android-VirtualAPK-analysis.html
- *
+ * https://www.zybuluo.com/dodola/note/814116
  * <p>
  * https://www.notion.so/VirtualAPK-1fce1a910c424937acde9528d2acd537
  * <p>
@@ -26,16 +26,15 @@ import java.util.List;
  * <p>
  * http://www.zircon.me/05-07-2018/android-VirtualAPK-analysis.html
  * <p>
- * [VirtualApk解决插件资源ID与宿主冲突的问题]
- * http://susion.work/2019/03/13/android%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/%E6%8F%92%E4%BB%B6%E5%8C%96/VirtualApk%E8%A7%A3%E5%86%B3%E6%8F%92%E4%BB%B6%E8%B5%84%E6%BA%90ID%E4%B8%8E%E5%AE%BF%E4%B8%BB%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/
+ * [VirtualApk解决插件资源ID与宿主冲突的问题](https://github.com/SusionSuc/AdvancedAndroid/tree/master/plugin/VirtualApk/)
  * <p>
  * [Android资源的插件化](https://www.jianshu.com/p/e09fc4482c7b)
  */
 @SuppressWarnings("JavaReflectionMemberAccess")
-public class ReSourceUtil {
+public class ResourceUtil {
 
     @SuppressLint("PrivateApi")
-    public static synchronized Resources createResources(Context hostContext, String apk) {
+    public static Resources createResources(Context hostContext, String apk) {
         Resources hostResources = hostContext.getResources();
         try {
             AssetManager assetManager = hostResources.getAssets();
@@ -69,9 +68,9 @@ public class ReSourceUtil {
 
                 ReflectUtil.invoke(AssetManager.class, assetManager, "ensureStringBlocks");//③
 
-                // ④：过程中很重要的一步，因为后面在资源查找的时候是需要通过一个ResTable_config来获取当前手机的一些配置从而获取到准确的资源，
+                // 4：过程中很重要的一步，因为后面在资源查找的时候是需要通过一个ResTable_config来获取当前手机的一些配置从而获取到准确的资源，
                 // 如果不进行初始化则会出现找不到资源的崩溃
-                hostResources.updateConfiguration(hostResources.getConfiguration(), hostResources.getDisplayMetrics());//此行代码非常重要④
+                hostResources.updateConfiguration(hostResources.getConfiguration(), hostResources.getDisplayMetrics());//此行代码非常重要4.
             } else {
                 ReflectUtil.invoke(AssetManager.class, assetManager, "addAssetPath", apk);
             }

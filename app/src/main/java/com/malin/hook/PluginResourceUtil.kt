@@ -21,7 +21,7 @@ object PluginResourceUtil {
         loadResourceType: Int
     ): Drawable? {
         val pluginApkPath = context.getFileStreamPath(pluginApkFileName).absolutePath
-        val resources = getPluginResources(context, pluginApkPath) ?: return null
+        val resources = ResourceUtil.createResources(context, pluginApkPath) ?: return null
         var resId = 0
         when (loadResourceType) {
             1 -> {

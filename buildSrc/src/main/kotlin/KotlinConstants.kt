@@ -9,7 +9,7 @@ object AppConfig {
     const val buildToolsVersion = "31.0.0"
     const val ndkVersion = "23.0.7599858"
     const val applicationId = "com.malin.hook"
-    const val minSdkVersion = 16
+    const val minSdkVersion = 15
     const val targetSdkVersion = 31
     const val versionCode = 1
     const val versionName = "1.0"
