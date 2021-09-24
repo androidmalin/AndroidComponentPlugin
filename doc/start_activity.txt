@@ -9,3 +9,181 @@ Context.startActivity启动,其实现是ContextImpl的startActivity,
 在这个方法里完成了Activity的创建和启动.
 
 [源码阅读之Activity启动与App启动流程 - Android 9.0](https://juejin.cn/post/6844903779926540296)
+
+Android进程间通过Binder机制进行通信。AMS(ActivityManagerService)与应用进程之间的通信，Android设计了IApplicationThread与IActivityManager两个接口。
+两个通信接口都是单向的：
+IApplicationThread是AMS请求应用进程的接口。
+IActivityManager是应用进程请求AMS的接口。
+
+
+ActivityManagerService实现了IActivityManager.aidl接口，提供了应用进程调用系统服务的方法，
+而Instrumentation包装了ActivityManagerService的调用
+
+sdk/android-28
+Activity启动流程.
+
+1.
+ActivityStackSupervisor{
+   //[1377]
+  boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,boolean andResume, boolean checkConfig) {
+    //[1523]
+    // Create activity launch transaction.
+    ClientTransaction clientTransaction = ClientTransaction.obtain(app.thread,r.appToken);
+    clientTransaction.addCallback(LaunchActivityItem.obtain());
+    //[1545]
+    ActivityManagerService.getLifecycleManager().scheduleTransaction(clientTransaction);
+  }
+}
+
+
+2.
+class ClientLifecycleManager {
+ //[45]
+  void scheduleTransaction(ClientTransaction transaction){
+     IApplicationThread client = transaction.getClient();
+     transaction.schedule();
+  }
+}
+
+3.
+class ClientTransaction{
+  //[128]
+  void schedule(){
+     IApplicationThread.scheduleTransaction(this);
+  }
+}
+
+4.
+class ActivityThread extends ClientTransactionHandler {
+   //[757]
+   private class ApplicationThread extends IApplicationThread.Stub {
+       //[1539]
+       @Override
+       public void scheduleTransaction(ClientTransaction transaction){
+            ActivityThread.this.scheduleTransaction(transaction);
+       }
+   }
+}
+
+5.
+public abstract class ClientTransactionHandler {
+     //[43]
+     void scheduleTransaction(ClientTransaction transaction) {
+        transaction.preExecute(this);
+        sendMessage(ActivityThread.H.EXECUTE_TRANSACTION, transaction);
+     }
+     abstract void sendMessage(int what, Object obj);
+}
+
+6.
+class ActivityThread extends ClientTransactionHandler{
+    //[265]
+    final H mH = new H();
+
+    //[2575]
+    void sendMessage(int what, Object obj) {
+        sendMessage(what, obj, 0, 0, false);
+    }
+
+    //[2769]
+    void sendMessage(int what, Object obj, int arg1, int arg2, boolean async) {
+       Message msg = Message.obtain();
+       msg.what = what;
+       msg.obj = obj;
+       msg.arg1 = arg1;
+       msg.arg2 = arg2;
+       if (async) {
+          msg.setAsynchronous(true);
+       }
+       mH.sendMessage(msg);
+    }
+
+    //[1555]
+    class H extends Handler {
+       //[1645]
+       public void handleMessage(Message msg) {
+           switch (msg.what) {
+               //[1807]
+               case EXECUTE_TRANSACTION:
+                   ClientTransaction transaction = (ClientTransaction) msg.obj;
+                   TransactionExecutor.execute(transaction);
+                   break;
+           }
+       }
+    }
+}
+
+7.
+public class TransactionExecutor {
+    //[64]
+    public void execute(ClientTransaction transaction) {
+        final IBinder token = transaction.getActivityToken();
+        executeCallbacks(transaction);
+        executeLifecycleState(transaction);
+    }
+    //[77]
+    public void executeCallbacks(ClientTransaction transaction) {
+        final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
+        if (callbacks == null) return;
+        for (int i = 0; i < callbacks.size(); ++i) {
+            final ClientTransactionItem item = callbacks.get(i);
+            item.execute(mTransactionHandler, token, mPendingActions);
+            item.postExecute(mTransactionHandler, token, mPendingActions);
+        }
+    }
+}
+
+8.
+public class LaunchActivityItem extends ClientTransactionItem {
+    //[71]
+    @Override
+    public void execute(ClientTransactionHandler client, IBinder token, PendingTransactionActions pendingActions) {
+        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
+                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mPendingResults, mPendingNewIntents, mIsForward,
+                mProfilerInfo, client);
+        client.handleLaunchActivity(r, pendingActions, null);
+    }
+}
+
+9.
+public abstract class ClientTransactionHandler {
+    //[143]
+    abstract Activity handleLaunchActivity(ActivityThread.ActivityClientRecord r, PendingTransactionActions pendingActions, Intent customIntent);
+}
+
+10.
+class ActivityThread extends ClientTransactionHandler{
+   //[3025]
+   public Activity handleLaunchActivity(ActivityClientRecord r,PendingTransactionActions pendingActions, Intent customIntent) {
+        //[3049]
+        final Activity a = performLaunchActivity(r, customIntent);
+        return a;
+   }
+
+   //[2809]
+   private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+        ContextImpl appContext = createBaseContextForActivity(r);
+        Activity activity = null;
+        try {
+             //[2831]
+            java.lang.ClassLoader cl = appContext.getClassLoader();
+            activity = mInstrumentation.newActivity(cl, component.getClassName(), r.intent);
+        } catch (Exception e) {}
+
+        try {
+            //[2849]
+           Application app = r.packageInfo.makeApplication(false, mInstrumentation);
+
+           if (activity != null) {
+               activity.attach(....);
+               if (r.isPersistable()) {
+                  mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);
+               } else {
+                  mInstrumentation.callActivityOnCreate(activity, r.state);
+               }
+           }
+        } catch (dException e) {}
+        return activity;
+    }
+}

@@ -11,7 +11,7 @@
         android:supportsRtl="false"
         android:testOnly="false"
         android:theme="@style/AppCompatTheme"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+        tools:ignore="AllowBackup,DataExtractionRules,GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
             android:exported="true">

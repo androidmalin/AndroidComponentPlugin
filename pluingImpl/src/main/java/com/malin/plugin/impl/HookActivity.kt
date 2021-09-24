@@ -514,6 +514,15 @@ object HookActivity {
                 // 1.获取ClientTransaction对象
                 val clientTransactionObj = msg.obj ?: return
 
+                // filter
+                val activityLifecycleItem =
+                    Class.forName("android.app.servertransaction.ClientTransaction")
+                        .getDeclaredMethod("getLifecycleStateRequest")
+                        .also { it.isAccessible = true }.invoke(clientTransactionObj)
+                val resumeActivityItemClazz =
+                    Class.forName("android.app.servertransaction.ResumeActivityItem")
+                if (!resumeActivityItemClazz.isInstance(activityLifecycleItem)) return
+
                 // 2.获取ClientTransaction类中属性mActivityCallbacks的Field
                 // private List<ClientTransactionItem> mActivityCallbacks;
                 val mActivityCallbacksField =
