@@ -14,7 +14,7 @@
 
 ### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12
 ### wetest设备兼容测试情况如下:
-### 测试设备数量331, 通过327(98.8%), 4台未通过
+### 测试设备数量333, 通过329(98.8%), 4台未通过
 
 | 设备品牌     | 设备型号                    | 设备别名               | 系统版本    |通过|
 |:-:         |:-:                         |:-:                    |:-:       |:-:|
@@ -345,7 +345,9 @@
 | OPPO       | OPPO R9s Plus              | OPPO R9s Plus       | 6.0.1 |  ✅  |
 | XIAOMI     | Redmi 4X                   | 红米Note 4X          | 6.0.1 |  ✅  |
 | Xiaomi     | Redmi Note 4X              | 红米 Note 4X         | 6.0.1 |  ✅  |
-| vivo       | vivo X7                    | VIVO X7             | 5.1.1 |  ❌  |
-| VIVO       | vivo Xplay5A               | VIVO Xplay 5        | 5.1.1 |  ❌  |
-| OPPO       | OPPO A59m                  | OPPO A59m           | 5.1      |  ❌  |
-| OPPO       | OPPO A59s                  | OPPO A59s           | 5.1      |  ❌  |
+| vivo       | vivo X7                    | VIVO X7             | 5.1.1 |  ✅  |
+| VIVO       | vivo Xplay5A               | VIVO Xplay 5        | 5.1.1 |  ✅  |
+| OPPO       | OPPO R9 Plustm A           | R9 Plustm A         | 5.1.1 |  ❌  |
+| OPPO       | A37f                       | A37f                | 5.1.1 |  ❌  |
+| OPPO       | OPPO A59m                  | OPPO A59m           | 5.1   |  ❌  |
+| OPPO       | OPPO A59s                  | OPPO A59s           | 5.1   |  ❌  |
