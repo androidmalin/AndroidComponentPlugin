@@ -58,7 +58,7 @@ object BaseDexClassLoaderHookHelperAnother {
             // private final DexPathList pathList;
             // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
             val pathListField = baseDexClassLoaderClazz.getDeclaredField("pathList")
-            pathListField.isAccessible = true
+                .also { it.isAccessible = true }
 
             // 2.获取DexPathList pathList实例;
             val dexPathList = pathListField[baseDexClassLoader]
@@ -67,7 +67,7 @@ object BaseDexClassLoaderHookHelperAnother {
             // private Element[] dexElements;
             // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
             val dexElementsField = dexPathList.javaClass.getDeclaredField("dexElements")
-            dexElementsField.isAccessible = true
+                .also { it.isAccessible = true }
 
             // 4.获取DexPathList的成员 Element[] dexElements 的值
             // Element是DexPathList的内部类
@@ -106,8 +106,7 @@ object BaseDexClassLoaderHookHelperAnother {
                         List::class.java,
                         File::class.java,
                         List::class.java
-                    )
-                    makePathElementsMethod.isAccessible = true
+                    ).also { it.isAccessible = true }
 
                     // 3.
                     pluginElements = makePathElementsMethod.invoke(
@@ -130,8 +129,7 @@ object BaseDexClassLoaderHookHelperAnother {
                         ArrayList::class.java,
                         File::class.java,
                         ArrayList::class.java
-                    )
-                    makeDexElementsMethod.isAccessible = true
+                    ).also { it.isAccessible = true }
 
                     // 3.
                     pluginElements = makeDexElementsMethod.invoke(
@@ -152,8 +150,9 @@ object BaseDexClassLoaderHookHelperAnother {
                         "makeDexElements",
                         ArrayList::class.java,
                         File::class.java
-                    )
-                    makeDexElementsMethod.isAccessible = true
+                    ).also { it.isAccessible = true }
+
+                    // 3.
                     pluginElements =
                         makeDexElementsMethod.invoke(null, files, optimizedDirectory) as Array<*>
                 }

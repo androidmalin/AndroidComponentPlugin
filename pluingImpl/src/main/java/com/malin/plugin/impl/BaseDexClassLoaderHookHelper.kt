@@ -65,13 +65,13 @@ object BaseDexClassLoaderHookHelper {
             // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
             // 2.获取DexPathList pathList实例;
             val dexPathList = baseDexClassLoaderClazz.getDeclaredField("pathList")
-                .apply { isAccessible = true }[baseDexClassLoader]
+                .also { it.isAccessible = true }[baseDexClassLoader]
 
             // 3.获取DexPathList的成员: Element[] dexElements 的Field
             // private Element[] dexElements;
             // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java
-            val dexElementsField =
-                dexPathList.javaClass.getDeclaredField("dexElements").apply { isAccessible = true }
+            val dexElementsField = dexPathList.javaClass.getDeclaredField("dexElements")
+                .also { it.isAccessible = true }
 
             // 4.获取DexPathList的成员 Element[] dexElements 的值
             // Element是DexPathList的内部类
@@ -83,11 +83,10 @@ object BaseDexClassLoaderHookHelper {
 
             // 6.创建一个数组, 用来替换原始的数组
             // 通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
-            val hostAndPluginElements =
-                java.lang.reflect.Array.newInstance(
-                    elementClazz!!,
-                    dexElements.size + 1
-                ) as Array<*>
+            val hostAndPluginElements = java.lang.reflect.Array.newInstance(
+                elementClazz!!,
+                dexElements.size + 1
+            ) as Array<*>
 
             // 根据不同的API, 获取插件DexClassLoader的 DexPathList中的 dexElements数组
             val apiLevel = Build.VERSION.SDK_INT
@@ -115,7 +114,7 @@ object BaseDexClassLoaderHookHelper {
                     // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
                     elementClazz.getDeclaredConstructor(
                         DexFile::class.java, File::class.java
-                    ).apply { isAccessible = true }.newInstance(dexFile, apkFile)
+                    ).also { it.isAccessible = true }.newInstance(dexFile, apkFile)
                 }
                 apiLevel >= 18 -> {
                     // 18<=API<=25 (4.3<=API<=7.1.1)
@@ -127,7 +126,7 @@ object BaseDexClassLoaderHookHelper {
                         Boolean::class.javaPrimitiveType,
                         File::class.java,
                         DexFile::class.java
-                    ).apply { isAccessible = true }.newInstance(apkFile, false, apkFile, dexFile)
+                    ).also { it.isAccessible = true }.newInstance(apkFile, false, apkFile, dexFile)
                 }
                 apiLevel == 17 -> {
                     // API=17  (API=4.2)
@@ -136,7 +135,7 @@ object BaseDexClassLoaderHookHelper {
                     // 8. 生成Element的实例对象
                     elementClazz.getDeclaredConstructor(
                         File::class.java, File::class.java, DexFile::class.java
-                    ).apply { isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
+                    ).also { it.isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
                 }
                 else -> {
                     // 15~16 (4.0.3=<API=4.1)
@@ -145,7 +144,8 @@ object BaseDexClassLoaderHookHelper {
                     // 8. 生成Element的实例对象
                     elementClazz.getDeclaredConstructor(
                         File::class.java, ZipFile::class.java, DexFile::class.java
-                    ).apply { isAccessible = true }.newInstance(apkFile, ZipFile(apkFile), dexFile)
+                    ).also { it.isAccessible = true }
+                        .newInstance(apkFile, ZipFile(apkFile), dexFile)
                 }
             }
 
