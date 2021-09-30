@@ -43,11 +43,10 @@ object HookActivity {
 
                     // 2.获取ActivityTaskManager的私有静态成员变量IActivityTaskManagerSingleton
                     // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
+                    // 3.取消Java的权限检查
                     val iActivityTaskManagerSingletonField =
                         activityTaskManagerClazz.getDeclaredField("IActivityTaskManagerSingleton")
-
-                    // 3.取消Java的权限检查
-                    iActivityTaskManagerSingletonField.isAccessible = true
+                            .also { it.isAccessible = true }
 
                     // 4.获取IActivityManagerSingleton的实例对象
                     // private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton
@@ -70,11 +69,10 @@ object HookActivity {
 
                     // 2.获取ActivityManager的私有静态属性IActivityManagerSingleton
                     // private static final Singleton<IActivityManager> IActivityManagerSingleton
+                    // 3.取消Java的权限检查
                     val iActivityManagerSingletonField =
                         activityManagerClazz.getDeclaredField("IActivityManagerSingleton")
-
-                    // 3.取消Java的权限检查
-                    iActivityManagerSingletonField.isAccessible = true
+                            .also { it.isAccessible = true }
 
                     // 4.获取IActivityManagerSingleton的实例对象
                     // private static final Singleton<IActivityManager> IActivityManagerSingleton
@@ -94,10 +92,9 @@ object HookActivity {
 
                     // 2.获取 ActivityManagerNative的 私有属性gDefault
                     // private static final Singleton<IActivityManager> gDefault
-                    val singletonField = activityManagerNativeClazz.getDeclaredField("gDefault")
-
                     // 3.对私有属性gDefault,解除私有限定
-                    singletonField.isAccessible = true
+                    val singletonField = activityManagerNativeClazz.getDeclaredField("gDefault")
+                        .also { it.isAccessible = true }
 
                     // 4.获得gDefaultField中对应的属性值(被static修饰了),既得到Singleton<IActivityManager>对象的实例
                     // 所有静态对象的反射可以通过传null获取
@@ -135,10 +132,9 @@ object HookActivity {
 
             // 7.获取mInstance属性
             // private T mInstance;
-            val mInstanceField = singletonClazz.getDeclaredField("mInstance")
-
             // 8.取消Java的权限检查
-            mInstanceField.isAccessible = true
+            val mInstanceField =
+                singletonClazz.getDeclaredField("mInstance").also { it.isAccessible = true }
 
             // 9.获取mInstance属性的值,既IActivityTaskManager的实例
             // 从private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityTaskManager
@@ -146,8 +142,8 @@ object HookActivity {
 
             // 10.android10之后,从mInstanceField中取到的值为null,这里判断如果为null,就再次从get方法中再取一次
             if (iActivityTaskManager == null) {
-                val getMethod = singletonClazz.getDeclaredMethod("get")
-                getMethod.isAccessible = true
+                val getMethod =
+                    singletonClazz.getDeclaredMethod("get").also { it.isAccessible = true }
                 iActivityTaskManager = getMethod.invoke(IActivityTaskManagerSingletonObj)
             }
 
@@ -191,7 +187,7 @@ object HookActivity {
         try {
             // 5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
             // 既,为了获取一个IActivityManager的实例对象
-            // private static final Singleton<IActivityManager> IActivityManagerSingleton =new Singleton<IActivityManager>(){...}
+            // private static final Singleton<IActivityManager> IActivityManagerSingleton = new Singleton<IActivityManager>(){...}
 
             // 6.获取Singleton类对象
             // package android.util
@@ -200,10 +196,9 @@ object HookActivity {
 
             // 7.获取mInstance属性
             // private T mInstance;
-            val mInstanceField = singletonClazz.getDeclaredField("mInstance")
-
             // 8.取消Java的权限检查
-            mInstanceField.isAccessible = true
+            val mInstanceField =
+                singletonClazz.getDeclaredField("mInstance").also { it.isAccessible = true }
 
             // 9.获取mInstance属性的值,既IActivityManager的实例
             // 从private static final Singleton<IActivityManager> IActivityManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityManager
@@ -252,7 +247,7 @@ object HookActivity {
             // public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
             val currentActivityThreadMethod =
                 activityThreadClazz.getDeclaredMethod("currentActivityThread")
-            currentActivityThreadMethod.isAccessible = true
+                    .also { it.isAccessible = true }
 
             // 3.获取ActivityThread的对象实例
             // public static ActivityThread currentActivityThread(){return sCurrentActivityThread;}
@@ -260,8 +255,7 @@ object HookActivity {
 
             // 4.获取ActivityThread 的属性mH
             // final H mH = new H();
-            val mHField = activityThreadClazz.getDeclaredField("mH")
-            mHField.isAccessible = true
+            val mHField = activityThreadClazz.getDeclaredField("mH").also { it.isAccessible = true }
 
             // 5.获取mH的值,既获取ActivityThread类中H类的实例对象
             // 从ActivityThread实例中获取mH属性对应的值,既mH的值
@@ -275,8 +269,8 @@ object HookActivity {
             // 7.获取mCallback属性
             // final Callback mCallback;
             // Callback是Handler类内部的一个接口
-            val mCallbackField = handlerClazz.getDeclaredField("mCallback")
-            mCallbackField.isAccessible = true
+            val mCallbackField =
+                handlerClazz.getDeclaredField("mCallback").also { it.isAccessible = true }
 
             // 8.给mH增加mCallback
             // 给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
@@ -344,7 +338,7 @@ object HookActivity {
             // 2.获取ActivityClientRecord的intent属性
             // Intent intent;
             val safeIntentField = activityClientRecordObj.javaClass.getDeclaredField("intent")
-            safeIntentField.isAccessible = true
+                .also { it.isAccessible = true }
 
             // 3.获取ActivityClientRecord的intent属性的值,既安全的Intent
             val safeIntent = safeIntentField[activityClientRecordObj] as? Intent ?: return
@@ -390,13 +384,15 @@ object HookActivity {
             //    }
             val currentActivityThreadMethod =
                 activityThreadClazz.getDeclaredMethod("currentActivityThread")
-            currentActivityThreadMethod.isAccessible = true
+                    .also { it.isAccessible = true }
+
             val activityThread = currentActivityThreadMethod.invoke(null)
 
             // 2.获取ActivityThread里面原始的 sPackageManager
             // static IPackageManager sPackageManager;
             val sPackageManagerField = activityThreadClazz.getDeclaredField("sPackageManager")
-            sPackageManagerField.isAccessible = true
+                .also { it.isAccessible = true }
+
             val sPackageManager = sPackageManagerField[activityThread]
 
             // 3.准备好代理对象, 用来替换原始的对象
@@ -417,8 +413,8 @@ object HookActivity {
             val packageManager = context.packageManager
             // PackageManager的实现类ApplicationPackageManager中的mPM
             // private final IPackageManager mPM;
-            val mPmField = packageManager.javaClass.getDeclaredField("mPM")
-            mPmField.isAccessible = true
+            val mPmField =
+                packageManager.javaClass.getDeclaredField("mPM").also { it.isAccessible = true }
             mPmField[packageManager] = proxy
         } catch (e: InvocationTargetException) {
             e.printStackTrace()
@@ -515,21 +511,22 @@ object HookActivity {
                 val clientTransactionObj = msg.obj ?: return
 
                 // filter
+                // public ActivityLifecycleItem getLifecycleStateRequest() { return mLifecycleStateRequest; }
                 val activityLifecycleItem =
                     Class.forName("android.app.servertransaction.ClientTransaction")
                         .getDeclaredMethod("getLifecycleStateRequest")
                         .also { it.isAccessible = true }.invoke(clientTransactionObj)
+
                 val resumeActivityItemClazz =
                     Class.forName("android.app.servertransaction.ResumeActivityItem")
                 if (!resumeActivityItemClazz.isInstance(activityLifecycleItem)) return
 
                 // 2.获取ClientTransaction类中属性mActivityCallbacks的Field
+                // 3.禁止Java访问检查
                 // private List<ClientTransactionItem> mActivityCallbacks;
                 val mActivityCallbacksField =
                     clientTransactionObj.javaClass.getDeclaredField("mActivityCallbacks")
-
-                // 3.禁止Java访问检查
-                mActivityCallbacksField.isAccessible = true
+                        .also { it.isAccessible = true }
 
                 // 4.获取ClientTransaction类中mActivityCallbacks属性的值,既List<ClientTransactionItem>
                 val mActivityCallbacks = mActivityCallbacksField[clientTransactionObj] as? List<*>
@@ -551,10 +548,9 @@ object HookActivity {
 
                 // 8.ClientTransactionItem的mIntent属性的mIntent的Field
                 // private Intent mIntent;
-                val mIntentField = launchActivityItemClazz.getDeclaredField("mIntent")
-
                 // 9.禁止Java访问检查
-                mIntentField.isAccessible = true
+                val mIntentField = launchActivityItemClazz.getDeclaredField("mIntent")
+                    .also { it.isAccessible = true }
 
                 // 10.获取mIntent属性的值,既桩Intent(安全的Intent)
                 // 从LaunchActivityItem中获取属性mIntent的值
