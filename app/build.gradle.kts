@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("com.guardsquare.proguard")
     kotlin("android")
-    id("io.gitlab.arturbosch.detekt") version "1.18.1"
+    id("io.gitlab.arturbosch.detekt") version "1.19.0-RC2"
 }
 
 android {
@@ -105,7 +105,7 @@ proguard {
 detekt {
     // Version of Detekt that will be used. When unspecified the latest detekt
     // version found will be used. Override to stay on the same version.
-    toolVersion = "1.18.1"
+    toolVersion = "1.19.0-RC2"
 
     // The directories where detekt looks for source files.
     // Defaults to `files("src/main/java", "src/test/java", "src/main/kotlin", "src/test/kotlin")`.
@@ -132,13 +132,16 @@ detekt {
     // Android: Don't create tasks for the specified build types (e.g. "release")
     ignoredBuildTypes = listOf("release")
 
-    reports {
-        xml.enabled = false
-        txt.enabled = false
-        sarif.enabled = false
-        html {
-            enabled = true
-            destination = file("build/reports/detekt/detekt.html")
+    // Kotlin DSL
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        reports {
+            xml.required.set(false)
+            txt.required.set(false)
+            sarif.required.set(false)
+            html {
+                outputLocation.set(file("build/reports/detekt/detekt.html"))
+                required.set(true) // reports can also be enabled and disabled at the task level as needed
+            }
         }
     }
 }
