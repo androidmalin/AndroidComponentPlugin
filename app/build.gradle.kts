@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("com.guardsquare.proguard")
     kotlin("android")
-    id("io.gitlab.arturbosch.detekt") version "1.19.0-RC2"
+    id("io.gitlab.arturbosch.detekt") version "1.19.0"
 }
 
 android {
@@ -105,7 +105,7 @@ proguard {
 detekt {
     // Version of Detekt that will be used. When unspecified the latest detekt
     // version found will be used. Override to stay on the same version.
-    toolVersion = "1.19.0-RC2"
+    toolVersion = "1.19.0"
 
     // The directories where detekt looks for source files.
     // Defaults to `files("src/main/java", "src/test/java", "src/main/kotlin", "src/test/kotlin")`.

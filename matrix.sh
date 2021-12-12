@@ -3,19 +3,19 @@
 
 #需要配置ANDROID_HOME环境变量 /User/malin/sdk
 #需要下载ndk 16.1.4479499 /User/malin/sdk/ndk/16.1.4479499
-root=`pwd`
+root=$(pwd)
 android_sdk_home=$ANDROID_HOME
 ndk=$android_sdk_home/ndk/16.1.4479499/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm
 
-echo $root
-echo $android_sdk_home
-echo $ndk
+echo "$root"
+echo "$android_sdk_home"
+echo "$ndk"
 
-java -jar ./analyze/matrix-apk-canary-2.0.0.jar \
---apk $root/app/build/outputs/apk/release/app-release.apk \
---unzip $root/app/build/apk-checker-result \
---mappingTxt $root/app/build/outputs/proguard/release/mapping/mapping.txt \
---output $root/app/build/apk-checker-result \
+java -jar ./analyze/matrix-apk-canary-2.0.2.jar \
+--apk "$root"/app/build/outputs/apk/release/app-release.apk \
+--unzip "$root"/app/build/apk-checker-result \
+--mappingTxt "$root"/app/build/outputs/proguard/release/mapping/mapping.txt \
+--output "$root"/app/build/apk-checker-result \
 --format "mm.html","mm.json" \
 --log v \
 -manifest \
@@ -27,10 +27,10 @@ java -jar ./analyze/matrix-apk-canary-2.0.0.jar \
 -uncompressedFile --suffix "png", "jpg", "jpeg", "gif", "arsc" \
 -countR \
 -duplicatedFile \
--checkMultiSTL --toolnm $ndk \
--unusedResources --rTxt $root/app/build/intermediates/runtime_symbol_list/release/R.txt --ignoreResources "R.raw.*","R.style.*","R.attr.*","R.id.*","R.string.ignore_*" \
+-checkMultiSTL --toolnm "$ndk" \
+-unusedResources --rTxt "$root"/app/build/intermediates/runtime_symbol_list/release/R.txt --ignoreResources "R.raw.*","R.style.*","R.attr.*","R.id.*","R.string.ignore_*" \
 -unusedAssets --ignoreAssets "*.so" \
--unstrippedSo --toolnm $ndk \
+-unstrippedSo --toolnm "$ndk" \
 -countClass --group package \
 sleep 2 && \
-open $root/app/build/apk-checker-result.html
+open "$root"/app/build/apk-checker-result.html
