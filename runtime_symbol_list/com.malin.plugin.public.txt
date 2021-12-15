@@ -1,2 +1,0 @@
-com.malin.plugin:layout/plugin_activity = 0x80020000
-com.malin.plugin:drawable/plugin_img = 0x80010000

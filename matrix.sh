@@ -1,8 +1,8 @@
 #!/bin/bash
 ./gradlew clean && ./gradlew assembleRelease \
 
-#需要配置ANDROID_HOME环境变量 /User/malin/sdk
-#需要下载ndk 16.1.4479499 /User/malin/sdk/ndk/16.1.4479499
+#需要配置ANDROID_HOME环境变量 /User/xxx/sdk
+#需要下载ndk 16.1.4479499 /User/xxx/sdk/ndk/16.1.4479499
 root=$(pwd)
 android_sdk_home=$ANDROID_HOME
 ndk=$android_sdk_home/ndk/16.1.4479499/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm

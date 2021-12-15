@@ -153,6 +153,4 @@ dependencies {
     implementation(DependenciesConfig.KTX_CORE)
     implementation(DependenciesConfig.ASYNC_LAYOUT)
     implementation(project(":pluingImpl"))
-    implementation(project(":hiddenapibypass"))
-    implementation(project(":restrictionbypass"))
 }
