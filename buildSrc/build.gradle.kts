@@ -6,12 +6,12 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath(kotlin("gradle-plugin", "1.6.0"))
+        classpath(kotlin("gradle-plugin", "1.6.10"))
     }
 }
 dependencies {
     implementation(gradleKotlinDsl())
-    implementation(kotlin("stdlib", "1.6.0"))
+    implementation(kotlin("stdlib", "1.6.10"))
 }
 repositories {
     gradlePluginPortal()
