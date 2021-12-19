@@ -152,5 +152,6 @@ dependencies {
     implementation(DependenciesConfig.APP_COMPAT)
     implementation(DependenciesConfig.KTX_CORE)
     implementation(DependenciesConfig.ASYNC_LAYOUT)
+    implementation(DependenciesConfig.HIDDEN_API_PASS)
     implementation(project(":pluingImpl"))
 }

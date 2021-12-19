@@ -28,5 +28,7 @@ object DependenciesConfig {
 
     const val ASYNC_LAYOUT = "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
 
+    const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:3.0"
+
     const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.0.0"
 }
