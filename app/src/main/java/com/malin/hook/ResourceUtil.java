@@ -3,9 +3,12 @@ package com.malin.hook;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.DisplayMetrics;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,11 +75,59 @@ public class ResourceUtil {
                 // 如果不进行初始化则会出现找不到资源的崩溃
                 hostResources.updateConfiguration(hostResources.getConfiguration(), hostResources.getDisplayMetrics());//此行代码非常重要4.
             } else {
-                ReflectUtil.invoke(AssetManager.class, assetManager, "addAssetPath", apk);
+                hostResources = getPluginResources(hostContext, apk);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return hostResources;
+    }
+
+
+    @SuppressWarnings({"JavaReflectionMemberAccess", "PrivateApi", "deprecation"})
+    public static Resources getPluginResources(Context context, String pluginPath) {
+        try {
+            //1.调用assetManager.addAssetPath(pluginPath);
+            AssetManager assetManager = AssetManager.class.newInstance();
+            Method addAssetPathMethod = assetManager.getClass().getDeclaredMethod("addAssetPath", String.class);
+            addAssetPathMethod.setAccessible(true);
+            addAssetPathMethod.invoke(assetManager, pluginPath);
+
+            Resources superRes = context.getResources();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                //Resources#public void setImpl(ResourcesImpl impl) {}
+                Class<?> displayAdjustmentsClazz = Class.forName("android.view.DisplayAdjustments");
+                Constructor<?> displayAdjustmentsConstructor = displayAdjustmentsClazz.getDeclaredConstructor();
+                displayAdjustmentsConstructor.setAccessible(true);
+                Object displayAdjustmentsObj = displayAdjustmentsConstructor.newInstance();
+
+                //new ResourcesImpl(AssetManager assets,DisplayMetrics metrics,
+                // Configuration config, DisplayAdjustments displayAdjustments) {}
+                Class<?> resourcesImplClazz = Class.forName("android.content.res.ResourcesImpl");
+                Constructor<?> resourcesImplConstructor = resourcesImplClazz.getDeclaredConstructor(AssetManager.class, DisplayMetrics.class, Configuration.class, displayAdjustmentsClazz);
+                resourcesImplConstructor.setAccessible(true);
+                Object resourcesImplObj = resourcesImplConstructor.newInstance(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration(), displayAdjustmentsObj);
+
+                //private Resources() {}
+                Class<?> resourcesClazz = Class.forName("android.content.res.Resources");
+                Constructor<?> resourcesConstructor = resourcesClazz.getDeclaredConstructor();
+                resourcesConstructor.setAccessible(true);
+                Object resourcesObj = resourcesConstructor.newInstance();
+
+                //Resources
+                //public void setImpl(ResourcesImpl impl) {}
+                Method setImplMethod = resourcesClazz.getDeclaredMethod("setImpl", resourcesImplClazz);
+                setImplMethod.setAccessible(true);
+
+                //resources.setImpl(ResourcesImpl impl){}
+                setImplMethod.invoke(resourcesObj, resourcesImplObj);
+                return (Resources) resourcesObj;
+            } else {
+                return new Resources(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
