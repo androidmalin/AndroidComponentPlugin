@@ -9,6 +9,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +42,21 @@ public class ResourceUtil {
         Resources hostResources = hostContext.getResources();
         try {
             AssetManager assetManager = hostResources.getAssets();
+            Class<?> assetManagerClazz = assetManager.getClass();
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 // 我们需要将应用原来加载的地址取出来，详情见①
                 // 由于我们将host的AssetManager已经destroy后，需要还原原来的地址，否则就会发生找不到资源的情况，
                 // 此时需要提前将host加载的资源路径全部取出来，理论上，这个过程系统是做了一部分的，当我们调用init方法的时候
                 List<String> cookieNames = new ArrayList<>();
-                int stringBlockCount = (int) ReflectUtil.invoke(AssetManager.class, assetManager, "getStringBlockCount");
+
+                // private native final int getStringBlockCount();
+                Method getStringBlockCount = assetManagerClazz.getDeclaredMethod("getStringBlockCount");
+                getStringBlockCount.setAccessible(true);
+                Object stringBlockCountObj = getStringBlockCount.invoke(assetManager);
+                if (stringBlockCountObj == null) return null;
+                int stringBlockCount = (int) stringBlockCountObj;
+
                 Method getCookieNameMethod = AssetManager.class.getDeclaredMethod("getCookieName", Integer.TYPE);
                 getCookieNameMethod.setAccessible(true);
 
@@ -55,21 +64,42 @@ public class ResourceUtil {
                     String cookieName = (String) getCookieNameMethod.invoke(assetManager, new Object[]{i + 1});
                     cookieNames.add(cookieName);
                 }
-                ReflectUtil.invoke(AssetManager.class, assetManager, "destroy");
-                ReflectUtil.invoke(AssetManager.class, assetManager, "init");
+
+                Method destroyMethod = assetManagerClazz.getDeclaredMethod("destroy");
+                destroyMethod.setAccessible(true);
+                destroyMethod.invoke(assetManager);
+
+                Method initMethod = assetManagerClazz.getDeclaredMethod("init");
+                initMethod.setAccessible(true);
+                initMethod.invoke(assetManager);
+
 
                 // ②③引用：它记录了之前加载过的所有资源包中的String Pool，很多时候访问字符串是从此处来的，如果不重新构造就会导致崩溃
-                ReflectUtil.setField(AssetManager.class, assetManager, "mStringBlocks", null);//②
+                // private StringBlock mStringBlocks[] = null;
+                Field mStringBlocksField = assetManagerClazz.getDeclaredField("mStringBlocks");//②
+                mStringBlocksField.setAccessible(true);
+                mStringBlocksField.set(assetManager, null);
 
+                // public final int addAssetPath(String path) {...}
+                @SuppressLint("DiscouragedPrivateApi")
+                Method addAssetPathMethod = assetManagerClazz.getDeclaredMethod("addAssetPath", String.class);
+                addAssetPathMethod.setAccessible(true);
                 // 将原来的assets添加进去，有了此步骤就不用刻意添加sourceDir了
                 for (String path : cookieNames) {
-                    ReflectUtil.invoke(AssetManager.class, assetManager, "addAssetPath", path);
+                    //ReflectUtil.invoke(AssetManager.class, assetManager, "addAssetPath", path);
+                    addAssetPathMethod.invoke(assetManager, path);
                 }
 
                 // 插入插件的资源地址
-                ReflectUtil.invoke(AssetManager.class, assetManager, "addAssetPath", apk);
+                @SuppressLint("DiscouragedPrivateApi")
+                Method addAssetPathMethod1 = assetManagerClazz.getDeclaredMethod("addAssetPath", String.class);
+                addAssetPathMethod1.setAccessible(true);
+                addAssetPathMethod1.invoke(assetManager, apk);
 
-                ReflectUtil.invoke(AssetManager.class, assetManager, "ensureStringBlocks");//③
+                // final void ensureStringBlocks() {}
+                Method ensureStringBlocksMethod = assetManagerClazz.getDeclaredMethod("ensureStringBlocks");//③
+                ensureStringBlocksMethod.setAccessible(true);
+                ensureStringBlocksMethod.invoke(assetManager);
 
                 // 4：过程中很重要的一步，因为后面在资源查找的时候是需要通过一个ResTable_config来获取当前手机的一些配置从而获取到准确的资源，
                 // 如果不进行初始化则会出现找不到资源的崩溃
