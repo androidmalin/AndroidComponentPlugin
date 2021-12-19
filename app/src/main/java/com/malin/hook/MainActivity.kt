@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 pluginApkFileName = PLUGIN_APK_FILE_NAME,
                 pluginPackageName = PLUGIN_PACKAGE_NAME,
                 resourceName = PLUGIN_IMG_NAME,
-                loadResourceType = 1
+                loadResourceType = 2
             )
             mIvPluginRes.setImageDrawable(drawableImg)
         }

@@ -1,9 +1,11 @@
 package com.malin.plugin.impl
 
+import android.R
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -349,12 +351,33 @@ object HookActivity {
             // 5.将安全的Intent,替换为原始的Intent,以启动我们要启动的未注册的Activity
             safeIntent.component = originIntent.component
 
+
+            // 给插件apk设置主题
+            val activityInfoField =
+                activityClientRecordObj.javaClass.getDeclaredField("activityInfo")
+                    .also { it.isAccessible = true }
+            val activityInfo: ActivityInfo =
+                activityInfoField.get(activityClientRecordObj) as ActivityInfo
+            activityInfo.theme = selectSystemTheme()
+
             // 6.处理启动的Activity为AppCompatActivity类或者子类的情况
             if (!isAppCompat) return
             hookPackageManager(context, subActivityClazz)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    @Suppress("SameParameterValue")
+    private fun selectSystemTheme(): Int {
+        val targetSdkVersion: Int = Build.VERSION.SDK_INT
+        val theme: Int = when {
+            targetSdkVersion < 11 -> R.style.Theme
+            targetSdkVersion < 14 -> R.style.Theme_Holo
+            targetSdkVersion < 24 -> com.malin.plugin.impl.R.style.AppCompatThemePlugin
+            else -> com.malin.plugin.impl.R.style.AppCompatThemePlugin
+        }
+        return theme
     }
 
     /**
@@ -563,6 +586,11 @@ object HookActivity {
 
                 // 13.将原始的Intent,赋值给clientTransactionItem的mIntent属性
                 safeIntent.component = originIntent.component
+
+                // 给插件apk设置主题
+                val activityInfo: ActivityInfo = launchActivityItemClazz.getDeclaredField("mInfo")
+                    .also { it.isAccessible = true }.get(launchActivityItem) as ActivityInfo
+                activityInfo.theme = selectSystemTheme()
 
                 // 14.处理未注册的Activity为AppCompatActivity类或者子类的情况
                 if (!isAppCompat) return

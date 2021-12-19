@@ -13,4 +13,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="AppCompatThemePlugin" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorRed</item>
+        <item name="colorPrimaryDark">@color/colorRed</item>
+        <item name="colorAccent">@color/colorRed</item>
+    </style>
 </resources>
