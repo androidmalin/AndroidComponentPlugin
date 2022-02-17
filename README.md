@@ -12,7 +12,7 @@
 
 5. 采用gradle kotlin dsl
 
-### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12
+### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12, android 13(模拟器)
 ### wetest设备兼容测试情况如下:
 ### 测试设备数量313, 通过309(98.7%), 4台未通过
 
