@@ -1,5 +1,5 @@
 object KotlinConstants {
-    const val gradle_version = "7.1.1"
+    const val gradle_version = "7.1.2"
     const val proguard_gradle = "7.2.0"
     const val kotlin_version = "1.6.10"
 }
@@ -30,5 +30,5 @@ object DependenciesConfig {
 
     const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
 
-    const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.0.0"
+    const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.1.0"
 }
