@@ -2,7 +2,7 @@
 
 0. 支持2种方式.第一种,hook Instrument实现;第二种,hook Handler实现.
 
-1. 兼容android4.1 ~ android12
+1. 兼容android4.1 ~ android13
 
 2. kotlin 实现
 

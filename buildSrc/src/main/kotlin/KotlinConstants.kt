@@ -1,13 +1,13 @@
 object KotlinConstants {
     const val gradle_version = "7.1.2"
-    const val proguard_gradle = "7.2.0"
+    const val proguard_gradle = "7.2.1"
     const val kotlin_version = "1.6.10"
 }
 
 object AppConfig {
     const val compileSdkVersion = 31
-    const val buildToolsVersion = "31.0.0"
-    const val ndkVersion = "23.1.7779620"
+    const val buildToolsVersion = "32.0.0"
+    const val ndkVersion = "24.0.8215888"
     const val applicationId = "com.malin.hook"
     const val minSdkVersion = 15
     const val targetSdkVersion = 31
