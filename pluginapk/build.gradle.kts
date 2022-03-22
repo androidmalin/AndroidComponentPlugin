@@ -51,6 +51,6 @@ android {
 }
 
 dependencies {
-    compileOnly(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    compileOnly(DependenciesConfig.APP_COMPAT)
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation(DependenciesConfig.APP_COMPAT)
 }

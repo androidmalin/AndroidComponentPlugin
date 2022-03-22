@@ -11,15 +11,15 @@
         android:id="@+id/iv_plugin_img"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="5dp"
         tools:ignore="ContentDescription" />
 
     <Button
         android:id="@+id/btn_load_plugin_img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="5dp"
         android:text="宿主中使用插件APK中的资源"
         tools:ignore="HardcodedText" />
 
@@ -27,7 +27,7 @@
         android:id="@+id/btn_start_host_register_act"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="5dp"
         android:text="启动宿主中的注册的Activity"
         tools:ignore="HardcodedText" />
 
@@ -35,7 +35,7 @@
         android:id="@+id/btn_start_host_unregister_act"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="5dp"
         android:text="启动宿主中未注册的Activity"
         tools:ignore="HardcodedText" />
 
@@ -51,7 +51,7 @@
         android:id="@+id/btn_start_plugin_apk_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="5dp"
         android:text="启动插件APK中的Activity"
         tools:ignore="HardcodedText" />
 
@@ -60,7 +60,7 @@
         android:id="@+id/btn_start_plugin_apk_appcompat_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="5dp"
         android:text="启动插件APK中的AppCompatActivity"
         tools:ignore="HardcodedText" />
 </LinearLayout>

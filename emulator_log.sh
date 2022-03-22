@@ -34,4 +34,7 @@ pidcat com.malin.hook \
 -i AdrenoGLES-0 \
 -i ProcessState \
 -i hw-ProcessState \
--i AdrenoUtils
+-i AdrenoUtils \
+-i WindowOnBackDispatcher \
+-i OnBackInvokedDispatcher \
+-i ziparchive
