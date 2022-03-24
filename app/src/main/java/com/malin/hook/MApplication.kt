@@ -14,6 +14,12 @@ class MApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         PluginImpl.init(context = baseContext, instrumentation = false, firstMode = true)
+    }
+
+    companion object {
+        lateinit var instance: Application
+            private set
     }
 }

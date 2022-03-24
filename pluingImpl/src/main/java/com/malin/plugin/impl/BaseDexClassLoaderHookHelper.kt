@@ -112,6 +112,7 @@ object BaseDexClassLoaderHookHelper {
                     //  @param outputPathName File that will hold the optimized form of the DEX data.
                     //  @param flags Enable optional features.  (Currently none defined.)
                     // warn log from http://androidxref.com/9.0.0_r3/xref/art/runtime/oat_file_manager.cc#404
+                    // http://androidxref.com/9.0.0_r3/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#606
                     elementClazz.getDeclaredConstructor(
                         DexFile::class.java, File::class.java
                     ).also { it.isAccessible = true }.newInstance(dexFile, apkFile)
@@ -121,6 +122,7 @@ object BaseDexClassLoaderHookHelper {
                     // 7.构造插件Element
                     // 使用构造函数 public Element(File file, boolean isDirectory, File zip, DexFile dexFile){}
                     // 8. 生成Element的实例对象
+                    // http://androidxref.com/4.3_r2.1/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#383
                     elementClazz.getDeclaredConstructor(
                         File::class.java,
                         Boolean::class.javaPrimitiveType,
@@ -133,6 +135,7 @@ object BaseDexClassLoaderHookHelper {
                     // 7.构造插件Element
                     // 使用构造函数:public Element(File file, File zip, DexFile dexFile){}
                     // 8. 生成Element的实例对象
+                    // http://androidxref.com/4.2_r1/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#387
                     elementClazz.getDeclaredConstructor(
                         File::class.java, File::class.java, DexFile::class.java
                     ).also { it.isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
@@ -142,6 +145,8 @@ object BaseDexClassLoaderHookHelper {
                     // 7.构造插件Element
                     // 使用构造函数:public Element(File file, ZipFile zipFile, DexFile dexFile){}
                     // 8. 生成Element的实例对象
+                    // http://androidxref.com/4.1.1/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#387
+                    // http://androidxref.com/4.0.3_r1/xref/libcore/dalvik/src/main/java/dalvik/system/DexPathList.java#387
                     elementClazz.getDeclaredConstructor(
                         File::class.java, ZipFile::class.java, DexFile::class.java
                     ).also { it.isAccessible = true }
