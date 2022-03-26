@@ -119,11 +119,12 @@ public class ResourceUtil2 {
         return hostResources;
     }
 
+    // Iterate over all known Resources objects
     @SuppressLint("PrivateApi")
     private static void handleConfiguration(Application application) {
 
         try {
-            Collection<WeakReference<?>> collection;
+            Collection<WeakReference<Resources>> collection;
             if (Build.VERSION.SDK_INT >= 19) {
                 Class<?> resourcesManagerClazz = Class.forName("android.app.ResourcesManager");
                 @SuppressLint("DiscouragedPrivateApi")
@@ -136,14 +137,18 @@ public class ResourceUtil2 {
                     // final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources = new ArrayMap<ResourcesKey, WeakReference<Resources> >();
                     Field mActiveResourcesField = resourcesManagerClazz.getDeclaredField("mActiveResources");
                     mActiveResourcesField.setAccessible(true);
-                    collection = ((ArrayMap) mActiveResourcesField.get(resourcesManagerObj)).values();
+
+                    @SuppressWarnings("unchecked")
+                    ArrayMap<?, WeakReference<Resources>> arrayMap = (ArrayMap<?, WeakReference<Resources>>) mActiveResourcesField.get(resourcesManagerObj);
+                    collection = arrayMap.values();
                 } catch (NoSuchFieldException e) {
                     // api>=24 && api <=31 [24,31]
                     // private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
                     @SuppressLint("DiscouragedPrivateApi")
                     Field mResourceReferencesField = resourcesManagerClazz.getDeclaredField("mResourceReferences");
                     mResourceReferencesField.setAccessible(true);
-                    collection = (Collection) mResourceReferencesField.get(resourcesManagerObj);
+                    //noinspection unchecked
+                    collection = (Collection<WeakReference<Resources>>) mResourceReferencesField.get(resourcesManagerObj);
                 }
             } else {
                 Class<?> activityThreadClazz = Class.forName("android.app.ActivityThread");
@@ -155,6 +160,7 @@ public class ResourceUtil2 {
                     // public LoadedApk mLoadedApk;
                     @SuppressLint("DiscouragedPrivateApi")
                     Field mLoadedApkField = Application.class.getDeclaredField("mLoadedApk");
+                    mLoadedApkField.setAccessible(true);
                     Object loadedApk = mLoadedApkField.get(application);
 
                     Class<?> loadedApkClazz = Class.forName("android.app.LoadedApk");
@@ -168,11 +174,14 @@ public class ResourceUtil2 {
                 // final HashMap<ResourcesKey, WeakReference<Resources>> mActiveResources = new HashMap<ResourcesKey, WeakReference<Resources> >();
                 Field mActiveResourcesField = activityThreadClazz.getDeclaredField("mActiveResources");
                 mActiveResourcesField.setAccessible(true);
-                collection = ((HashMap) mActiveResourcesField.get(activityThreadObj)).values();
+
+                @SuppressWarnings("unchecked")
+                HashMap<?, WeakReference<Resources>> map = (HashMap<?, WeakReference<Resources>>) mActiveResourcesField.get(activityThreadObj);
+                collection = map.values();
             }
             if (collection == null) return;
-            for (WeakReference<?> weakReference : collection) {
-                Resources resources = (Resources) weakReference.get();
+            for (WeakReference<Resources> weakReference : collection) {
+                Resources resources = weakReference.get();
                 if (resources != null) {
                     resources.updateConfiguration(resources.getConfiguration(), resources.getDisplayMetrics());
                     Log.d("ResourceManager", "update successfully");

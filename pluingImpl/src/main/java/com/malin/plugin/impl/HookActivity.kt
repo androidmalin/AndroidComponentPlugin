@@ -1,6 +1,5 @@
 package com.malin.plugin.impl
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
@@ -162,7 +161,7 @@ object HookActivity {
 
             // 13.重新赋值
             // 给mInstance属性,赋新值
-            // 给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
+            // 给Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象的属性private T mInstance赋新值
             mInstanceField[IActivityTaskManagerSingletonObj] = iActivityTaskManagerProxy
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
@@ -372,10 +371,10 @@ object HookActivity {
     private fun selectSystemTheme(): Int {
         val targetSdkVersion: Int = Build.VERSION.SDK_INT
         val theme: Int = when {
-            targetSdkVersion < 11 -> R.style.Theme
-            targetSdkVersion < 14 -> R.style.Theme_Holo
-            targetSdkVersion < 24 -> com.malin.plugin.impl.R.style.AppCompatThemePlugin
-            else -> com.malin.plugin.impl.R.style.AppCompatThemePlugin
+            targetSdkVersion < 11 -> android.R.style.Theme
+            targetSdkVersion < 14 -> android.R.style.Theme_Holo
+            targetSdkVersion < 24 -> R.style.AppCompatThemePlugin
+            else -> R.style.AppCompatThemePlugin
         }
         return theme
     }
