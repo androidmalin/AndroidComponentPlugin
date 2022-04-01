@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("project-report")
     id("com.guardsquare.proguard")
     kotlin("android")
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
