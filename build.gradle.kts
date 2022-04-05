@@ -3,16 +3,11 @@ buildscript {
         google()
         mavenCentral()
     }
+    // https://www.guardsquare.com/manual/setup/upgrading
     dependencies {
         classpath("com.android.tools.build:gradle:${KotlinConstants.gradle_version}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinConstants.kotlin_version}")
         classpath("com.guardsquare:proguard-gradle:${KotlinConstants.proguard_gradle}")
-    }
-    configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            substitute(module("net.sf.proguard:proguard-gradle"))
-                .using(module("com.guardsquare:proguard-gradle:${KotlinConstants.proguard_gradle}"))
-        }
     }
 }
 

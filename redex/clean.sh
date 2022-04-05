@@ -5,3 +5,5 @@ find . -name "*.apk" -type f |  xargs rm -rf
 find . -name "*.txt" -type f |  xargs rm -rf
 find . -name "*.idsig" -type f |  xargs rm -rf
 find . -name "*.json" -type f |  xargs rm -rf
+find . -name "*.class" -type f | xargs rm -rf 
+find . -name "infer-out" -type d |  xargs rm -rf

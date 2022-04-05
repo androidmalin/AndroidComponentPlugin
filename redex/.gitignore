@@ -2,3 +2,5 @@
 *.json
 *.idsig
 *.apk
+infer-out
+*.class

@@ -55,7 +55,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
-            // https://www.guardsquare.com/manual/setup/gradleplugin
+            // https://www.guardsquare.com/manual/setup/upgrading
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
@@ -92,7 +92,6 @@ android {
     }
 }
 
-// 下载最新版本的 ProGuard 去替换 SDK 里面的 Proguard 以支持新特性。SDK 中 Proguard 的路径是 ANDROID_SDK/tools/proguard
 // https://www.guardsquare.com/manual/setup/upgrading
 proguard {
     configurations {
