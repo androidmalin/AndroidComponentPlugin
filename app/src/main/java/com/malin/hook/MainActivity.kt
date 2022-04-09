@@ -15,6 +15,10 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var mIvPluginRes: ImageView
+
+    /**
+     * 属性委托使用反射，这样会增加一些性能开销。这种代价换来的是简洁的语法，可让您节省开发时间。
+     */
     private val mBtnStartHostRegisterAct: Button by bindView(R.id.btn_start_host_register_act)
 
     @SuppressLint("InflateParams")
@@ -35,6 +39,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mIvPluginRes = findViewById(R.id.iv_plugin_img)
     }
 
+    /**
+     * 扩展方法
+     */
     private fun <T : View> Activity.bindView(@IdRes res: Int): Lazy<T> {
         return lazy { findViewById(res) }
     }
@@ -51,6 +58,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initLoadPluginResourceImg() {
+        // SAM 转换
         findViewById<View>(R.id.btn_load_plugin_img).setOnClickListener {
             val drawableImg = PluginResourceUtil.getPluginDrawableByName(
                 context = applicationContext,
@@ -89,8 +97,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * 每个条件分支都隐式地返回其最后一行的表达式的结果，因此无需使用 return 关键字。
+     * 由于全部三个分支的结果都是 Intent 类型，因此 when 表达式的结果也是 Intent 类型。
+     */
     private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
+        // 1.延时初始化
         lateinit var intent: Intent
+
+        // 2.条件表达式
         when (startActType) {
 
             Type.HOST_EXIST_ACTIVITY -> {
@@ -129,6 +144,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * companion object
+     *
+     * 伴生对象提供了一种机制，用于定义在概念上与某个类型相关但不与某个特定对象关联的变量或函数。
+     * 伴生对象类似于对变量和方法使用 Java 的 static 关键字。
+     * 伴生对象有助于连接变量、函数和类定义，而无需引用该类的任何特定实例。
+     */
     private companion object {
         private const val PLUGIN_PACKAGE_NAME = "com.malin.plugin"
         private const val PLUGIN_ACTIVITY_NAME = "com.malin.plugin.PluginActivity"

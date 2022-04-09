@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 # https://github.com/shwenzhang/AndResGuard/blob/master/doc/how_to_work.zh-cn.md
+# shellcheck disable=SC2038
 find . -name "outapk" -type d |  xargs rm -rf
 find . -name "*.apk" -type f |  xargs rm -rf
 
@@ -22,6 +23,6 @@ java -jar AndResGuard-cli-1.2.21.jar input.apk \
 -signature ../plugin.jks plugin plugin plugin \
 -7zip /usr/local/bin/7z
 
-adb install uninstall com.malin.hook
+adb uninstall com.malin.hook
 adb install ./outapk/input_7zip_aligned_signed.apk
 adb shell am start com.malin.hook/.MainActivity
