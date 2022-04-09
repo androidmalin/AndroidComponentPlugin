@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -16,6 +19,8 @@ public class PluginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         Log.d(TAG, TAG + ":onCreate");
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
@@ -25,6 +30,13 @@ public class PluginActivity extends Activity {
         textView.setText("启动插件APK中的PluginActivity,成功!");
 
         relativeLayout.addView(textView);
+
+        relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PluginActivity.this.finish();
+            }
+        });
         setContentView(relativeLayout);
     }
 

@@ -15,7 +15,10 @@ class MApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        PluginImpl.init(context = baseContext, instrumentation = false, firstMode = true)
+        //111 instrumentation = false, firstMode = true; meizu 15/15pro error
+        //122 instrumentation = true, firstMode = false
+        //133 instrumentation = false, firstMode = false
+        PluginImpl.init(context = baseContext, instrumentation = false, firstMode = false)
     }
 
     companion object {

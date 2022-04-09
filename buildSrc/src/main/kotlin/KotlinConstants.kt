@@ -11,8 +11,8 @@ object AppConfig {
     const val applicationId = "com.malin.hook"
     const val minSdkVersion = 15
     const val targetSdkVersion = 31
-    const val versionCode = 1
-    const val versionName = "1.0"
+    const val versionCode = 133
+    const val versionName = "133.0"
     val abi = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
 }
 
