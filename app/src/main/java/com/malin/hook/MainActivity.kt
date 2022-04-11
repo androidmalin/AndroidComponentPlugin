@@ -14,8 +14,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        try {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
         setContentView(R.layout.activity_main)
         initListener()
+        try {
+            val actionBar = actionBar
+            actionBar?.hide()
+            val supportActionBar = supportActionBar
+            supportActionBar?.hide()
+        } catch (ignore: Throwable) {
+        }
     }
 
     private fun initListener() {
@@ -26,46 +40,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btn_start_plugin_apk_activity -> {
-                startActivity(startActType = Type.PLUGIN_ACTIVITY, isApplicationContext = false)
+                this.startActivity(Intent(this, ImageActivity::class.java))
             }
             R.id.btn_start_plugin_apk_appcompat_activity -> {
-                startActivity(
-                    startActType = Type.PLUGIN_APPCOMPAT_ACTIVITY,
-                    isApplicationContext = false
-                )
-            }
-        }
-    }
-
-    /**
-     * 每个条件分支都隐式地返回其最后一行的表达式的结果，因此无需使用 return 关键字。
-     * 由于全部三个分支的结果都是 Intent 类型，因此 when 表达式的结果也是 Intent 类型。
-     */
-    private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
-        // 1.延时初始化
-        lateinit var intent: Intent
-
-        // 2.条件表达式
-        when (startActType) {
-            Type.PLUGIN_ACTIVITY -> {
-                intent = Intent()
-                intent.component =
-                    ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_ACTIVITY_NAME)
-            }
-
-            Type.PLUGIN_APPCOMPAT_ACTIVITY -> {
-                intent = Intent()
+                val intent = Intent()
                 intent.component =
                     ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_APPCOMPAT_ACTIVITY_NAME)
-            }
-        }
-
-        when {
-            isApplicationContext -> {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                applicationContext.startActivity(intent)
-            }
-            else -> {
                 this.startActivity(intent)
             }
         }

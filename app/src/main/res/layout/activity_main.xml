@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_horizontal"
-              android:orientation="vertical"
-              tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
-    <Button
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
             android:id="@+id/btn_start_plugin_apk_activity"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:text="启动插件APK中的Activity"
-            tools:ignore="HardcodedText"/>
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:text="加载图片"
+            tools:ignore="HardcodedText" />
+    </FrameLayout>
 
 
     <Button
-            android:id="@+id/btn_start_plugin_apk_appcompat_activity"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:text="启动插件APK中的AppCompatActivity"
-            tools:ignore="HardcodedText"/>
+        android:id="@+id/btn_start_plugin_apk_appcompat_activity"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="启动插件APK中的AppCompatActivity"
+        tools:ignore="HardcodedText" />
 </LinearLayout>

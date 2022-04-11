@@ -18,7 +18,8 @@ class MApplication : Application() {
         //111 instrumentation = false, firstMode = true; meizu 15/15pro error
         //122 instrumentation = true, firstMode = false
         //133 instrumentation = false, firstMode = false
-        PluginImpl.init(context = baseContext, instrumentation = false, firstMode = false)
+        //144 instrumentation = true, firstMode = false
+        PluginImpl.init(context = baseContext, instrumentation = true, firstMode = false)
     }
 
     companion object {
