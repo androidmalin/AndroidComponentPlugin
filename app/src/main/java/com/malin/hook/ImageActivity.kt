@@ -1,6 +1,8 @@
 package com.malin.hook
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -9,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 
 class ImageActivity : AppCompatActivity() {
 
+    private val handle: Handler = Handler(Looper.myLooper()!!)
+    private val image: ImageView by lazy { findViewById(R.id.iv_) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -16,7 +21,7 @@ class ImageActivity : AppCompatActivity() {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -33,16 +38,22 @@ class ImageActivity : AppCompatActivity() {
         findViewById<View>(R.id.root_layout).setOnClickListener {
             this.finish()
         }
+        loadImage()
+    }
 
-        val image: ImageView = findViewById(R.id.iv_)
-        val drawableImg = PluginResourceUtil.getPluginDrawableByName(
-            context = applicationContext,
-            pluginApkFileName = PLUGIN_APK_FILE_NAME,
-            pluginPackageName = PLUGIN_PACKAGE_NAME,
-            resourceName = PLUGIN_IMG_NAME,
-            loadResourceType = 2
-        )
-        image.setImageDrawable(drawableImg)
+    private fun loadImage() {
+        Thread {
+            val drawableImg = PluginResourceUtil.getPluginDrawableByName(
+                context = applicationContext,
+                pluginApkFileName = PLUGIN_APK_FILE_NAME,
+                pluginPackageName = PLUGIN_PACKAGE_NAME,
+                resourceName = PLUGIN_IMG_NAME,
+                loadResourceType = 2
+            )
+            handle.post {
+                image.setImageDrawable(drawableImg)
+            }
+        }.start()
     }
 
     companion object {

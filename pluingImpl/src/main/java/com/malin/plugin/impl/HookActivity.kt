@@ -359,9 +359,7 @@ object HookActivity {
                 activityInfoField.get(activityClientRecordObj) as ActivityInfo
             activityInfo.theme = selectSystemTheme()
 
-            // 6.处理启动的Activity为AppCompatActivity类或者子类的情况
-            if (!isAppCompat) return
-            hookPackageManager(context, subActivityClazz)
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -591,9 +589,6 @@ object HookActivity {
                     .also { it.isAccessible = true }.get(launchActivityItem) as ActivityInfo
                 activityInfo.theme = selectSystemTheme()
 
-                // 14.处理未注册的Activity为AppCompatActivity类或者子类的情况
-                if (!isAppCompat) return
-                hookPackageManager(context, subActivityClazz)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -605,7 +600,7 @@ object HookActivity {
         private val mAppPackageName: String,
         private val mSubActivityClazzName: String
     ) : InvocationHandler {
-        @Throws(InvocationTargetException::class, IllegalAccessException::class)
+        @Throws(Throwable::class)
         override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
             // public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo" == method.name && args != null && args.isNotEmpty()) {
@@ -623,7 +618,16 @@ object HookActivity {
             // https://stackoverflow.com/questions/41774450/why-is-kotlin-throw-illegalargumentexception-when-using-proxy
             // * is also used to pass an array to a vararg parameter
             // method!!.invoke(worker, *(args ?: arrayOfNulls<Any>(0)))
-            return method.invoke(mIPackageManagerObj, *(args ?: arrayOfNulls<Any>(0)))
+            return try {
+                method.invoke(mIPackageManagerObj, *(args ?: arrayOfNulls<Any>(0))) as Any
+            } catch (e: IllegalAccessException) {
+                println("IllegalAccessException appear")
+                throw e.cause
+                    ?: IllegalAccessException("PackageManagerProxyHandler IllegalAccessException unKnow")
+            } catch (e: InvocationTargetException) {
+                throw e.cause
+                    ?: IllegalAccessException("PackageManagerProxyHandler InvocationTargetException unKnow")
+            }
         }
     }
 }

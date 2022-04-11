@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 public class BaseActivity extends AppCompatActivity {
@@ -17,7 +18,8 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Resources resource = PluginResourceUtil.getResource(getApplication());
+        File dexFile = getFileStreamPath("pluginapk-debug.apk");
+        Resources resource =   ResourceUtil.create(getApplication(), dexFile.getAbsolutePath()) ;
         mContext = new ContextThemeWrapper(getBaseContext(), 0);
         Class<?> contextClazz = mContext.getClass();
         try {

@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import com.malin.plugin.impl.BaseDexClassLoaderHookHelper.patchClassLoader
 import com.malin.plugin.impl.BaseDexClassLoaderHookHelperAnother.patchClassLoader
-import com.malin.plugin.impl.HookActivity.hookPackageManager
 import com.malin.plugin.impl.HookActivityWrapper.hookStartActivity
 import com.malin.plugin.impl.HookInstrumentation.hookInstrumentation
 import java.util.concurrent.Executors
@@ -49,7 +48,9 @@ object PluginImpl {
             }
             when {
                 instrumentation -> {
-                    hookPackageManager(context, StubAppCompatActivity::class.java)
+                    HookActivityWrapper.hookPackageManager(context = context,
+                        subActivityClass = StubAppCompatActivity::class.java,
+                        isAppCompat = true)
                 }
                 else -> {
                     when {
