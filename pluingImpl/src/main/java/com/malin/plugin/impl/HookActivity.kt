@@ -119,7 +119,7 @@ object HookActivity {
     private fun handleIActivityTaskManager(
         context: Context,
         subActivityClazz: Class<*>,
-        IActivityTaskManagerSingletonObj: Any?
+        IActivityTaskManagerSingletonObj: Any?,
     ) {
         try {
             // 5.获取private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton对象中的属性private T mInstance的值
@@ -183,7 +183,7 @@ object HookActivity {
     private fun handleIActivityManager(
         context: Context,
         subActivityClazz: Class<*>,
-        iActivityManagerSingletonObj: Any?
+        iActivityManagerSingletonObj: Any?,
     ) {
         try {
             // 5.获取private static final Singleton<IActivityManager> IActivityManagerSingleton对象中的属性private T mInstance的值
@@ -231,13 +231,9 @@ object HookActivity {
 
     /**
      * 启动未注册的Activity,将之前替换了的Intent,换回去.我们的目标是要启动未注册的Activity
-     *
-     * @param context          context
-     * @param subActivityClazz 注册了的Activity的Class对象
-     * @param isAppCompat      是否是AppCompatActivity的子类
      */
     @SuppressLint("DiscouragedPrivateApi")
-    fun hookLauncherActivity(context: Context, subActivityClazz: Class<*>, isAppCompat: Boolean) {
+    fun hookLauncherActivity() {
         try {
             // 1.获取ActivityThread的Class对象
             // package android.app
@@ -277,9 +273,9 @@ object HookActivity {
             // 给mH,既Handler的子类设置mCallback属性,提前对消息进行处理.
             if (Build.VERSION.SDK_INT >= 28) {
                 // >=android 9.0
-                mCallbackField[mHObj] = HandlerCallbackP(context, subActivityClazz, isAppCompat)
+                mCallbackField[mHObj] = HandlerCallbackP()
             } else {
-                mCallbackField[mHObj] = HandlerCallback(context, subActivityClazz, isAppCompat)
+                mCallbackField[mHObj] = HandlerCallback()
             }
         } catch (e: InvocationTargetException) {
             e.printStackTrace()
@@ -294,12 +290,7 @@ object HookActivity {
         }
     }
 
-    private fun handleLaunchActivity(
-        msg: Message,
-        context: Context,
-        subActivityClazz: Class<*>,
-        isAppCompat: Boolean
-    ) {
+    private fun handleLaunchActivity(msg: Message) {
         var launchActivity = 100
         try {
             // 1.获取ActivityThread的内部类H的Class对象
@@ -369,8 +360,6 @@ object HookActivity {
     private fun selectSystemTheme(): Int {
         val targetSdkVersion: Int = Build.VERSION.SDK_INT
         val theme: Int = when {
-            targetSdkVersion < 11 -> android.R.style.Theme
-            targetSdkVersion < 14 -> android.R.style.Theme_Holo
             targetSdkVersion < 24 -> R.style.AppCompatThemePlugin
             else -> R.style.AppCompatThemePlugin
         }
@@ -455,7 +444,7 @@ object HookActivity {
     private class IActivityInvocationHandler(
         private val mIActivityManager: Any?,
         private val mContext: Context,
-        private val mSubActivityClazz: Class<*>
+        private val mSubActivityClazz: Class<*>,
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
         override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
@@ -491,13 +480,9 @@ object HookActivity {
     /**
      * 对应<9.0情况,创建一个Handler的Callback接口的实例对象
      */
-    private class HandlerCallback(
-        private val context: Context,
-        private val subActivityClazz: Class<*>,
-        private val isAppCompat: Boolean
-    ) : Handler.Callback {
+    private class HandlerCallback : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
-            handleLaunchActivity(msg, context, subActivityClazz, isAppCompat)
+            handleLaunchActivity(msg)
             return false
         }
     }
@@ -506,11 +491,7 @@ object HookActivity {
      * 对Android 9.0的处理
      * https://www.cnblogs.com/Jax/p/9521305.html
      */
-    private class HandlerCallbackP(
-        private val context: Context,
-        private val subActivityClazz: Class<*>,
-        private val isAppCompat: Boolean
-    ) : Handler.Callback {
+    private class HandlerCallbackP : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
             // android.app.ActivityThread$H.EXECUTE_TRANSACTION = 159
             // android 9.0反射,Accessing hidden field Landroid/app/ActivityThread$H;->EXECUTE_TRANSACTION:I (dark greylist, reflection)
@@ -598,10 +579,10 @@ object HookActivity {
     private class PackageManagerProxyHandler(
         private val mIPackageManagerObj: Any?,
         private val mAppPackageName: String,
-        private val mSubActivityClazzName: String
+        private val mSubActivityClazzName: String,
     ) : InvocationHandler {
         @Throws(Throwable::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any {
             // public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo" == method.name && args != null && args.isNotEmpty()) {
                 var index = 0

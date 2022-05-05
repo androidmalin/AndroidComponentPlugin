@@ -13,7 +13,7 @@ object PluginResourceUtil {
         pluginApkFileName: String,
         pluginPackageName: String,
         resourceName: String,
-        loadResourceType: Int
+        loadResourceType: Int,
     ): Drawable? {
         val pluginApkPath = context.getFileStreamPath(pluginApkFileName).absolutePath
         val resources = ResourceUtil.createResources(context, pluginApkPath) ?: return null
@@ -63,7 +63,7 @@ object PluginResourceUtil {
     private fun getResId2(
         resources: Resources,
         pluginPackageName: String,
-        resName: String
+        resName: String,
     ): Int {
         return resources.getIdentifier(resName, "drawable", pluginPackageName)
     }
@@ -72,7 +72,7 @@ object PluginResourceUtil {
         context: Context,
         pluginPath: String,
         pluginPackageName: String,
-        resName: String
+        resName: String,
     ): Int {
         try {
             val optimizedDirectoryFile = context.getDir("dex", Context.MODE_PRIVATE)

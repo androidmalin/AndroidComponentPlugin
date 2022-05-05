@@ -74,15 +74,16 @@ object HookInstrumentation {
     private class InstrumentationProxy(
         private val mInstrumentation: Instrumentation,
         private val mPackageManager: PackageManager,
-        private val mStubActivityClazz: Class<*>
+        private val mStubActivityClazz: Class<*>,
     ) : Instrumentation() {
         /**
          * android16-android31
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */
-        @SuppressLint("QueryPermissionsNeeded")
         @Keep
+        @Suppress("UNUSED")
+        @SuppressLint("QueryPermissionsNeeded")
         fun execStartActivity(
             who: Context?,
             contextThread: IBinder?,
@@ -90,7 +91,7 @@ object HookInstrumentation {
             target: Activity?,
             intent: Intent,
             requestCode: Int,
-            options: Bundle?
+            options: Bundle?,
         ): ActivityResult? {
             var resolveInfoList: List<ResolveInfo>? = null
             try {
@@ -146,6 +147,7 @@ object HookInstrumentation {
          * http://androidxref.com/4.0.3_r1/xref/frameworks/base/core/java/android/app/Instrumentation.java
          */
         @Keep
+        @Suppress("UNUSED")
         @SuppressLint("QueryPermissionsNeeded")
         fun execStartActivity(
             who: Context?,
@@ -153,7 +155,7 @@ object HookInstrumentation {
             token: IBinder?,
             target: Activity?,
             intent: Intent,
-            requestCode: Int
+            requestCode: Int,
         ): ActivityResult? {
             if (Build.VERSION.SDK_INT != 15) return null
             var resolveInfoList: List<ResolveInfo>? = null
@@ -211,7 +213,7 @@ object HookInstrumentation {
         override fun newActivity(
             classLoader: ClassLoader,
             className: String,
-            intent: Intent
+            intent: Intent,
         ): Activity {
             val pluginIntent = intent.getParcelableExtra<Intent>(TARGET_INTENT_CLASS)
             val pluginIntentClassNameExist = pluginIntent != null && !TextUtils.isEmpty(
@@ -250,7 +252,7 @@ object HookInstrumentation {
         dexPath: String,
         optimizedDirectory: String,
         libraryPath: String,
-        parent: ClassLoader
+        parent: ClassLoader,
     ) : DexClassLoader(dexPath, optimizedDirectory, libraryPath, parent) {
         companion object {
             /**
@@ -259,7 +261,7 @@ object HookInstrumentation {
             fun getPluginClassLoader(
                 context: Context,
                 plugin: File,
-                packageName: String
+                packageName: String,
             ): CustomClassLoader {
                 // String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent
                 return CustomClassLoader(

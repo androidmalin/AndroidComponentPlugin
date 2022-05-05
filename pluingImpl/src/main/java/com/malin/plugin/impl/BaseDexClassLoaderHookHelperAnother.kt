@@ -21,23 +21,9 @@ import java.io.IOException
  * 使用makePathElements()或者makeDexElements()方法生成插件的Element[]
  */
 object BaseDexClassLoaderHookHelperAnother {
-    /*
-     * 默认情况下performLaunchActivity会使用替身StubActivity的ApplicationInfo也就是宿主程序的ClassLoader加载所有的类;
-     * 我们的思路是告诉宿主ClassLoader我们在哪,让其帮助完成类加载的过程.
-     * <p>
-     * 宿主程序的ClassLoader最终继承自BaseDexClassLoader,BaseDexClassLoader通过DexPathList进行类的查找过程;
-     * 而这个查找通过遍历一个dexElements的数组完成;
-     * <p>
-     * 我们通过把插件dex添加进这个数组就让宿主ClassLoader获取了加载插件类的能力.
-     * <p>
-     * 系统使用ClassLoader findClass的过程,发现应用程序使用的非系统类都是通过同一个PathClassLoader加载的;
-     * 而这个类的最终父类BaseDexClassLoader通过DexPathList完成类的查找过程;我们hack了这个查找过程,从而完成了插件类的加载
-     */
+
     /**
      * 使用宿主ClassLoader帮助加载插件类
-     * java.lang.IllegalAccessError: Class ref in pre-verified class resolved to unexpected implementation
-     * 在插件apk和宿主中包含了相同的Jar包;解决方法,插件编译时使用compileOnly依赖和宿主相同的依赖.
-     * https://blog.csdn.net/berber78/article/details/41721877
      *
      * @param baseDexClassLoader 表示宿主的LoadedApk在Application类中有一个成员变量mLoadedApk,而这个变量是从ContextImpl中获取的;
      * ContextImpl重写了getClassLoader方法,
@@ -79,7 +65,7 @@ object BaseDexClassLoaderHookHelperAnother {
 
             // 6.创建一个数组, 用来替换原始的数组
             // 通过Array.newInstance()可以反射生成数组对象,生成数组,指定元素类型和数组长度
-            val hostAndPluginElements = java.lang.reflect.Array.newInstance(
+            val hostAndPluginElements: Array<*> = java.lang.reflect.Array.newInstance(
                 elementClazz!!,
                 dexElements.size + 1
             ) as Array<*>

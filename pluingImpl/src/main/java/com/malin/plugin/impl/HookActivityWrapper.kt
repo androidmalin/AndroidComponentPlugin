@@ -7,7 +7,7 @@ object HookActivityWrapper {
     fun hookStartActivity(context: Context, subActivityClass: Class<*>, isAppCompat: Boolean) {
         hookPackageManager(context, subActivityClass, isAppCompat)
         HookActivity.hookStartActivity(context, subActivityClass)
-        HookActivity.hookLauncherActivity(context, subActivityClass, isAppCompat)
+        HookActivity.hookLauncherActivity()
     }
 
     fun hookPackageManager(context: Context, subActivityClass: Class<*>, isAppCompat: Boolean) {

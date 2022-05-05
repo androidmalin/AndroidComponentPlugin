@@ -33,9 +33,9 @@ object PluginUtils {
     /**
      * 待加载插件经过opt优化之后存放odex得路径
      */
-    fun getPluginOptDexDir(context: Context, packageName: String): File {
-        return enforceDirExists(File(getPluginBaseDir(context, packageName), "odex"))
-    }
+    fun getPluginOptDexDir(context: Context, packageName: String) =
+        enforceDirExists(File(getPluginBaseDir(context, packageName), "odex"))
+
 
     /**
      * 插件得lib库路径, 这个demo里面没有用
@@ -46,7 +46,7 @@ object PluginUtils {
 
     private fun closeSilently(closeable: Closeable?) {
         try {
-            closeable?.close() ?: return
+            closeable?.close()
         } catch (e: Throwable) {
             e.printStackTrace()
         }

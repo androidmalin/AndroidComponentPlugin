@@ -19,7 +19,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         File dexFile = getFileStreamPath("pluginapk-debug.apk");
-        Resources resource =   ResourceUtil.create(getApplication(), dexFile.getAbsolutePath()) ;
+        Resources resource = ResourceUtil.create(getApplication(), dexFile.getAbsolutePath());
         mContext = new ContextThemeWrapper(getBaseContext(), 0);
         Class<?> contextClazz = mContext.getClass();
         try {

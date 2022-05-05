@@ -1,7 +1,7 @@
 object KotlinConstants {
-    const val gradle_version = "7.1.2"
+    const val gradle_version = "7.1.3"
     const val proguard_gradle = "7.2.1"
-    const val kotlin_version = "1.6.10"
+    const val kotlin_version = "1.6.21"
 }
 
 object AppConfig {

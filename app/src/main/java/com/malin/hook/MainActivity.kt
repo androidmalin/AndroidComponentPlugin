@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         setContentView(R.layout.activity_main)

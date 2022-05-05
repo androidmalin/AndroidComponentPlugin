@@ -104,7 +104,7 @@ object ResourceUtil {
     @SuppressLint("DiscouragedPrivateApi")
     private fun getPluginResourceForAndroidM(
         hostContext: Context,
-        pluginPath: String?
+        pluginPath: String?,
     ): Resources? {
         try {
             val assetManager = AssetManager::class.java.newInstance()
