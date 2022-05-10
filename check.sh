@@ -9,7 +9,9 @@ aapt d resources ./app/build/outputs/apk/debug/app-debug.apk >$host_path
 aapt d resources ./app/src/main/assets/pluginapk-debug.apk >$plugin_path
 # shellcheck disable=SC2002
 img_id=$(cat $plugin_path | grep plugin_img | awk NR==1 | awk '{print $3}')
+# shellcheck disable=SC2002
 cat $host_path | grep -q "$img_id"
+# shellcheck disable=SC2181
 if [ $? -ne 0 ] ;then
     result="very good"
 else
