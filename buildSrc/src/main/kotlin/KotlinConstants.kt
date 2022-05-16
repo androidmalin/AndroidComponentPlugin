@@ -1,16 +1,16 @@
 object KotlinConstants {
-    const val gradle_version = "7.1.3"
+    const val gradle_version = "7.2.0"
     const val proguard_gradle = "7.2.1"
     const val kotlin_version = "1.6.21"
 }
 
 object AppConfig {
-    const val compileSdkVersion = 31
+    const val compileSdkVersion = 32
     const val buildToolsVersion = "32.0.0"
     const val ndkVersion = "24.0.8215888"
     const val applicationId = "com.malin.hook"
     const val minSdkVersion = 15
-    const val targetSdkVersion = 31
+    const val targetSdkVersion = 32
     const val versionCode = 151
     const val versionName = "151.0"
     val abi = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
