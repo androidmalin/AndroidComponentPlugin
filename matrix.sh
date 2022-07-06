@@ -11,7 +11,7 @@ echo "$root"
 echo "$android_sdk_home"
 echo "$ndk"
 
-java -jar ./analyze/matrix-apk-canary-2.0.5.jar \
+java -jar ./analyze/matrix-apk-canary-2.0.8.jar \
 --apk "$root"/app/build/outputs/apk/release/app-release.apk \
 --unzip "$root"/app/build/apk-checker-result \
 --mappingTxt "$root"/app/build/outputs/proguard/release/mapping/mapping.txt \
