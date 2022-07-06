@@ -14,3 +14,4 @@ systemhook
 infer-out
 md5_repeat_result.txt
 name_repeat_result.txt
+*.hprof

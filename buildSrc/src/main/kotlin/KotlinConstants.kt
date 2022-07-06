@@ -1,7 +1,7 @@
 object KotlinConstants {
-    const val gradle_version = "7.2.0"
-    const val proguard_gradle = "7.2.1"
-    const val kotlin_version = "1.6.21"
+    const val gradle_version = "7.2.1"
+    const val proguard_gradle = "7.2.2"
+    const val kotlin_version = "1.7.0"
 }
 
 object AppConfig {
@@ -20,11 +20,11 @@ object DependenciesConfig {
 
     const val STD_LIB = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KotlinConstants.kotlin_version}"
 
-    const val APP_COMPAT = "androidx.appcompat:appcompat:1.4.1"
+    const val APP_COMPAT = "androidx.appcompat:appcompat:1.4.2"
 
-    const val ANNOTATION = "androidx.annotation:annotation:1.3.0"
+    const val ANNOTATION = "androidx.annotation:annotation:1.4.0"
 
-    const val KTX_CORE = "androidx.core:core-ktx:1.7.0"
+    const val KTX_CORE = "androidx.core:core-ktx:1.8.0"
 
     const val ASYNC_LAYOUT = "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
 
