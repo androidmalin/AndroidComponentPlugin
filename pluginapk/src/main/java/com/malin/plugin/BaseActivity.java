@@ -18,8 +18,9 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Resources resource = PluginResourceUtil.getResource(getApplication());
-        mContext = new ContextThemeWrapper(getBaseContext(),  0);
+        File dexFile = getFileStreamPath("pluginapk-debug.apk");
+        Resources resource = ResourceUtil.create(getApplication(), dexFile.getAbsolutePath());
+        mContext = new ContextThemeWrapper(getBaseContext(), 0);
         Class<?> contextClazz = mContext.getClass();
         try {
             // android 15/16 java.lang.NoSuchFieldException: mResources
@@ -32,7 +33,6 @@ public class BaseActivity extends AppCompatActivity {
             Field mThemeResourceField = contextClazz.getDeclaredField("mThemeResource");
             mThemeResourceField.setAccessible(true);
             mThemeResourceField.set(mContext, com.google.android.material.R.style.Theme_MaterialComponents_DayNight);
-            //mThemeResourceField.set(mContext, androidx.appcompat.R.style.Theme_AppCompat_Light_DarkActionBar);
         } catch (Throwable e) {
             e.printStackTrace();
         }
