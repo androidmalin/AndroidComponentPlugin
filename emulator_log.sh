@@ -1,5 +1,5 @@
 #!/bin/bash
-pidcat com.malin.hook \
+pidcat.py com.malin.hook \
 -i ActivityThread \
 -i EGL_emulation \
 -i eglCodecCommon \
@@ -34,4 +34,7 @@ pidcat com.malin.hook \
 -i AdrenoGLES-0 \
 -i ProcessState \
 -i hw-ProcessState \
--i AdrenoUtils
+-i AdrenoUtils \
+-i ziparchive \
+-i Parcel \
+-i AutofillManager

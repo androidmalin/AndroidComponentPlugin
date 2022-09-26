@@ -21,7 +21,7 @@ public class PluginResourceUtil {
         return mResources;
     }
 
-    @SuppressWarnings({"JavaReflectionMemberAccess"})
+    @SuppressWarnings({"JavaReflectionMemberAccess", "Deprecated"})
     private static Resources loadResource(Context context) {
         try {
             File dexFile = context.getFileStreamPath("pluginapk-debug.apk");
