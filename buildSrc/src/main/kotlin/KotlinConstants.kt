@@ -1,11 +1,11 @@
 object KotlinConstants {
-    const val gradle_version = "7.2.1"
+    const val gradle_version = "7.3.0"
     const val proguard_gradle = "7.2.2"
-    const val kotlin_version = "1.7.0"
+    const val kotlin_version = "1.7.10"
 }
 
 object AppConfig {
-    const val compileSdkVersion = 32
+    const val compileSdkVersion = 33
     const val buildToolsVersion = "32.0.0"
     const val ndkVersion = "24.0.8215888"
     const val applicationId = "com.malin.hook"
@@ -20,11 +20,11 @@ object DependenciesConfig {
 
     const val STD_LIB = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KotlinConstants.kotlin_version}"
 
-    const val APP_COMPAT = "androidx.appcompat:appcompat:1.4.2"
+    const val APP_COMPAT = "androidx.appcompat:appcompat:1.5.1"
 
-    const val ANNOTATION = "androidx.annotation:annotation:1.4.0"
+    const val ANNOTATION = "androidx.annotation:annotation:1.5.0"
 
-    const val KTX_CORE = "androidx.core:core-ktx:1.8.0"
+    const val KTX_CORE = "androidx.core:core-ktx:1.9.0"
 
     const val ASYNC_LAYOUT = "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
 

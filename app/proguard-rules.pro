@@ -249,3 +249,5 @@
 #}
 #-------------------------------reflect system api.-------------------------------
 -dontwarn kotlin.**
+-keep class kotlinx.** {*;}
+-dontwarn kotlinx.**
