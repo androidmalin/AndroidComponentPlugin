@@ -8,31 +8,12 @@ android {
     ndkVersion = AppConfig.ndkVersion
 
     defaultConfig {
+        applicationId = "com.malin.plugin"
         resourceConfigurations.addAll(arrayOf("zh", "en"))
         minSdk = AppConfig.minSdkVersion
         targetSdk = AppConfig.targetSdkVersion
         versionCode = AppConfig.versionCode
         versionName = AppConfig.versionName
-    }
-
-//    https://juejin.cn/post/7002497671558610951
-//    https://fucknmb.com/2017/11/15/aapt2%E9%80%82%E9%85%8D%E4%B9%8B%E8%B5%84%E6%BA%90id%E5%9B%BA%E5%AE%9A/
-    androidResources {
-        val publicFile = project.rootProject.file("runtime_symbol_list/com.malin.plugin.public.txt")
-        if (publicFile.exists()) {
-            project.logger.error("$publicFile exists, apply it.")
-            additionalParameters.addAll(
-                listOf(
-                    "--package-id",
-                    "0x80",
-                    "--stable-ids",
-                    "$publicFile"
-                )
-            )
-        } else {
-            project.logger.error("$publicFile not exists, generate it.")
-            additionalParameters.addAll(listOf("--package-id", "0x80", "--emit-ids", "$publicFile"))
-        }
     }
 
     buildTypes {
@@ -53,7 +34,6 @@ android {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(DependenciesConfig.APP_COMPAT)
-    //androidx.appcompat:appcompat
     implementation("com.google.android.material:material:1.6.1") {
         exclude(group = "androidx.appcompat", module = "appcompat")
     }
