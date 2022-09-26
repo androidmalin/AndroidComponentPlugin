@@ -1,0 +1,4 @@
+<resources>
+    <style name="AppCompatThemePlugin" parent="Theme.MaterialComponents.DayNight">
+    </style>
+</resources>

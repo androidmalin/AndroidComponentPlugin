@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:testOnly="false"
-        android:theme="@style/AppCompatTheme"
+        android:theme="@style/AppCompatThemeHost"
         tools:ignore="AllowBackup,DataExtractionRules,GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"

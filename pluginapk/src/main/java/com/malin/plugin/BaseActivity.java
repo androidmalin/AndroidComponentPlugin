@@ -18,9 +18,8 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        File dexFile = getFileStreamPath("pluginapk-debug.apk");
-        Resources resource = ResourceUtil.create(getApplication(), dexFile.getAbsolutePath());
-        mContext = new ContextThemeWrapper(getBaseContext(), 0);
+        Resources resource = PluginResourceUtil.getResource(getApplication());
+        mContext = new ContextThemeWrapper(getBaseContext(),  R.style.AppCompatThemePlugin);
         Class<?> contextClazz = mContext.getClass();
         try {
             // android 15/16 java.lang.NoSuchFieldException: mResources

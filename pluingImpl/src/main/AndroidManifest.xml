@@ -5,7 +5,7 @@
     <application>
         <activity
             android:name=".StubActivity"
-            android:theme="@style/AppThemeNotAppCompat" />
+            android:theme="@style/AppCompatTheme" />
         <activity
             android:name=".StubAppCompatActivity"
             android:theme="@style/AppCompatTheme" />

@@ -14,22 +14,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
         setContentView(R.layout.activity_main)
         initListener()
-        try {
-            val actionBar = actionBar
-            actionBar?.hide()
-            val supportActionBar = supportActionBar
-            supportActionBar?.hide()
-        } catch (ignore: Throwable) {
-        }
     }
 
     private fun initListener() {

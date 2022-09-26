@@ -3,7 +3,6 @@ plugins {
     id("project-report")
     id("com.guardsquare.proguard")
     kotlin("android")
-    id("io.gitlab.arturbosch.detekt") version "1.20.0"
 }
 
 android {
@@ -78,17 +77,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        // Target version of the generated JVM bytecode. It is used for type resolution.
-        this.jvmTarget = "11"
+        jvmTarget = "1.8"
     }
 }
 
@@ -102,50 +96,6 @@ proguard {
     }
 }
 
-detekt {
-    // Version of Detekt that will be used. When unspecified the latest detekt
-    // version found will be used. Override to stay on the same version.
-    toolVersion = "1.20.0"
-
-    // The directories where detekt looks for source files.
-    // Defaults to `files("src/main/java", "src/test/java", "src/main/kotlin", "src/test/kotlin")`.
-    source = files("src/main/java")
-
-    // Builds the AST in parallel. Rules are always executed in parallel.
-    // Can lead to speedups in larger projects. `false` by default.
-    parallel = true
-
-    // Turns on all the rules. `false` by default.
-    allRules = true
-
-    // Disables all default detekt rulesets and will only run detekt with custom rules
-    // defined in plugins passed in with `detektPlugins` configuration. `false` by default.
-    disableDefaultRuleSets = false
-
-    // Adds debug output during task execution. `false` by default.
-    debug = false
-
-    // If set to `true` the build does not fail when the
-    // maxIssues count was reached. Defaults to `false`.
-    ignoreFailures = true
-
-    // Android: Don't create tasks for the specified build types (e.g. "release")
-    ignoredBuildTypes = listOf("release")
-
-    // Kotlin DSL
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        reports {
-            xml.required.set(false)
-            txt.required.set(false)
-            sarif.required.set(false)
-            html {
-                outputLocation.set(file("build/reports/detekt/detekt.html"))
-                required.set(true) // reports can also be enabled and disabled at the task level as needed
-            }
-        }
-    }
-}
-
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(DependenciesConfig.STD_LIB)
@@ -154,4 +104,5 @@ dependencies {
     implementation(DependenciesConfig.ASYNC_LAYOUT)
     implementation(DependenciesConfig.HIDDEN_API_PASS)
     implementation(project(":pluingImpl"))
+    implementation("com.google.android.material:material:1.6.1")
 }

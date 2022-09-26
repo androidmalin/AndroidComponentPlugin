@@ -25,4 +25,5 @@ dependencies {
     implementation(DependenciesConfig.STD_LIB)
     implementation(DependenciesConfig.APP_COMPAT)
     implementation(DependenciesConfig.KTX_CORE)
+    implementation("com.google.android.material:material:1.6.1")
 }

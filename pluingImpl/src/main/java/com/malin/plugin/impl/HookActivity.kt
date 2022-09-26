@@ -360,8 +360,8 @@ object HookActivity {
     private fun selectSystemTheme(): Int {
         val targetSdkVersion: Int = Build.VERSION.SDK_INT
         val theme: Int = when {
-            targetSdkVersion < 24 -> R.style.AppCompatThemePlugin
-            else -> R.style.AppCompatThemePlugin
+            targetSdkVersion < 24 -> R.style.AppCompatTheme
+            else -> R.style.AppCompatTheme
         }
         return theme
     }
