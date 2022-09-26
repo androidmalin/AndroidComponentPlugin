@@ -7,26 +7,73 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+    <ImageView
+        android:id="@+id/iv_plugin_img"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="30dp"
+        tools:ignore="ContentDescription"
+        tools:src="@tools:sample/avatars" />
 
-        <Button
-            android:id="@+id/btn_start_plugin_apk_activity"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:text="加载图片"
-            tools:ignore="HardcodedText" />
-    </FrameLayout>
+    <Button
+        android:id="@+id/btn_load_plugin_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="宿主中使用插件APK中的资源"
+        android:textAllCaps="false"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_start_host_register_act"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="启动宿主中__注册__的Activity"
+        android:textAllCaps="false"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_start_host_unregister_act"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="启动宿主中__未注册__的Activity"
+        android:textAllCaps="false"
+        tools:ignore="HardcodedText" />
+
+
+    <Button
+        android:id="@+id/btn_start_host_unregister_appcompat_act"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="启动宿主中__未注册__的AppCompatActivity"
+        android:textAllCaps="false"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_start_plugin_apk_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorAccent"
+        android:text="启动插件APK中的Activity"
+        android:textAllCaps="false"
+        android:textColor="#ffffff"
+        android:textStyle="italic"
+        tools:ignore="HardcodedText" />
 
 
     <Button
         android:id="@+id/btn_start_plugin_apk_appcompat_activity"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorAccent"
         android:text="启动插件APK中的AppCompatActivity"
+        android:textAllCaps="false"
+        android:textColor="#ffffff"
+        android:textStyle="italic"
         tools:ignore="HardcodedText" />
 </LinearLayout>

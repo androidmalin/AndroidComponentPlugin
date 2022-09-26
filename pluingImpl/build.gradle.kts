@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 plugins {
     id("com.android.library")
     kotlin("android")
@@ -19,11 +21,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
     implementation(DependenciesConfig.STD_LIB)
     implementation(DependenciesConfig.APP_COMPAT)
     implementation(DependenciesConfig.KTX_CORE)
-    implementation("com.google.android.material:material:1.6.1")
 }

@@ -6,13 +6,13 @@ object KotlinConstants {
 
 object AppConfig {
     const val compileSdkVersion = 33
-    const val buildToolsVersion = "32.0.0"
-    const val ndkVersion = "24.0.8215888"
+    const val buildToolsVersion = "33.0.0"
+    const val ndkVersion = "25.1.8937393"
     const val applicationId = "com.malin.hook"
     const val minSdkVersion = 15
     const val targetSdkVersion = 32
-    const val versionCode = 151
-    const val versionName = "151.0"
+    const val versionCode = 200
+    const val versionName = "200.0"
     val abi = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
 }
 

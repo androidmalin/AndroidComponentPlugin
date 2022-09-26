@@ -1,0 +1,15 @@
+FATAL EXCEPTION: main
+Process: com.malin.hook, PID: 21644
+java.lang.NullPointerException: null cannot be cast to non-null type kotlin.Any
+	at com.malin.plugin.impl.HookActivity$PackageManagerProxyHandler.invoke(HookActivity.kt:603)
+	at java.lang.reflect.Proxy.invoke(Proxy.java:1006)
+	at $Proxy2.notifyPackagesReplacedReceived(Unknown Source)
+	at android.app.ActivityThread.handleDispatchPackageBroadcast(ActivityThread.java:6329)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2182)
+	at android.os.Handler.dispatchMessage(Handler.java:106)
+	at android.os.Looper.loopOnce(Looper.java:201)
+	at android.os.Looper.loop(Looper.java:288)
+	at android.app.ActivityThread.main(ActivityThread.java:7870)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)

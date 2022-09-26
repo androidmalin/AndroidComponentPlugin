@@ -62,6 +62,7 @@ object HookActivity {
                         iActivityTaskManagerSingletonObj
                     )
                 }
+
                 apiLevel >= 26 -> {
                     // 1.获取ActivityManager的Class对象
                     // package android.app
@@ -84,6 +85,7 @@ object HookActivity {
                         iActivityManagerSingletonField[null]
                     )
                 }
+
                 else -> {
                     // 1.获取ActivityManagerNative的Class对象
                     // package android.app
@@ -581,8 +583,9 @@ object HookActivity {
         private val mAppPackageName: String,
         private val mSubActivityClazzName: String,
     ) : InvocationHandler {
+        // bug fixed java.lang.NullPointerException: null cannot be cast to non-null type kotlin.Any
         @Throws(Throwable::class)
-        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any {
+        override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
             // public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
             if ("getActivityInfo" == method.name && args != null && args.isNotEmpty()) {
                 var index = 0
@@ -600,7 +603,7 @@ object HookActivity {
             // * is also used to pass an array to a vararg parameter
             // method!!.invoke(worker, *(args ?: arrayOfNulls<Any>(0)))
             return try {
-                method.invoke(mIPackageManagerObj, *(args ?: arrayOfNulls<Any>(0))) as Any
+                method.invoke(mIPackageManagerObj, *(args ?: arrayOfNulls<Any>(0)))
             } catch (e: IllegalAccessException) {
                 println("IllegalAccessException appear")
                 throw e.cause
