@@ -15,7 +15,7 @@
         android:src="@drawable/plugin_img"
         tools:ignore="ContentDescription,HardcodedText" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="启动插件APK中的PluginAppCompatActivity,成功!"

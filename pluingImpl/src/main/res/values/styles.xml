@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppCompatTheme" parent="Theme.MaterialComponents.DayNight">
+    <style name="AppCompatTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorRed</item>
         <item name="colorPrimaryDark">@color/colorRed</item>
         <item name="colorAccent">@color/colorRed</item>
