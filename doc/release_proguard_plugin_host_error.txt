@@ -1,0 +1,227 @@
+com.malin.plugin.PluginResourceUtil -> o.pv:
+# {"fileName":"PluginResourceUtil.java","id":"sourceFile"}
+    android.content.res.Resources mResources -> O000000o
+    15:21:android.content.res.Resources getResource(android.content.Context) -> O000000o
+    27:40:android.content.res.Resources loadResource(android.content.Context) -> O00000Oo
+
+
+    //插件apk中的 o.pv类
+    package o;
+    import android.content.Context;
+    import android.content.res.AssetManager;
+    import android.content.res.Resources;
+    import java.io.File;
+    import java.lang.reflect.Method;
+
+    /* loaded from: classes.dex */
+    public class pv {
+        private static Resources O000000o;
+
+        public static Resources O000000o(Context context) {
+            if (O000000o == null) {
+                Resources O00000Oo = O00000Oo(context);
+                O000000o = O00000Oo;
+                if (O00000Oo == null) {
+                    throw new NullPointerException("plugin Resources==null");
+                }
+            }
+            return O000000o;
+        }
+
+        private static Resources O00000Oo(Context context) {
+            try {
+                File fileStreamPath = context.getFileStreamPath("pluginapk-debug.apk");
+                AssetManager assetManager = (AssetManager) AssetManager.class.newInstance();
+                Method declaredMethod = assetManager.getClass().getDeclaredMethod("addAssetPath", String.class);
+                declaredMethod.setAccessible(true);
+                declaredMethod.invoke(assetManager, fileStreamPath.getAbsolutePath());
+                Resources resources = context.getResources();
+                return new Resources(assetManager, resources.getDisplayMetrics(), resources.getConfiguration());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+    
+    
+    //宿主apk中的 o.pv类
+    package o;
+    import android.content.Context;
+    import android.os.Handler;
+    import android.os.Message;
+    import android.util.AttributeSet;
+    import android.util.Log;
+    import android.view.LayoutInflater;
+    import android.view.View;
+    import android.view.ViewGroup;
+    import java.util.concurrent.ArrayBlockingQueue;
+    import o.h;
+    
+    /* loaded from: classes.dex */
+    public final class pv {
+        LayoutInflater O000000o;
+        private Handler.Callback O00000o = new Handler.Callback() { // from class: o.pv.1
+            @Override // android.os.Handler.Callback
+            public boolean handleMessage(Message message) {
+                O00000Oo o00000Oo = (O00000Oo) message.obj;
+                if (o00000Oo.O00000o == null) {
+                    o00000Oo.O00000o = pv.this.O000000o.inflate(o00000Oo.O00000o0, o00000Oo.O00000Oo, false);
+                }
+                o00000Oo.O00000oO.onInflateFinished(o00000Oo.O00000o, o00000Oo.O00000o0, o00000Oo.O00000Oo);
+                pv.this.O00000o0.O000000o(o00000Oo);
+                return true;
+            }
+        };
+        Handler O00000Oo = new Handler(this.O00000o);
+        O00000o0 O00000o0 = O00000o0.O000000o();
+    
+        /* loaded from: classes.dex */
+        public interface O00000o {
+            void onInflateFinished(View view, int i, ViewGroup viewGroup);
+        }
+    
+        public pv(Context context) {
+            this.O000000o = new O000000o(context);
+        }
+    
+        public void O000000o(int i, ViewGroup viewGroup, O00000o o00000o) {
+            if (o00000o == null) {
+                throw new NullPointerException("callback argument may not be null!");
+            }
+            O00000Oo O00000o02 = this.O00000o0.O00000o0();
+            O00000o02.O000000o = this;
+            O00000o02.O00000o0 = i;
+            O00000o02.O00000Oo = viewGroup;
+            O00000o02.O00000oO = o00000o;
+            this.O00000o0.O00000Oo(O00000o02);
+        }
+    
+        /* JADX INFO: Access modifiers changed from: package-private */
+        /* loaded from: classes.dex */
+        public static class O00000Oo {
+            pv O000000o;
+            ViewGroup O00000Oo;
+            View O00000o;
+            int O00000o0;
+            O00000o O00000oO;
+    
+            O00000Oo() {
+            }
+        }
+    
+        /* loaded from: classes.dex */
+        static class O000000o extends LayoutInflater {
+            private static final String[] O000000o = {"android.widget.", "android.webkit.", "android.app."};
+    
+            O000000o(Context context) {
+                super(context);
+            }
+    
+            @Override // android.view.LayoutInflater
+            public LayoutInflater cloneInContext(Context context) {
+                return new O000000o(context);
+            }
+    
+            @Override // android.view.LayoutInflater
+            protected View onCreateView(String str, AttributeSet attributeSet) throws ClassNotFoundException {
+                View createView;
+                for (String str2 : O000000o) {
+                    try {
+                        createView = createView(str, str2, attributeSet);
+                    } catch (ClassNotFoundException unused) {
+                    }
+                    if (createView != null) {
+                        return createView;
+                    }
+                }
+                return super.onCreateView(str, attributeSet);
+            }
+        }
+    
+        /* loaded from: classes.dex */
+        static class O00000o0 extends Thread {
+            private static final O00000o0 O000000o;
+            private ArrayBlockingQueue<O00000Oo> O00000Oo = new ArrayBlockingQueue<>(10);
+            private h.O00000o0<O00000Oo> O00000o0 = new h.O00000o0<>(10);
+    
+            private O00000o0() {
+            }
+    
+            static {
+                O00000o0 o00000o0 = new O00000o0();
+                O000000o = o00000o0;
+                o00000o0.start();
+            }
+    
+            public static O00000o0 O000000o() {
+                return O000000o;
+            }
+    
+            public void O00000Oo() {
+                try {
+                    O00000Oo take = this.O00000Oo.take();
+                    try {
+                        take.O00000o = take.O000000o.O000000o.inflate(take.O00000o0, take.O00000Oo, false);
+                    } catch (RuntimeException e) {
+                        Log.w("AsyncLayoutInflater", "Failed to inflate resource in the background! Retrying on the UI thread", e);
+                    }
+                    Message.obtain(take.O000000o.O00000Oo, 0, take).sendToTarget();
+                } catch (InterruptedException e2) {
+                    Log.w("AsyncLayoutInflater", e2);
+                }
+            }
+    
+            @Override // java.lang.Thread, java.lang.Runnable
+            public void run() {
+                while (true) {
+                    O00000Oo();
+                }
+            }
+    
+            public O00000Oo O00000o0() {
+                O00000Oo O000000o2 = this.O00000o0.O000000o();
+                return O000000o2 == null ? new O00000Oo() : O000000o2;
+            }
+    
+            public void O000000o(O00000Oo o00000Oo) {
+                o00000Oo.O00000oO = null;
+                o00000Oo.O000000o = null;
+                o00000Oo.O00000Oo = null;
+                o00000Oo.O00000o0 = 0;
+                o00000Oo.O00000o = null;
+                this.O00000o0.O000000o(o00000Oo);
+            }
+    
+            public void O00000Oo(O00000Oo o00000Oo) {
+                try {
+                    this.O00000Oo.put(o00000Oo);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Failed to enqueue async inflate request", e);
+                }
+            }
+        }
+    }
+    
+    
+9778-9778  AndroidRuntime          com.malin.hook                       E  FATAL EXCEPTION: main
+Process: com.malin.hook, PID: 9778
+java.lang.NoSuchMethodError: No static method O000000o(Landroid/content/Context;)Landroid/content/res/Resources; in class Lo/pv; or its super classes (declaration of 'o.pv' appears in /data/app/~~5uAI-TWpCWRT1xO82JB8JQ==/com.malin.hook-UHkYGi3lVHfz3o-kYCKHhQ==/base.apk)
+at com.malin.plugin.BaseActivity.onCreate(SourceFile:20)
+at com.malin.plugin.PluginAppCompatActivity.onCreate(SourceFile:17)
+at android.app.Activity.performCreate(Activity.java:8054)
+at android.app.Activity.performCreate(Activity.java:8034)
+at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1341)
+at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3688)
+at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3864)
+at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:103)
+at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2253)
+at android.os.Handler.dispatchMessage(Handler.java:106)
+at android.os.Looper.loopOnce(Looper.java:201)
+at android.os.Looper.loop(Looper.java:288)
+at android.app.ActivityThread.main(ActivityThread.java:7870)
+at java.lang.reflect.Method.invoke(Native Method)
+at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)    

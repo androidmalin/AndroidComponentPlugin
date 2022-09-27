@@ -25,9 +25,16 @@ public class BaseActivity extends AppCompatActivity {
             mResourcesField.setAccessible(true);
             mResourcesField.set(mContext, resource);
 
-            Field mThemeResourceField = contextClazz.getDeclaredField("mThemeResource");
-            mThemeResourceField.setAccessible(true);
-            mThemeResourceField.set(mContext, com.google.android.material.R.style.Theme_MaterialComponents_DayNight);
+            Class<?> rClazz = Class.forName("com.google.android.material.R$style");
+            Field themeField = rClazz.getDeclaredField("Theme_MaterialComponents_DayNight");
+            themeField.setAccessible(true);
+            Object themeObj = themeField.get(null);
+            if (themeObj != null) {
+                int theme = (int) themeObj;
+                Field mThemeResourceField = contextClazz.getDeclaredField("mThemeResource");
+                mThemeResourceField.setAccessible(true);
+                mThemeResourceField.set(mContext, theme);
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
