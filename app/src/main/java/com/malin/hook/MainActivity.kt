@@ -72,15 +72,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     isApplicationContext = false
                 )
             }
+
             R.id.btn_start_host_unregister_appcompat_act -> {
                 startActivity(
                     startActType = Type.HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
                     isApplicationContext = false
                 )
             }
+
             R.id.btn_start_plugin_apk_activity -> {
                 startActivity(startActType = Type.PLUGIN_ACTIVITY, isApplicationContext = false)
             }
+
             R.id.btn_start_plugin_apk_appcompat_activity -> {
                 startActivity(
                     startActType = Type.PLUGIN_APPCOMPAT_ACTIVITY,
@@ -90,15 +93,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    /**
-     * 每个条件分支都隐式地返回其最后一行的表达式的结果，因此无需使用 return 关键字。
-     * 由于全部三个分支的结果都是 Intent 类型，因此 when 表达式的结果也是 Intent 类型。
-     */
-    private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
-        // 1.延时初始化
-        lateinit var intent: Intent
 
-        // 2.条件表达式
+    private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
+
+        val intent: Intent
+
         when (startActType) {
 
             Type.HOST_EXIST_ACTIVITY -> {
@@ -131,6 +130,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 applicationContext.startActivity(intent)
             }
+
             else -> {
                 this.startActivity(intent)
             }
@@ -138,7 +138,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private companion object {
-        private const val PLUGIN_PACKAGE_NAME = "com.malin.plugin"
+        // 插件包名和宿主保持一致
+        // https://juejin.cn/post/6844903875284058119
+        private const val PLUGIN_PACKAGE_NAME = "com.malin.hook"
         private const val PLUGIN_ACTIVITY_NAME = "com.malin.plugin.PluginActivity"
         private const val PLUGIN_APPCOMPAT_ACTIVITY_NAME =
             "com.malin.plugin.PluginAppCompatActivity"

@@ -13,7 +13,9 @@ android {
     ndkVersion = AppConfig.ndkVersion
 
     defaultConfig {
-        applicationId = "com.malin.plugin"
+        // 插件包名和宿主保持一致
+        // https://juejin.cn/post/6844903875284058119
+        applicationId = AppConfig.applicationId
         resourceConfigurations.addAll(arrayOf("zh", "en"))
         minSdk = AppConfig.minSdkVersion
         targetSdk = AppConfig.targetSdkVersion

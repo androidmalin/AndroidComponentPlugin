@@ -24,6 +24,7 @@ object HookActivity {
      * 对IActivityManager接口中的startActivity方法进行动态代理,发生在app的进程中
      * [android.app.Activity.startActivity]
      * [android.app.Activity.startActivityForResult]
+     * [android.app.Instrumentation]
      * android.app.Instrumentation#execStartActivity()
      * Activity#startActivityForResult-->Instrumentation#execStartActivity-->ActivityManager.getService().startActivity()-->
      * IActivityManager public int startActivity(android.app.IApplicationThread caller, java.lang.String callingPackage, android.content.Intent intent, java.lang.String resolvedType, android.os.IBinder resultTo, java.lang.String resultWho, int requestCode, int flags, android.app.ProfilerInfo profilerInfo, android.os.Bundle options) throws android.os.RemoteException;
@@ -338,7 +339,13 @@ object HookActivity {
             val safeIntent = safeIntentField[activityClientRecordObj] as? Intent ?: return
 
             // 4.获取原始的Intent
-            val originIntent = safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT) ?: return
+            val originIntent: Intent? = if (Build.VERSION.SDK_INT >= 33) {
+                safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT, Intent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT)
+            }
+            if (originIntent == null) return
 
             // 5.将安全的Intent,替换为原始的Intent,以启动我们要启动的未注册的Activity
             safeIntent.component = originIntent.component
@@ -450,7 +457,7 @@ object HookActivity {
     ) : InvocationHandler {
         @Throws(InvocationTargetException::class, IllegalAccessException::class)
         override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
-            if (method.name == "startActivity" && args != null && args.isNotEmpty()) {
+            if (method.name == "startActivity" && !args.isNullOrEmpty()) {
                 var intentIndex = 2
                 for (i in args.indices) {
                     if (args[i] is Intent) {
@@ -561,8 +568,14 @@ object HookActivity {
 
                 // 11.获取原始的Intent
                 // 12.需要判断originIntent != null
-                val originIntent =
-                    safeIntent.getParcelableExtra<Intent>(EXTRA_ORIGIN_INTENT) ?: return
+                val originIntent: Intent? =
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT, Intent::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        safeIntent.getParcelableExtra(EXTRA_ORIGIN_INTENT)
+                    }
+                if (originIntent == null) return
 
                 // 13.将原始的Intent,赋值给clientTransactionItem的mIntent属性
                 safeIntent.component = originIntent.component
@@ -587,7 +600,7 @@ object HookActivity {
         @Throws(Throwable::class)
         override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
             // public android.content.pm.ActivityInfo getActivityInfo(android.content.ComponentName className, int flags, int userId)
-            if ("getActivityInfo" == method.name && args != null && args.isNotEmpty()) {
+            if ("getActivityInfo" == method.name && !args.isNullOrEmpty()) {
                 var index = 0
                 for (i in args.indices) {
                     if (args[i] is ComponentName) {

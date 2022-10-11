@@ -1,5 +1,6 @@
 package com.malin.hook
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -22,6 +23,7 @@ object PluginResourceUtil {
             1 -> {
                 resId = getResId(pluginPackageName = pluginPackageName, resName = resourceName)
             }
+
             2 -> {
                 resId = getResId2(
                     resources = resources,
@@ -29,6 +31,7 @@ object PluginResourceUtil {
                     resName = resourceName
                 )
             }
+
             3 -> {
                 resId = getResId3(
                     context = context,
@@ -37,6 +40,7 @@ object PluginResourceUtil {
                     resName = resourceName
                 )
             }
+
             4 -> {
                 resId =
                     getResId4(
@@ -60,6 +64,7 @@ object PluginResourceUtil {
         return 0
     }
 
+    @SuppressLint("DiscouragedApi")
     private fun getResId2(
         resources: Resources,
         pluginPackageName: String,

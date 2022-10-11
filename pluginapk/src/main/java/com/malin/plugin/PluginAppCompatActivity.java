@@ -17,14 +17,12 @@ public class PluginAppCompatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, TAG + ":onCreate");
         View rootView;
-        String packageName = getPackageName();
-        // pluginapk/build.gradle.kts/android.defaultConfig.applicationId
-        if (packageName.equals("com.malin.plugin")) {
-            // 插件作为独立的apk运行
-            rootView = LayoutInflater.from(this).inflate(R.layout.plugin_activity, null);
-        } else {
+        if (pluginInHostRunning) {
             // 插件apk在宿主中运行
             rootView = LayoutInflater.from(mContext).inflate(R.layout.plugin_activity, null);
+        } else {
+            // 插件作为独立的apk运行
+            rootView = LayoutInflater.from(this).inflate(R.layout.plugin_activity, null);
         }
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -6,6 +6,7 @@ import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.os.Build
 import android.os.Bundle
@@ -99,12 +100,20 @@ object HookInstrumentation {
                 if (Build.VERSION.SDK_INT >= 23) {
                     flags = PackageManager.MATCH_ALL
                 }
-                resolveInfoList = mPackageManager.queryIntentActivities(intent, flags)
+                resolveInfoList = if (Build.VERSION.SDK_INT >= 33) {
+                    mPackageManager.queryIntentActivities(
+                        intent,
+                        ResolveInfoFlags.of(flags.toLong())
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    mPackageManager.queryIntentActivities(intent, flags)
+                }
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
             }
             var finalIntent = intent
-            if (resolveInfoList == null || resolveInfoList.isEmpty()) {
+            if (resolveInfoList.isNullOrEmpty()) {
                 // 目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
                 finalIntent = Intent(who, mStubActivityClazz)
                 // public class Intent implements Parcelable;
@@ -161,12 +170,20 @@ object HookInstrumentation {
             var resolveInfoList: List<ResolveInfo>? = null
             try {
                 val flags = 0
-                resolveInfoList = mPackageManager.queryIntentActivities(intent, flags)
+                resolveInfoList = if (Build.VERSION.SDK_INT >= 33) {
+                    mPackageManager.queryIntentActivities(
+                        intent,
+                        ResolveInfoFlags.of(flags.toLong())
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    mPackageManager.queryIntentActivities(intent, flags)
+                }
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
             }
             var finalIntent = intent
-            if (resolveInfoList == null || resolveInfoList.isEmpty()) {
+            if (resolveInfoList.isNullOrEmpty()) {
                 // 目标Activity没有在AndroidManifest.xml中注册的话,将目标Activity的ClassName保存到桩Intent中.
                 finalIntent = Intent(who, mStubActivityClazz)
                 // public class Intent implements Parcelable;
@@ -215,7 +232,12 @@ object HookInstrumentation {
             className: String,
             intent: Intent,
         ): Activity {
-            val pluginIntent = intent.getParcelableExtra<Intent>(TARGET_INTENT_CLASS)
+            val pluginIntent: Intent? = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra(TARGET_INTENT_CLASS, Intent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(TARGET_INTENT_CLASS)
+            }
             val pluginIntentClassNameExist = pluginIntent != null && !TextUtils.isEmpty(
                 pluginIntent.component?.className
             )
