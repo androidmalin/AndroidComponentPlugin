@@ -11,14 +11,15 @@
 
     <com.google.android.material.button.MaterialButton
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="80dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="30dp"
         android:text="MaterialButton"
         android:textAllCaps="false"
+        android:textColor="#ffffff"
         app:backgroundTint="@color/colorAccent"
-        app:cornerRadius="20dp"
+        app:cornerRadius="10dp"
         app:iconPadding="1dp"
         tools:ignore="ContentDescription,HardcodedText" />
 
