@@ -102,6 +102,7 @@ object BaseDexClassLoaderHookHelperAnother {
                         suppressedExceptions
                     ) as Array<*>
                 }
+
                 apiLevel >= 19 -> {
                     // 1.
                     val files = ArrayList<File>()
@@ -125,6 +126,7 @@ object BaseDexClassLoaderHookHelperAnother {
                         suppressedExceptions
                     ) as Array<*>
                 }
+
                 else -> {
                     // 1.
                     val files = ArrayList<File>()
@@ -152,16 +154,16 @@ object BaseDexClassLoaderHookHelperAnother {
             // * @param      length   the number of array elements to be copied.
             // https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
-            // 8.把插件的element数组复制进去
-            System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.size)
+            // 8.把宿主的elements复制进去
+            System.arraycopy(dexElements, 0, hostAndPluginElements, 0, dexElements.size)
 
             // 9.把宿主的elements复制进去
             System.arraycopy(
-                dexElements,
+                pluginElements,
                 0,
                 hostAndPluginElements,
-                pluginElements.size,
-                dexElements.size
+                dexElements.size,
+                pluginElements.size
             )
 
             // 10.替换

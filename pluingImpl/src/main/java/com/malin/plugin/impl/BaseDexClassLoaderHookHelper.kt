@@ -109,6 +109,7 @@ object BaseDexClassLoaderHookHelper {
                         DexFile::class.java, File::class.java
                     ).also { it.isAccessible = true }.newInstance(dexFile, apkFile)
                 }
+
                 apiLevel >= 18 -> {
                     // 18<=API<=25 (4.3<=API<=7.1.1)
                     // 7.构造插件Element
@@ -122,6 +123,7 @@ object BaseDexClassLoaderHookHelper {
                         DexFile::class.java
                     ).also { it.isAccessible = true }.newInstance(apkFile, false, apkFile, dexFile)
                 }
+
                 apiLevel == 17 -> {
                     // API=17  (API=4.2)
                     // 7.构造插件Element
@@ -132,6 +134,7 @@ object BaseDexClassLoaderHookHelper {
                         File::class.java, File::class.java, DexFile::class.java
                     ).also { it.isAccessible = true }.newInstance(apkFile, apkFile, dexFile)
                 }
+
                 else -> {
                     // 15~16 (4.0.3=<API=4.1)
                     // 7.构造插件Element
@@ -157,16 +160,16 @@ object BaseDexClassLoaderHookHelper {
             // * @param      length   the number of array elements to be copied.
             // https://blog.csdn.net/wenzhi20102321/article/details/78444158
 
-            // 10.把插件的element数组复制进去
-            System.arraycopy(pluginElements, 0, hostAndPluginElements, 0, pluginElements.size)
+            // 10.把宿主的elements复制进去
+            System.arraycopy(dexElements, 0, hostAndPluginElements, 0, dexElements.size)
 
             // 11.把宿主的elements复制进去
             System.arraycopy(
-                dexElements,
+                pluginElements,
                 0,
                 hostAndPluginElements,
-                pluginElements.size,
-                dexElements.size
+                dexElements.size,
+                pluginElements.size
             )
 
             // 12.替换

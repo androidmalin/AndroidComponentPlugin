@@ -71,12 +71,10 @@ android {
     }
 }
 
-// pluginapk模块作为插件时&&宿主release包,修改为 compileOnly 模式的依赖
-// pluginapk模块作为单独的apk时,修改为 implementation 依赖模式.
 dependencies {
-    compileOnly(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    compileOnly(DependenciesConfig.APP_COMPAT)
-    compileOnly("com.google.android.material:material:1.7.0") {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation(DependenciesConfig.APP_COMPAT)
+    implementation("com.google.android.material:material:1.7.0") {
         exclude(group = "androidx.appcompat", module = "appcompat")
     }
 }
