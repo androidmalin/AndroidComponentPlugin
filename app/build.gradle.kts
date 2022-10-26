@@ -3,7 +3,6 @@
 plugins {
     id("com.android.application")
     id("project-report")
-    id("com.guardsquare.proguard")
     kotlin("android")
 }
 
@@ -57,9 +56,13 @@ android {
         }
         getByName("release") {
             // https://www.guardsquare.com/manual/setup/upgrading
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -88,16 +91,6 @@ android {
     }
 }
 
-// https://www.guardsquare.com/manual/setup/upgrading
-proguard {
-    configurations {
-        register("release") {
-            defaultConfiguration("proguard-android-optimize.txt")
-            configuration("proguard-rules.pro")
-        }
-    }
-}
-
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(DependenciesConfig.STD_LIB)
@@ -106,5 +99,5 @@ dependencies {
     implementation(DependenciesConfig.ASYNC_LAYOUT)
     implementation(DependenciesConfig.HIDDEN_API_PASS)
     implementation(project(":pluingImpl"))
-    implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.android.material:material:1.7.0")
 }

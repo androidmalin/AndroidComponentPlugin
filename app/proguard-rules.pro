@@ -23,8 +23,7 @@
 #https://github.com/WrBug/FrenziedProguard
 # ----------------------------------------------------------------------------
 # 混淆的压缩比例，0-7 表示对代码进行迭代优化的次数，optimization可以对代码进行各种优化，每次优化后还可以继续优化，故称之迭代优化
--dontoptimize
--applymapping mapping.txt
+-optimizationpasses 7
 
 # https://blog.csdn.net/wmadao11/article/details/102613078
 -allowaccessmodification

@@ -17,6 +17,12 @@ class PluginAppCompatActivity : BaseActivity() {
             LayoutInflater.from(mContext).inflate(R.layout.plugin_activity, null)
         } else {
             // 插件作为独立的apk运行
+            val themeField = Class.forName("com.google.android.material.R\$style")
+                .getDeclaredField("Theme_MaterialComponents_DayNight")
+            themeField.isAccessible = true
+            val themeObj = themeField[null]
+            val theme = themeObj as Int
+            setTheme(theme)
             LayoutInflater.from(this).inflate(R.layout.plugin_activity, null)
         }
         setContentView(rootView)

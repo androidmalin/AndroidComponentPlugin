@@ -3,7 +3,6 @@
 plugins {
     id("com.android.application")
     id("project-report")
-    id("com.guardsquare.proguard")
     kotlin("android")
 }
 
@@ -57,9 +56,13 @@ android {
         }
         getByName("release") {
             // https://www.guardsquare.com/manual/setup/upgrading
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -68,20 +71,12 @@ android {
     }
 }
 
-// https://www.guardsquare.com/manual/setup/upgrading
-proguard {
-    configurations {
-        register("release") {
-            defaultConfiguration("proguard-android-optimize.txt")
-            configuration("proguard-rules.pro")
-        }
-    }
-}
-
+// pluginapk模块作为插件时&&宿主release包,修改为 compileOnly 模式的依赖
+// pluginapk模块作为单独的apk时,修改为 implementation 依赖模式.
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation(DependenciesConfig.APP_COMPAT)
-    implementation("com.google.android.material:material:1.6.1") {
+    compileOnly(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    compileOnly(DependenciesConfig.APP_COMPAT)
+    compileOnly("com.google.android.material:material:1.7.0") {
         exclude(group = "androidx.appcompat", module = "appcompat")
     }
 }
