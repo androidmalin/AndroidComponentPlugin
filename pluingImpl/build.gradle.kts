@@ -9,7 +9,7 @@ android {
     compileSdk = AppConfig.compileSdkVersion
     buildToolsVersion = AppConfig.buildToolsVersion
     ndkVersion = AppConfig.ndkVersion
-
+    namespace = "com.malin.plugin.impl"
     defaultConfig {
         resourceConfigurations.addAll(arrayOf("zh", "en"))
         minSdk = AppConfig.minSdkVersion

@@ -29,5 +29,7 @@ object DependenciesConfig {
 
     const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
 
+    const val MATERIAL = "com.google.android.material:material:1.7.0"
+
     const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.1.0"
 }

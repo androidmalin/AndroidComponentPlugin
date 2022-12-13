@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.malin.plugin.impl">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
         <activity
-            android:name=".StubActivity"
+            android:name="com.malin.plugin.impl.StubActivity"
             android:theme="@style/AppCompatTheme" />
         <activity
-            android:name=".StubAppCompatActivity"
+            android:name="com.malin.plugin.impl.StubAppCompatActivity"
             android:theme="@style/AppCompatTheme" />
     </application>
 </manifest>

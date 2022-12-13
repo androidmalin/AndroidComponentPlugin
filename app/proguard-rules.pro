@@ -24,6 +24,8 @@
 # ----------------------------------------------------------------------------
 # 混淆的压缩比例，0-7 表示对代码进行迭代优化的次数，optimization可以对代码进行各种优化，每次优化后还可以继续优化，故称之迭代优化
 -optimizationpasses 7
+# 为了让插件和原来的宿主兼容，需要使用ProGuard的applymapping功能的进行增量混淆,
+# 先编译插件release包,然后把插件release编译生成的mapping.txt文件复制到宿主的代码目录下,在宿主的proguard-rules.pro文件中增加配置 -applymapping mapping.txt
 -applymapping mapping.txt
 
 # https://blog.csdn.net/wmadao11/article/details/102613078
@@ -181,53 +183,6 @@
 -keep class androidx.appcompat.view.ContextThemeWrapper {*;}
 ##-------------------------------androidx-------------------------------
 
-
-#proguard6.2.2/examples/android/proguard-project.txt
-# If you wish, you can let the optimization step remove Android logging calls.
-#-assumenosideeffects class android.util.Log {
-#    public static boolean isLoggable(java.lang.String, int);
-#    public static int v(...);
-#    public static int i(...);
-#    public static int w(...);
-#    public static int d(...);
-#    public static int e(...);
-#}
-
-#proguard6.2.2/examples/android/proguard-project.txt start
-# In that case, it's especially useful to also clean up any corresponding
-# string concatenation calls.
--assumenoexternalsideeffects class java.lang.StringBuilder {
-    public java.lang.StringBuilder();
-    public java.lang.StringBuilder(int);
-    public java.lang.StringBuilder(java.lang.String);
-    public java.lang.StringBuilder append(java.lang.Object);
-    public java.lang.StringBuilder append(java.lang.String);
-    public java.lang.StringBuilder append(java.lang.StringBuffer);
-    public java.lang.StringBuilder append(char[]);
-    public java.lang.StringBuilder append(char[], int, int);
-    public java.lang.StringBuilder append(boolean);
-    public java.lang.StringBuilder append(char);
-    public java.lang.StringBuilder append(int);
-    public java.lang.StringBuilder append(long);
-    public java.lang.StringBuilder append(float);
-    public java.lang.StringBuilder append(double);
-    public java.lang.String toString();
-}
-
--assumenoexternalreturnvalues class java.lang.StringBuilder {
-    public java.lang.StringBuilder append(java.lang.Object);
-    public java.lang.StringBuilder append(java.lang.String);
-    public java.lang.StringBuilder append(java.lang.StringBuffer);
-    public java.lang.StringBuilder append(char[]);
-    public java.lang.StringBuilder append(char[], int, int);
-    public java.lang.StringBuilder append(boolean);
-    public java.lang.StringBuilder append(char);
-    public java.lang.StringBuilder append(int);
-    public java.lang.StringBuilder append(long);
-    public java.lang.StringBuilder append(float);
-    public java.lang.StringBuilder append(double);
-}
-#proguard6.2.2/examples/android/proguard-project.txt end
 
 #https://proandroiddev.com/improving-proguard-name-obfuscation-83b27b34c52a
 -repackageclasses 'o'

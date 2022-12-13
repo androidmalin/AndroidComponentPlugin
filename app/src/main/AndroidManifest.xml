@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.malin.hook">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:name="com.malin.hook.MApplication"
@@ -13,7 +12,7 @@
         android:theme="@style/AppCompatThemeHost"
         tools:ignore="AllowBackup,DataExtractionRules,GoogleAppIndexingWarning">
         <activity
-            android:name=".MainActivity"
+            android:name="com.malin.hook.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

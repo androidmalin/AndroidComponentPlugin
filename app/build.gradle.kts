@@ -10,6 +10,7 @@ android {
     compileSdk = AppConfig.compileSdkVersion
     buildToolsVersion = AppConfig.buildToolsVersion
     ndkVersion = AppConfig.ndkVersion
+    namespace = AppConfig.applicationId
     defaultConfig {
         resourceConfigurations.addAll(arrayOf("zh", "en"))
         applicationId = AppConfig.applicationId
@@ -98,6 +99,6 @@ dependencies {
     implementation(DependenciesConfig.KTX_CORE)
     implementation(DependenciesConfig.ASYNC_LAYOUT)
     implementation(DependenciesConfig.HIDDEN_API_PASS)
+    implementation(DependenciesConfig.MATERIAL)
     implementation(project(":pluingImpl"))
-    implementation("com.google.android.material:material:1.7.0")
 }

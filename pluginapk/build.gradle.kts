@@ -10,6 +10,7 @@ android {
     compileSdk = AppConfig.compileSdkVersion
     buildToolsVersion = AppConfig.buildToolsVersion
     ndkVersion = AppConfig.ndkVersion
+    namespace = "com.malin.plugin"
 
     defaultConfig {
         // 插件包名和宿主保持一致
@@ -55,7 +56,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
-            // https://www.guardsquare.com/manual/setup/upgrading
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
@@ -74,7 +74,7 @@ android {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(DependenciesConfig.APP_COMPAT)
-    implementation("com.google.android.material:material:1.7.0") {
+    implementation(DependenciesConfig.MATERIAL) {
         exclude(group = "androidx.appcompat", module = "appcompat")
     }
 }
