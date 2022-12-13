@@ -37,12 +37,12 @@
 # 指定混淆是采用的算法
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
 
-# 指定外部模糊字典 dic.txt 改为混淆文件名，下同
--obfuscationdictionary dic.txt
-# 指定class模糊字典
--classobfuscationdictionary dic.txt
-# 指定package模糊字典
--packageobfuscationdictionary dic.txt
+## 指定外部模糊字典 dic.txt 改为混淆文件名，下同
+#-obfuscationdictionary dic.txt
+## 指定class模糊字典
+#-classobfuscationdictionary dic.txt
+## 指定package模糊字典
+#-packageobfuscationdictionary dic.txt
 
 #-------------------------------common-------------------------------
 
