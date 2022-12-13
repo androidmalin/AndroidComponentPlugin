@@ -93,6 +93,7 @@ object ResourceUtil {
 
         // 4：过程中很重要的一步，因为后面在资源查找的时候是需要通过一个ResTable_config来获取当前手机的一些配置从而获取到准确的资源，
         // 如果不进行初始化则会出现找不到资源的崩溃
+        @Suppress("DEPRECATION")
         hostResources.updateConfiguration(
             hostResources.configuration,
             hostResources.displayMetrics
@@ -113,6 +114,7 @@ object ResourceUtil {
                 .invoke(assetManager, pluginPath)
             val superRes = hostContext.resources
 
+            @Suppress("DEPRECATION")
             return Resources(assetManager, superRes.displayMetrics, superRes.configuration)
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -170,6 +172,7 @@ object ResourceUtil {
 
                 resourcesObj as Resources
             } else {
+                @Suppress("DEPRECATION")
                 Resources(assetManager, superRes.displayMetrics, superRes.configuration)
             }
         } catch (e: Throwable) {
