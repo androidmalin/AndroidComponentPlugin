@@ -1,0 +1,29 @@
+2022-12-13 12:43:32.515 27284-27284 AndroidRuntime          com.malin.hook                       E  FATAL EXCEPTION: main
+Process: com.malin.hook, PID: 27284
+java.lang.VerifyError: Verifier rejected class o.h8: o.h8 o.h8.g0(int, double[], double[][]) failed to verify: o.h8 o.h8.g0(int, double[], double[][]): [0xF] returning 'Precise Reference: o.es', but expected from declaration 'Reference: o.h8' (declaration of 'o.h8' appears in /data/user/0/com.malin.hook/files/pluginapk-debug.apk)
+	at o.h8.y(SourceFile:1)
+	at com.malin.plugin.BaseActivity.onCreate(SourceFile:33)
+	at com.malin.plugin.PluginAppCompatActivity.onCreate(SourceFile:1)
+	at android.app.Activity.performCreate(Activity.java:8413)
+	at android.app.Activity.performCreate(Activity.java:8392)
+	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1343)
+	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4231)
+	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4463)
+	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:149)
+	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:103)
+	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2665)
+	at android.os.Handler.dispatchMessage(Handler.java:109)
+	at android.os.Looper.loopOnce(Looper.java:206)
+	at android.os.Looper.loop(Looper.java:296)
+	at android.app.ActivityThread.main(ActivityThread.java:8912)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:569)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:976)
+
+
+插件混淆,在宿主中启动插件中的Activity的场景下.编译插件时,出现这么运行时,验证的错误.
+
+解决办法:
+在gradle.properties中加入1个配置,可以解决这个问题
+android.enableR8.fullMode=false

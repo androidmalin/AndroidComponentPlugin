@@ -1,4 +1,7 @@
 #!/bin/bash
+rm app/mapping.txt
+rm app/proguard-merge-config.txt
+rm pluginapk/proguard-merge-config.txt
 ./gradlew :pluginapk:clean && \
 ./gradlew :pluginapk:assembleRelease && \
 cp pluginapk/build/outputs/apk/release/pluginapk-release.apk ./app/src/main/assets/pluginapk-debug.apk && \
