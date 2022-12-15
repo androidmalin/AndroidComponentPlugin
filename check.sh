@@ -1,8 +1,14 @@
 #!/bin/sh
 result=""
-./make_plugin.sh
-./gradlew clean
-./gradlew assembleDebug
+rm -rf ./app/src/main/assets/*.apk
+rm -rf ./app/build
+rm -rf ./pluginapk/build
+./gradlew -q clean &&
+./gradlew -q pluginapk:assembleDebug &&
+cp ./pluginapk/build/outputs/apk/debug/pluginapk-debug.apk ./app/src/main/assets/
+
+./gradlew app:clean
+./gradlew app:assembleDebug
 host_path=./app/build/outputs/host_id.txt
 plugin_path=./app/build/outputs/plugin_id.txt
 aapt d resources ./app/build/outputs/apk/debug/app-debug.apk >$host_path
