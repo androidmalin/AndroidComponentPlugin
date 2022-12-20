@@ -1,0 +1,20 @@
+* 启动时从插件Intent替换到代理Intent的版本区别
+* [10,13]
+  从 Android 10 开始，
+  `Instrumentation#execStartActivity` 方法会通过
+  `IActivityTaskManagerSingleton` 这个 `Binder` 代理
+  调用 `ActivityTaskManagerService` 的 `startActivity` 方法
+
+* [8,9]
+  `Instrumentation#execStartActivity`方法会通过
+  `IActivityManagerSingleton` 这个 Binder 代理
+  调用 `ActivityManagerService` 的 `startActivity` 方法
+
+* [4,7]
+  `Instrumentation#execStartActivity`方法会通过
+  `ActivityManagerNative`
+  `IActivityManager`
+
+* 从代理Intent替换到插件Intent的版本区别
+* [9,13] `LaunchActivityItem`
+* [4,8]  `ActivityClientRecord`

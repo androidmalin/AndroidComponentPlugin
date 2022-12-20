@@ -37,6 +37,8 @@ object HookActivity {
         try {
             val apiLevel = Build.VERSION.SDK_INT
             when {
+                // 29 <= apiLevel <= 33
+                // [android10, android11, android12, android13]
                 apiLevel >= 29 -> {
                     // 1.获取ActivityTaskManager的Class对象
                     // package android.app;
@@ -64,6 +66,8 @@ object HookActivity {
                     )
                 }
 
+                // 26 <= apiLevel <= 28
+                // [android8, android8.1, android9]
                 apiLevel >= 26 -> {
                     // 1.获取ActivityManager的Class对象
                     // package android.app
@@ -88,6 +92,8 @@ object HookActivity {
                 }
 
                 else -> {
+                    // 15 <= apiLevel <= 25
+                    // [android4.0.3 ... android7]
                     // 1.获取ActivityManagerNative的Class对象
                     // package android.app
                     // public abstract class ActivityManagerNative
@@ -116,7 +122,8 @@ object HookActivity {
     }
 
     /**
-     * just for apiLevel >= 29
+     * handle 29 <= apiLevel <= 33
+     * [android10 ... android13]
      */
     @SuppressLint("DiscouragedPrivateApi")
     private fun handleIActivityTaskManager(
@@ -180,7 +187,9 @@ object HookActivity {
     }
 
     /**
-     *  for 15<= apiLevel <= 28
+     *  handle 15<= apiLevel <= 28
+     *  [android8, android8.1, android9]
+     *  [android4.0.3 ... android7]
      */
     @SuppressLint("DiscouragedPrivateApi")
     private fun handleIActivityManager(
@@ -293,6 +302,11 @@ object HookActivity {
         }
     }
 
+    /**
+     * handle
+     * [android4.0.3 ~ android8]
+     * 从代理Intent替换到插件Intent
+     */
     private fun handleLaunchActivity(msg: Message) {
         var launchActivity = 100
         try {
@@ -487,7 +501,10 @@ object HookActivity {
     }
 
     /**
-     * 对应<9.0情况,创建一个Handler的Callback接口的实例对象
+     * 从代理Intent替换到插件Intent
+     *
+     * 对应 < 9.0 情况,创建一个Handler的Callback接口的实例对象
+     * [android4.0.3 ~ android8]
      */
     private class HandlerCallback : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
@@ -497,7 +514,10 @@ object HookActivity {
     }
 
     /**
-     * 对Android 9.0的处理
+     * 从代理Intent替换到插件Intent
+     *
+     * [android9 ... android13]
+     * 对大于Android 9.0版本的处理
      * https://www.cnblogs.com/Jax/p/9521305.html
      */
     private class HandlerCallbackP : Handler.Callback {
