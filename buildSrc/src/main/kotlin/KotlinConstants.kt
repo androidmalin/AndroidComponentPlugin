@@ -1,5 +1,5 @@
 object KotlinConstants {
-    const val gradle_version = "7.3.1"
+    const val gradle_version = "7.4.0-rc02"
     const val kotlin_version = "1.7.22"
 }
 

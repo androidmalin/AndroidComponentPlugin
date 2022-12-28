@@ -56,7 +56,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
-            // https://www.guardsquare.com/manual/setup/upgrading
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
