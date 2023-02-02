@@ -1,12 +1,12 @@
 object KotlinConstants {
-    const val gradle_version = "7.4.0-rc02"
-    const val kotlin_version = "1.7.22"
+    const val gradle_version = "7.4.1"
+    const val kotlin_version = "1.8.0"
 }
 
 object AppConfig {
     const val compileSdkVersion = 33
     const val buildToolsVersion = "33.0.1"
-    const val ndkVersion = "25.1.8937393"
+    const val ndkVersion = "25.2.9519653"
     const val applicationId = "com.malin.hook"
     const val minSdkVersion = 15
     const val targetSdkVersion = 32
@@ -19,7 +19,7 @@ object DependenciesConfig {
 
     const val STD_LIB = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KotlinConstants.kotlin_version}"
 
-    const val APP_COMPAT = "androidx.appcompat:appcompat:1.5.1"
+    const val APP_COMPAT = "androidx.appcompat:appcompat:1.6.0"
 
     const val ANNOTATION = "androidx.annotation:annotation:1.5.0"
 
@@ -29,7 +29,7 @@ object DependenciesConfig {
 
     const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
 
-    const val MATERIAL = "com.google.android.material:material:1.7.0"
+    const val MATERIAL = "com.google.android.material:material:1.8.0"
 
     const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.1.0"
 }
