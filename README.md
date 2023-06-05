@@ -2,7 +2,7 @@
 
 0. 支持2种方式.第一种,hook Instrument实现;第二种,hook Handler实现.
 
-1. 兼容android4.1 ~ android13
+1. 兼容android4.1 ~ android14
 
 2. kotlin 实现
 
@@ -12,12 +12,19 @@
 
 5. 采用gradle kotlin dsl
 
-### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 12, android 13(模拟器)
+### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 14
 ### wetest设备兼容测试情况如下:
-### 测试设备数量378, 通过374(99%), 4台未通过
+### 测试设备数量385, 通过381(99%), 4台未通过
 
 | 设备品牌       | 设备型号                       | 设备别名                | 系统版本  | 通过     |
 |:-:         |:-:                         |:-:                    |:-:       |:-:|
+| GOOGLE     | Redfin 64-bit only         | Pixel 5             | 14   | ✅ |
+| vivo       | V2049A                     | iQOO 7              | 13   | ✅ |
+| samsung    | SM-G9860                   | 三星Galaxy S20+ 5G   | 13   | ✅ |
+| Google     | Pixel 4 XL                 | PIXEL 4 XL          | 13   | ✅ |
+| vivo       | V2196A                     | VIVO iQOO Neo6      | 13   | ✅ |
+| XIAOMI     | 2201123C                   | Xiaomi 12           | 13   | ✅ |
+| vivo       | V2136A                     | Vivo iQOO 8         | 13   | ✅ |
 | Google     | Pixel 5                    | PIXEL 5             | 12 | ✅ |
 | XIAOMI     | M2011K2C                   | 小米11 5G             | 12 | ✅ |
 | vivo       | V2054A                     | iQOO                | 11 | ✅ |
