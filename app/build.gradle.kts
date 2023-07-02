@@ -40,7 +40,7 @@ android {
         }
     }
 
-    packagingOptions {
+    packaging {
         resources.excludes += "META-INF/*"
         resources.excludes += "META-INF/CERT.SF"
         resources.excludes += "META-INF/CERT.RSA"
