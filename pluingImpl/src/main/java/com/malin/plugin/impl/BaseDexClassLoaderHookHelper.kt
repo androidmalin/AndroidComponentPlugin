@@ -51,6 +51,15 @@ object BaseDexClassLoaderHookHelper {
         // -->BaseDexClassLoader中DexPathList pathList
         // -->DexPathList中 Element[] dexElements
         try {
+
+            // https://developer.android.com/about/versions/14/behavior-changes-14?hl=zh-cn#safer-dynamic-code-loading
+            if (Build.VERSION.SDK_INT >= 34) {//android14
+                try {
+                    apkFile.setReadOnly()
+                } catch (ignore: Throwable) {
+                }
+            }
+
             // 0.获取PathClassLoader的父类dalvik.system.BaseDexClassLoader的Class对象
             val baseDexClassLoaderClazz = PathClassLoader::class.java.superclass
 

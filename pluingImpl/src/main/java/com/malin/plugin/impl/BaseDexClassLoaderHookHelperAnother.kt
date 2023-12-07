@@ -79,6 +79,14 @@ object BaseDexClassLoaderHookHelperAnother {
             val apiLevel = Build.VERSION.SDK_INT
             when {
                 apiLevel >= 23 -> {
+                    // https://developer.android.com/about/versions/14/behavior-changes-14?hl=zh-cn#safer-dynamic-code-loading
+                    // https://stackoverflow.com/questions/76498531/problems-encountered-when-developing-apps-with-android-14
+                    if (apiLevel >= 34) {
+                        try {
+                            apkFile.setReadOnly()
+                        } catch (ignore: Throwable) {
+                        }
+                    }
 
                     // 1.
                     val files = ArrayList<File>()

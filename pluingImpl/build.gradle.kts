@@ -6,14 +6,14 @@ plugins {
 }
 
 android {
-    compileSdk = AppConfig.compileSdkVersion
-    buildToolsVersion = AppConfig.buildToolsVersion
-    ndkVersion = AppConfig.ndkVersion
+    compileSdk = AppConfig.COMPILE_SDK_VERSION
+    buildToolsVersion = AppConfig.BUILD_TOOLS_VERSION
+    ndkVersion = AppConfig.NDK_VERSION
     namespace = "com.malin.plugin.impl"
     defaultConfig {
         resourceConfigurations.addAll(arrayOf("zh", "en"))
-        minSdk = AppConfig.minSdkVersion
-        targetSdk = AppConfig.targetSdkVersion
+        minSdk = AppConfig.MIN_SDK_VERSION
+        targetSdk = AppConfig.TARGET_SDK_VERSION
         consumerProguardFiles("consumer-rules.pro")
     }
 

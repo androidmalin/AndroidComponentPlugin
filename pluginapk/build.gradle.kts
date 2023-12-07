@@ -7,20 +7,20 @@ plugins {
 }
 
 android {
-    compileSdk = AppConfig.compileSdkVersion
-    buildToolsVersion = AppConfig.buildToolsVersion
-    ndkVersion = AppConfig.ndkVersion
+    compileSdk = AppConfig.COMPILE_SDK_VERSION
+    buildToolsVersion = AppConfig.BUILD_TOOLS_VERSION
+    ndkVersion = AppConfig.NDK_VERSION
     namespace = "com.malin.plugin"
 
     defaultConfig {
         // 插件包名和宿主保持一致
         // https://juejin.cn/post/6844903875284058119
-        applicationId = AppConfig.applicationId
+        applicationId = AppConfig.APPLICATION_ID
         resourceConfigurations.addAll(arrayOf("zh", "en"))
-        minSdk = AppConfig.minSdkVersion
-        targetSdk = AppConfig.targetSdkVersion
-        versionCode = AppConfig.versionCode
-        versionName = AppConfig.versionName
+        minSdk = AppConfig.MIN_SDK_VERSION
+        targetSdk = AppConfig.TARGET_SDK_VERSION
+        versionCode = AppConfig.VERSION_CODE
+        versionName = AppConfig.VERSION_NAME
     }
 
     signingConfigs {

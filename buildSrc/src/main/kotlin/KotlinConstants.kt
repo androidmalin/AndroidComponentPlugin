@@ -1,23 +1,23 @@
 object KotlinConstants {
-    const val gradle_version = "8.0.2"
-    const val kotlin_version = "1.8.21"
+    const val ANDROID_GRADLE_VERSION = "8.2.0"
+    const val KOTLIN_VERSION = "1.9.21"
 }
 
 object AppConfig {
-    const val compileSdkVersion = 33
-    const val buildToolsVersion = "33.0.1"
-    const val ndkVersion = "25.2.9519653"
-    const val applicationId = "com.malin.hook"
-    const val minSdkVersion = 15
-    const val targetSdkVersion = 32
-    const val versionCode = 200
-    const val versionName = "200.0"
-    val abi = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+    const val COMPILE_SDK_VERSION = 34
+    const val BUILD_TOOLS_VERSION = "34.0.0"
+    const val NDK_VERSION = "25.2.9519653"
+    const val APPLICATION_ID = "com.malin.hook"
+    const val MIN_SDK_VERSION = 15
+    const val TARGET_SDK_VERSION = 34
+    const val VERSION_CODE = 200
+    const val VERSION_NAME = "200.0"
+    val ABI = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
 }
 
 object DependenciesConfig {
 
-    const val STD_LIB = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KotlinConstants.kotlin_version}"
+    const val STD_LIB = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KotlinConstants.KOTLIN_VERSION}"
 
     const val APP_COMPAT = "androidx.appcompat:appcompat:1.6.1"
 

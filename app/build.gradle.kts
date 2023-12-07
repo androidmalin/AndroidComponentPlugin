@@ -7,19 +7,19 @@ plugins {
 }
 
 android {
-    compileSdk = AppConfig.compileSdkVersion
-    buildToolsVersion = AppConfig.buildToolsVersion
-    ndkVersion = AppConfig.ndkVersion
-    namespace = AppConfig.applicationId
+    compileSdk = AppConfig.COMPILE_SDK_VERSION
+    buildToolsVersion = AppConfig.BUILD_TOOLS_VERSION
+    ndkVersion = AppConfig.NDK_VERSION
+    namespace = AppConfig.APPLICATION_ID
     defaultConfig {
         resourceConfigurations.addAll(arrayOf("zh", "en"))
-        applicationId = AppConfig.applicationId
-        minSdk = AppConfig.minSdkVersion
-        targetSdk = AppConfig.targetSdkVersion
-        versionCode = AppConfig.versionCode
-        versionName = AppConfig.versionName
+        applicationId = AppConfig.APPLICATION_ID
+        minSdk = AppConfig.MIN_SDK_VERSION
+        targetSdk = AppConfig.TARGET_SDK_VERSION
+        versionCode = AppConfig.VERSION_CODE
+        versionName = AppConfig.VERSION_NAME
         ndk {
-            abiFilters.addAll(AppConfig.abi)
+            abiFilters.addAll(AppConfig.ABI)
         }
     }
 
