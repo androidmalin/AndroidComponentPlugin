@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -21,15 +20,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AsyncLayoutInflater(this@MainActivity).inflate(
-            R.layout.activity_main,
-            null
-        ) { view, _, _ ->
-            setContentView(view)
-            initView()
-            initListener()
-            initLoadPluginResourceImg()
-        }
+        setContentView(R.layout.activity_main)
+        initView()
+        initListener()
+        initLoadPluginResourceImg()
     }
 
     private fun initView() {
