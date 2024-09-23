@@ -108,7 +108,7 @@ object ResourceUtil {
         pluginPath: String?,
     ): Resources? {
         try {
-            val assetManager = AssetManager::class.java.newInstance()
+            val assetManager = AssetManager::class.java.getDeclaredConstructor().newInstance()
             assetManager.javaClass.getDeclaredMethod("addAssetPath", String::class.java)
                 .also { it.isAccessible = true }
                 .invoke(assetManager, pluginPath)
@@ -126,7 +126,7 @@ object ResourceUtil {
     private fun getPluginResourceForAndroidS(context: Context, pluginPath: String?): Resources? {
         try {
             //1.调用assetManager.addAssetPath(pluginPath);
-            val assetManager = AssetManager::class.java.newInstance()
+            val assetManager = AssetManager::class.java.getDeclaredConstructor().newInstance()
             assetManager.javaClass.getDeclaredMethod("addAssetPath", String::class.java)
                 .also { it.isAccessible = true }
                 .invoke(assetManager, pluginPath)

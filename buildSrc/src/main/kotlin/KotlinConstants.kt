@@ -21,15 +21,10 @@ object DependenciesConfig {
 
     const val APP_COMPAT = "androidx.appcompat:appcompat:1.6.1"
 
-    const val ANNOTATION = "androidx.annotation:annotation:1.6.0"
-
     const val KTX_CORE = "androidx.core:core-ktx:1.10.1"
-
-    const val ASYNC_LAYOUT = "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
 
     const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
 
     const val MATERIAL = "com.google.android.material:material:1.9.0"
 
-    const val X_CRASH = "com.iqiyi.xcrash:xcrash-android-lib:3.1.0"
 }

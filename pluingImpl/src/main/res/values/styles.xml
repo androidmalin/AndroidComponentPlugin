@@ -3,5 +3,7 @@
         <item name="colorPrimary">#FF5474</item>
         <item name="colorPrimaryDark">#FF5474</item>
         <item name="colorAccent">#FF5474</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 </resources>

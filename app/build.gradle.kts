@@ -96,7 +96,6 @@ dependencies {
     implementation(DependenciesConfig.STD_LIB)
     implementation(DependenciesConfig.APP_COMPAT)
     implementation(DependenciesConfig.KTX_CORE)
-    implementation(DependenciesConfig.ASYNC_LAYOUT)
     implementation(DependenciesConfig.HIDDEN_API_PASS)
     implementation(DependenciesConfig.MATERIAL)
     implementation(project(":pluingImpl"))
