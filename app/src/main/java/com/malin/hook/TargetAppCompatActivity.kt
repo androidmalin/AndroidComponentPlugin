@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 
 /**
  * 宿主中未注册的AppCompatActivity类型的Activity
@@ -24,6 +25,15 @@ class TargetAppCompatActivity : AppCompatActivity() {
         textView.setTextColor(Color.parseColor("#000000"))
         relativeLayout.addView(textView)
         setContentView(relativeLayout)
+        supportActionBar?.hide()
+        lightStatus()
+    }
+
+    private fun lightStatus() {
+        val window = window ?: return
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.isAppearanceLightStatusBars = true
     }
 
     override fun onStart() {

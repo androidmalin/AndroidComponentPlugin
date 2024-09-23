@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 
 @SuppressLint("SetTextI18n")
 class HostRegisterActivity : AppCompatActivity() {
@@ -24,6 +25,15 @@ class HostRegisterActivity : AppCompatActivity() {
         relativeLayout.addView(textView)
 
         setContentView(relativeLayout)
+        supportActionBar?.hide()
+        lightStatus()
+    }
+
+    private fun lightStatus() {
+        val window = window ?: return
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.isAppearanceLightStatusBars = true
     }
 
     override fun onStart() {

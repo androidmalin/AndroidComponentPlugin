@@ -3,12 +3,14 @@ package com.malin.plugin
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.Resources
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.WindowCompat
 
 @SuppressLint("SetTextI18n")
 class PluginActivity : Activity() {
@@ -39,7 +41,9 @@ class PluginActivity : Activity() {
             linearLayout.addView(imageView, layoutParams)
 
             val textView = TextView(this)
-            textView.text = "插件APK使用自己的Resources加载图片\n 启动插件APK中的PluginActivity,成功!"
+            textView.text =
+                "插件APK使用自己的Resources加载图片\n 启动插件APK中的PluginActivity,成功!"
+            textView.setTextColor(Color.parseColor("#000000"))
             textView.gravity = Gravity.CENTER
             linearLayout.addView(textView)
         } else {
@@ -49,6 +53,14 @@ class PluginActivity : Activity() {
             linearLayout.addView(textView)
         }
         setContentView(linearLayout)
+        lightStatus()
+    }
+
+    private fun lightStatus() {
+        val window = window ?: return
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.isAppearanceLightStatusBars = true
     }
 
     override fun onStart() {

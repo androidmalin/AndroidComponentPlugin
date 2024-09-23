@@ -20,6 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HostRegisterActivity" />
+        <activity
+            android:name=".HostRegisterActivity"
+            android:theme="@style/AppCompatThemeHost" />
     </application>
 </manifest>

@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -21,6 +22,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        supportActionBar?.hide()
+        lightStatus()
         initView()
         initListener()
         initLoadPluginResourceImg()
@@ -28,6 +31,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun initView() {
         mIvPluginRes = findViewById(R.id.iv_plugin_img)
+    }
+
+    private fun lightStatus() {
+        val window = window ?: return
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.isAppearanceLightStatusBars = true
     }
 
     private fun <T : View> Activity.bindView(@IdRes res: Int): Lazy<T> {

@@ -1,5 +1,6 @@
 <resources>
-    <style name="AppCompatThemeHost" parent="Theme.AppCompat.Light.DarkActionBar">
+
+    <style name="AppCompatThemeHost" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorRed</item>
         <item name="colorPrimaryDark">@color/colorRed</item>
         <item name="colorAccent">@color/colorRed</item>

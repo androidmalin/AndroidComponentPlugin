@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import androidx.core.view.WindowCompat
 
 @SuppressLint("SetTextI18n")
 class PluginAppCompatActivity : BaseActivity() {
@@ -30,7 +31,18 @@ class PluginAppCompatActivity : BaseActivity() {
             setTheme(theme)
             LayoutInflater.from(this).inflate(R.layout.plugin_activity, null)
         }
+
         setContentView(rootView)
+        supportActionBar?.hide()
+        lightStatus()
+    }
+
+
+    private fun lightStatus() {
+        val window = window ?: return
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.isAppearanceLightStatusBars = true
     }
 
     override fun onStart() {
