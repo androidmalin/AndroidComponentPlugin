@@ -28,7 +28,7 @@ open class BaseActivity : AppCompatActivity() {
                 mResourcesField.isAccessible = true
                 mResourcesField[mContext] = resource
                 val rClazz = Class.forName("com.google.android.material.R\$style")
-                val themeField = rClazz.getDeclaredField("Theme_MaterialComponents_DayNight")
+                val themeField = rClazz.getDeclaredField("Theme_MaterialComponents_Light")
                 themeField.isAccessible = true
                 // release 编译时, 需要在 在gradle.properties中加入 android.enableR8.fullMode=false
                 val themeObj = themeField[null]

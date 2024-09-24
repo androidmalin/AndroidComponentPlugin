@@ -1,6 +1,9 @@
 package com.malin.plugin
 
 import android.annotation.SuppressLint
+import android.app.UiModeManager
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,11 +41,28 @@ class PluginAppCompatActivity : BaseActivity() {
     }
 
 
+    /**
+     * https://stackoverflow.com/questions/71865491/change-the-color-of-status-bar-text-and-icon-in-api-30
+     */
+    @Suppress("DEPRECATION")
     private fun lightStatus() {
         val window = window ?: return
         val decorView = window.decorView
         val controller = WindowCompat.getInsetsController(window, decorView)
-        controller.isAppearanceLightStatusBars = true
+        if (pluginInHostRunning) {
+            window.statusBarColor = Color.WHITE
+            controller.isAppearanceLightStatusBars = true
+        } else {
+            val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+            val nightMode = uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
+            if (nightMode) {
+                window.statusBarColor = Color.BLACK
+                controller.isAppearanceLightStatusBars = false
+            } else {
+                window.statusBarColor = Color.WHITE
+                controller.isAppearanceLightStatusBars = true
+            }
+        }
     }
 
     override fun onStart() {
