@@ -9,6 +9,10 @@ import dalvik.system.DexClassLoader
 
 object PluginResourceUtil {
 
+    /**
+     * 获取插件apk中的图片.
+     * 有几种不同的方式.
+     */
     fun getPluginDrawableByName(
         context: Context,
         pluginApkFileName: String,

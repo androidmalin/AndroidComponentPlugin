@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,12 @@ class HostRegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "$TAG:onCreate")
+        setContentView(getRootLayout())
+        supportActionBar?.hide()
+        lightStatus()
+    }
 
+    private fun getRootLayout(): View {
         val relativeLayout = RelativeLayout(this)
         relativeLayout.gravity = Gravity.CENTER
 
@@ -23,10 +29,7 @@ class HostRegisterActivity : AppCompatActivity() {
         textView.text = "宿主中自带的已注册的HostRegisterActivity,启动成功!"
         textView.setTextColor(Color.parseColor("#000000"))
         relativeLayout.addView(textView)
-
-        setContentView(relativeLayout)
-        supportActionBar?.hide()
-        lightStatus()
+        return relativeLayout
     }
 
     private fun lightStatus() {

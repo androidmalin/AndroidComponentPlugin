@@ -11,14 +11,20 @@ import android.util.DisplayMetrics
 /**
  * 插件可以访问宿主的资源.
  * 插件调用宿主资源则需要将宿主的APK和插件的APK一起添加到同一个AssetManager里.
- * https://www.zybuluo.com/dodola/note/814116
- * https://www.notion.so/VirtualAPK-1fce1a910c424937acde9528d2acd537
- * https://android.googlesource.com/platform/frameworks/base/+/android-4.4.2_r2.0.1/libs/androidfw/AssetManager.cpp#155
- * https://android.googlesource.com/platform/frameworks/base.git/+/android-4.4.2_r2.0.1/core/jni/android_util_AssetManager.cpp
- * https://android.googlesource.com/platform/frameworks/base/+/android-4.4.2_r2.0.1/core/java/android/content/res/AssetManager.java#751
- * http://www.zircon.me/05-07-2018/android-VirtualAPK-analysis.html
+ *
+ * 相关的源码分析,原理参考如下链接.
+ *
+ * [VirtualAPK资源的插件化处理](https://www.zybuluo.com/dodola/note/814116)
+ *
+ * [VirtualAPK资源的插件化处理(备用)](https://www.notion.so/VirtualAPK-1fce1a910c424937acde9528d2acd537)
+ *
+ * [AssetManager.cpp#155](https://android.googlesource.com/platform/frameworks/base/+/android-4.4.2_r2.0.1/libs/androidfw/AssetManager.cpp#155)
+ *
+ * [android_util_AssetManager.cpp](https://android.googlesource.com/platform/frameworks/base.git/+/android-4.4.2_r2.0.1/core/jni/android_util_AssetManager.cpp)
+ *
+ * [AssetManager.java#751](https://android.googlesource.com/platform/frameworks/base/+/android-4.4.2_r2.0.1/core/java/android/content/res/AssetManager.java#751)
+ *
  * [VirtualApk解决插件资源ID与宿主冲突的问题](https://github.com/SusionSuc/AdvancedAndroid/tree/master/plugin/VirtualApk/)
- * [Android资源的插件化](https://www.jianshu.com/p/e09fc4482c7b)
  */
 object ResourceUtil {
     fun createResources(hostContext: Context, apk: String?): Resources? {
@@ -27,9 +33,11 @@ object ResourceUtil {
             version < Build.VERSION_CODES.LOLLIPOP -> { // 15 <= api < 21
                 getPluginResourceForAndroidL(hostContext, apk)
             }
+
             version < Build.VERSION_CODES.N -> { // 21 <= api < 24
                 getPluginResourceForAndroidM(hostContext, apk)
             }
+
             else -> { // 24 <= api < 32
                 getPluginResourceForAndroidS(hostContext, apk)
             }

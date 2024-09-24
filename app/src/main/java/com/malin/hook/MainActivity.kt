@@ -1,12 +1,10 @@
 package com.malin.hook
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -14,29 +12,25 @@ import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-    private lateinit var mIvPluginRes: ImageView
+    private val mIvPluginRes: ImageView by bindView(R.id.iv_plugin_img)
 
-    private val mBtnStartHostRegisterAct: Button by bindView(R.id.btn_start_host_register_act)
-
-    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        supportActionBar?.hide()
-        lightStatus()
         initView()
+        lightStatus()
         initListener()
         initLoadPluginResourceImg()
     }
 
     private fun initView() {
-        mIvPluginRes = findViewById(R.id.iv_plugin_img)
+        supportActionBar?.hide()
     }
 
     private fun lightStatus() {
-        val window = window ?: return
-        val decorView = window.decorView
-        val controller = WindowCompat.getInsetsController(window, decorView)
+        val localWindow = window ?: return
+        val localDecorView = localWindow.decorView
+        val controller = WindowCompat.getInsetsController(localWindow, localDecorView)
         controller.isAppearanceLightStatusBars = true
     }
 
@@ -45,16 +39,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initListener() {
-        mIvPluginRes.setOnClickListener(this)
-        mBtnStartHostRegisterAct.setOnClickListener {
-            startActivity(startActType = Type.HOST_EXIST_ACTIVITY, isApplicationContext = true)
-        }
+        findViewById<View>(R.id.btn_start_host_register_act).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_host_unregister_act).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_host_unregister_appcompat_act).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_plugin_apk_activity).setOnClickListener(this)
         findViewById<View>(R.id.btn_start_plugin_apk_appcompat_activity).setOnClickListener(this)
     }
 
+    /**
+     * 宿主中使用插件APK中的资源
+     */
     private fun initLoadPluginResourceImg() {
         findViewById<View>(R.id.btn_load_plugin_img).setOnClickListener {
             val drawableImg = PluginResourceUtil.getPluginDrawableByName(
@@ -70,27 +64,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
+
+            // 启动宿主中注册的 HostRegisterActivity
+            R.id.btn_start_host_register_act -> {
+                startActivity(
+                    startActType = LaunchTargetActType.HOST_EXIST_ACTIVITY,
+                    isApplicationContext = true
+                )
+            }
+
+            // 启动宿主中未注册的 TargetActivity
             R.id.btn_start_host_unregister_act -> {
                 startActivity(
-                    startActType = Type.HOST_UNREGISTER_ACTIVITY,
+                    startActType = LaunchTargetActType.HOST_UNREGISTER_ACTIVITY,
                     isApplicationContext = false
                 )
             }
 
+            // 启动宿主中未注册的 TargetAppCompatActivity
             R.id.btn_start_host_unregister_appcompat_act -> {
                 startActivity(
-                    startActType = Type.HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
+                    startActType = LaunchTargetActType.HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
                     isApplicationContext = false
                 )
             }
 
+            // 启动插件APK中的 PluginActivity
             R.id.btn_start_plugin_apk_activity -> {
-                startActivity(startActType = Type.PLUGIN_ACTIVITY, isApplicationContext = false)
+                startActivity(
+                    startActType = LaunchTargetActType.PLUGIN_ACTIVITY,
+                    isApplicationContext = false
+                )
             }
 
+            // 启动插件APK中的 PluginAppCompatActivity
             R.id.btn_start_plugin_apk_appcompat_activity -> {
                 startActivity(
-                    startActType = Type.PLUGIN_APPCOMPAT_ACTIVITY,
+                    startActType = LaunchTargetActType.PLUGIN_APPCOMPAT_ACTIVITY,
                     isApplicationContext = false
                 )
             }
@@ -98,65 +108,113 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    private fun startActivity(startActType: Type, isApplicationContext: Boolean) {
+    private fun startActivity(startActType: LaunchTargetActType, isApplicationContext: Boolean) {
 
-        val intent: Intent
+        val intent: Intent = when (startActType) {
 
-        when (startActType) {
-
-            Type.HOST_EXIST_ACTIVITY -> {
-                intent = Intent(this, HostRegisterActivity::class.java)
+            // 启动 宿主中注册的 [HostRegisterActivity]
+            LaunchTargetActType.HOST_EXIST_ACTIVITY -> {
+                Intent(this, HostRegisterActivity::class.java)
             }
 
-            Type.HOST_UNREGISTER_ACTIVITY -> {
-                intent = Intent(this, TargetActivity::class.java)
+            // 启动 宿主中未注册的 [TargetActivity]
+            LaunchTargetActType.HOST_UNREGISTER_ACTIVITY -> {
+                Intent(this, TargetActivity::class.java)
             }
 
-            Type.HOST_UNREGISTER_APPCOMPAT_ACTIVITY -> {
-                intent = Intent(this, TargetAppCompatActivity::class.java)
+            // 启动 宿主中未注册的 [TargetAppCompatActivity]
+            LaunchTargetActType.HOST_UNREGISTER_APPCOMPAT_ACTIVITY -> {
+                Intent(this, TargetAppCompatActivity::class.java)
             }
 
-            Type.PLUGIN_ACTIVITY -> {
-                intent = Intent()
-                intent.component =
-                    ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_ACTIVITY_NAME)
+            // 启动 插件APK中的 PluginActivity
+            LaunchTargetActType.PLUGIN_ACTIVITY -> {
+                Intent().apply {
+                    component = ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_ACTIVITY_NAME)
+                }
             }
 
-            Type.PLUGIN_APPCOMPAT_ACTIVITY -> {
-                intent = Intent()
-                intent.component =
-                    ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_APPCOMPAT_ACTIVITY_NAME)
+            // 启动 插件APK中的 PluginAppCompatActivity
+            LaunchTargetActType.PLUGIN_APPCOMPAT_ACTIVITY -> {
+                Intent().apply {
+                    component = ComponentName(PLUGIN_PACKAGE_NAME, PLUGIN_APPCOMPAT_ACTIVITY_NAME)
+                }
             }
         }
 
         when {
+            // 启动的上下文是 ApplicationContext
             isApplicationContext -> {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 applicationContext.startActivity(intent)
             }
 
+            // 启动的上下文不是 ApplicationContext
             else -> {
-                this.startActivity(intent)
+                this@MainActivity.startActivity(intent)
             }
         }
     }
 
     private companion object {
-        // 插件包名和宿主保持一致
-        // https://juejin.cn/post/6844903875284058119
+        /**
+         * 插件apk的文件名称
+         * 位置: app/src/main/assets/pluginapk-debug.apk
+         */
+        private const val PLUGIN_APK_FILE_NAME = "pluginapk-debug.apk"
+
+        /**
+         * 插件apk的包名
+         * 插件apk的包名和宿主包名一致,原理参考如下博客
+         * https://juejin.cn/post/6844903875284058119
+         */
         private const val PLUGIN_PACKAGE_NAME = "com.malin.hook"
+
+        /**
+         * 插件apk中插件PluginActivity的类名
+         * 位置: pluginapk/src/main/java/com/malin/plugin/PluginActivity.kt
+         */
         private const val PLUGIN_ACTIVITY_NAME = "com.malin.plugin.PluginActivity"
+
+        /**
+         * 插件apk中插件PluginAppCompatActivity的类名
+         * 位置: pluginapk/src/main/java/com/malin/plugin/PluginAppCompatActivity.kt
+         */
         private const val PLUGIN_APPCOMPAT_ACTIVITY_NAME =
             "com.malin.plugin.PluginAppCompatActivity"
-        private const val PLUGIN_APK_FILE_NAME = "pluginapk-debug.apk"
+
+        /**
+         * 插件apk的一种图片
+         * 位置: pluginapk/src/main/res/drawable/plugin_img.png
+         */
         private const val PLUGIN_IMG_NAME = "plugin_img"
     }
 
-    private enum class Type {
+
+    private enum class LaunchTargetActType {
+        /**
+         * 宿主中注册的 [HostRegisterActivity]
+         */
+        HOST_EXIST_ACTIVITY,
+
+        /**
+         * 宿主中未注册的 [TargetActivity]
+         */
         HOST_UNREGISTER_ACTIVITY,
+
+        /**
+         * 宿主中未注册的 [TargetAppCompatActivity]
+         */
         HOST_UNREGISTER_APPCOMPAT_ACTIVITY,
+
+        /**
+         * 插件APK中的 PluginActivity
+         */
         PLUGIN_ACTIVITY,
+
+        /**
+         * 插件APK中的 PluginAppCompatActivity
+         */
         PLUGIN_APPCOMPAT_ACTIVITY,
-        HOST_EXIST_ACTIVITY
     }
 }
