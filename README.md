@@ -1,19 +1,26 @@
 ### Android 启动未在AndroidManifest.xml中注册的Activity
 
-0. 支持2种方式.第一种,hook Instrument实现;第二种,hook Handler实现.
+1. 支持2种方式.第一种,hook Instrument实现;第二种,hook Handler实现.
 
-1. 兼容android4.1 ~ android15
+2. 兼容android4.1 ~ android15
 
-2. kotlin 实现
+3. kotlin 实现
 
-3. 增加了代码混淆配置
+4. 增加了代码混淆配置
 
-4. 使用最新gradle,apg版本
+5. 使用最新gradle,apg版本
 
-5. 采用gradle kotlin dsl
+6. 采用gradle kotlin dsl
 
+### 开发调试
+
+1. 编译debug插件并拷贝到宿主中, 编译debug宿主, 安装到手机并启动, 请执行 `./build_debug_apk.sh` 脚本
+
+2. 编译release插件并拷贝到宿主中, 编译release宿主, 安装到手机并启动, 请执行 `./build_release_apk.sh` 脚本
+
+### 代码的兼容性测试说明:使用腾讯WeTest真机测试平台,少部分是Testin云测和阿里云测试
 ### 测试代码为 develop_kotlin分支, 代码兼容 android 4.1 到 android 15
-### wetest设备兼容测试情况如下:
+### WeTest设备兼容测试情况如下:
 ### 测试设备数量386, 通过386(100%), 全部通过测试.
 
 |    设备品牌    |            设备型号            |        设备别名         | 系统版本  | 通过 |
