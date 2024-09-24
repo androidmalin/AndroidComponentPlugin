@@ -22,7 +22,7 @@ object PluginResourceUtil {
         try {
             val dexFile = context.getFileStreamPath("pluginapk-debug.apk")
             // 执行此addAssetPath(String path) 方法，能把插件的路径添加进去
-            val assetManager = AssetManager::class.java.newInstance()
+            val assetManager = AssetManager::class.java.getDeclaredConstructor().newInstance()
             val addAssetPathMethod =
                 assetManager.javaClass.getDeclaredMethod("addAssetPath", String::class.java)
             addAssetPathMethod.isAccessible = true
