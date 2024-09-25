@@ -106,7 +106,6 @@ object HookInstrumentation {
                         ResolveInfoFlags.of(flags.toLong())
                     )
                 } else {
-                    @Suppress("DEPRECATION")
                     mPackageManager.queryIntentActivities(intent, flags)
                 }
             } catch (throwable: Throwable) {
@@ -157,7 +156,7 @@ object HookInstrumentation {
          */
         @Keep
         @Suppress("UNUSED")
-        @SuppressLint("QueryPermissionsNeeded")
+        @SuppressLint("QueryPermissionsNeeded", "ObsoleteSdkInt")
         fun execStartActivity(
             who: Context?,
             contextThread: IBinder?,
@@ -170,15 +169,7 @@ object HookInstrumentation {
             var resolveInfoList: List<ResolveInfo>? = null
             try {
                 val flags = 0
-                resolveInfoList = if (Build.VERSION.SDK_INT >= 33) {
-                    mPackageManager.queryIntentActivities(
-                        intent,
-                        ResolveInfoFlags.of(flags.toLong())
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    mPackageManager.queryIntentActivities(intent, flags)
-                }
+                resolveInfoList = mPackageManager.queryIntentActivities(intent, flags)
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
             }
