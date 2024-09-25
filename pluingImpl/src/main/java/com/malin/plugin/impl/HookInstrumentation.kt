@@ -78,7 +78,7 @@ object HookInstrumentation {
         private val mStubActivityClazz: Class<*>,
     ) : Instrumentation() {
         /**
-         * android16-android31
+         * android16-android35
          * Instrumentation的execStartActivity方法激活Activity生命周期
          * 使用占坑的Activity来通过AMS的验证.
          */

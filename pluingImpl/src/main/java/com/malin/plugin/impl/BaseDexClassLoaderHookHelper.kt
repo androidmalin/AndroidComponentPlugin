@@ -105,7 +105,7 @@ object BaseDexClassLoaderHookHelper {
 
             val elementPluginObj: Any = when {
                 apiLevel >= 26 -> {
-                    // 26<=API<=31 (8.0<=API<=12.0)
+                    // 26<=API<=35 (8.0<=API<=15.0)
                     // 7.构造插件Element
                     // 使用构造函数 public Element(DexFile dexFile, File dexZipPath){}
                     // 这个构造函数不能用了 @Deprecated public Element(File dir, boolean isDirectory, File zip, DexFile dexFile){},使用会报错

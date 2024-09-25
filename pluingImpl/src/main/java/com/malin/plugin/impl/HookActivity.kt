@@ -37,8 +37,8 @@ object HookActivity {
         try {
             val apiLevel = Build.VERSION.SDK_INT
             when {
-                // 29 <= apiLevel <= 33
-                // [android10, android11, android12, android13]
+                // 29 <= apiLevel <= 35
+                // [android10, android11, android12, android13, android14, android15]
                 apiLevel >= 29 -> {
                     // 1.获取ActivityTaskManager的Class对象
                     // package android.app;
@@ -122,14 +122,14 @@ object HookActivity {
     }
 
     /**
-     * handle 29 <= apiLevel <= 33
-     * [android10 ... android13]
+     * handle 29 <= apiLevel <= 35
+     * [android10 ... android15]
      */
     @SuppressLint("DiscouragedPrivateApi")
     private fun handleIActivityTaskManager(
         context: Context,
         subActivityClazz: Class<*>,
-        IActivityTaskManagerSingletonObj: Any?,
+        iActivityTaskManagerSingletonObj: Any?,
     ) {
         try {
             // 5.获取private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton对象中的属性private T mInstance的值
@@ -149,13 +149,13 @@ object HookActivity {
 
             // 9.获取mInstance属性的值,既IActivityTaskManager的实例
             // 从private static final Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象中获取mInstance属性对应的值,既IActivityTaskManager
-            var iActivityTaskManager = mInstanceField[IActivityTaskManagerSingletonObj]
+            var iActivityTaskManager = mInstanceField[iActivityTaskManagerSingletonObj]
 
             // 10.android10之后,从mInstanceField中取到的值为null,这里判断如果为null,就再次从get方法中再取一次
             if (iActivityTaskManager == null) {
                 val getMethod =
                     singletonClazz.getDeclaredMethod("get").also { it.isAccessible = true }
-                iActivityTaskManager = getMethod.invoke(IActivityTaskManagerSingletonObj)
+                iActivityTaskManager = getMethod.invoke(iActivityTaskManagerSingletonObj)
             }
 
             // 11.获取IActivityTaskManager接口的类对象
@@ -172,7 +172,7 @@ object HookActivity {
             // 13.重新赋值
             // 给mInstance属性,赋新值
             // 给Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象的属性private T mInstance赋新值
-            mInstanceField[IActivityTaskManagerSingletonObj] = iActivityTaskManagerProxy
+            mInstanceField[iActivityTaskManagerSingletonObj] = iActivityTaskManagerProxy
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
         } catch (e: NoSuchFieldException) {
@@ -516,7 +516,7 @@ object HookActivity {
     /**
      * 从代理Intent替换到插件Intent
      *
-     * [android9 ... android13]
+     * [android9 ... android15]
      * 对大于Android 9.0版本的处理
      * https://www.cnblogs.com/Jax/p/9521305.html
      */
