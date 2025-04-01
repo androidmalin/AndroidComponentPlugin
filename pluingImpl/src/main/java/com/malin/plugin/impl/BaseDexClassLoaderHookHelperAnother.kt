@@ -1,5 +1,6 @@
 package com.malin.plugin.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import dalvik.system.PathClassLoader
@@ -30,6 +31,7 @@ object BaseDexClassLoaderHookHelperAnother {
      * 因此我们在Context环境中直接getClassLoader()获取到的就是宿主程序唯一的ClassLoader.
      * @param apkFile            apkFile
      */
+    @SuppressLint("MemberExtensionConflict")
     fun patchClassLoader(baseDexClassLoader: ClassLoader, context: Context, apkFile: File) {
 
         // -->PathClassLoader
@@ -84,7 +86,7 @@ object BaseDexClassLoaderHookHelperAnother {
                     if (apiLevel >= 34) {
                         try {
                             apkFile.setReadOnly()
-                        } catch (ignore: Throwable) {
+                        } catch (_: Throwable) {
                         }
                     }
 

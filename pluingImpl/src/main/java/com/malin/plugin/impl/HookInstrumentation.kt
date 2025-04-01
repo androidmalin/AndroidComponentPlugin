@@ -28,7 +28,7 @@ object HookInstrumentation {
 
     private lateinit var mContext: Context
 
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     fun hookInstrumentation(context: Context) {
         // 1.from ContextImpl get mMainThread field value (ActivityThread obj)
         // 2.from ActivityThread get mInstrumentation field (Instrumentation obj)
@@ -62,11 +62,7 @@ object HookInstrumentation {
                 context.packageManager,
                 StubAppCompatActivity::class.java
             )
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -84,7 +80,7 @@ object HookInstrumentation {
          */
         @Keep
         @Suppress("UNUSED")
-        @SuppressLint("QueryPermissionsNeeded")
+        @SuppressLint("QueryPermissionsNeeded", "MemberExtensionConflict")
         fun execStartActivity(
             who: Context?,
             contextThread: IBinder?,
@@ -156,7 +152,7 @@ object HookInstrumentation {
          */
         @Keep
         @Suppress("UNUSED")
-        @SuppressLint("QueryPermissionsNeeded", "ObsoleteSdkInt")
+        @SuppressLint("QueryPermissionsNeeded", "ObsoleteSdkInt", "MemberExtensionConflict")
         fun execStartActivity(
             who: Context?,
             contextThread: IBinder?,

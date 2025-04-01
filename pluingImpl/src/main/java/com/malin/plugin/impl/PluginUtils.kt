@@ -1,5 +1,6 @@
 package com.malin.plugin.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import java.io.*
 
@@ -8,6 +9,7 @@ object PluginUtils {
     /**
      * 把Assets里面得文件复制到 /data/data/files 目录下
      */
+    @SuppressLint("MemberExtensionConflict")
     fun extractAssets(context: Context, sourceName: String) {
         val assetManager = context.assets
         var inputStream: InputStream? = null
@@ -44,6 +46,7 @@ object PluginUtils {
         return enforceDirExists(File(getPluginBaseDir(context, packageName), "lib"))
     }
 
+    @SuppressLint("MemberExtensionConflict")
     private fun closeSilently(closeable: Closeable?) {
         try {
             closeable?.close()

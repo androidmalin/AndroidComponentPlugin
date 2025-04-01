@@ -1,15 +1,15 @@
 object KotlinConstants {
-    const val ANDROID_GRADLE_VERSION = "8.6.1"
+    const val ANDROID_GRADLE_VERSION = "8.9.1"
     const val KOTLIN_VERSION = "1.9.25"
 }
 
 object AppConfig {
-    const val COMPILE_SDK_VERSION = 35
-    const val BUILD_TOOLS_VERSION = "35.0.0"
+    const val COMPILE_SDK_VERSION = 36
+    const val BUILD_TOOLS_VERSION = "36.0.0"
     const val NDK_VERSION = "25.2.9519653"
     const val APPLICATION_ID = "com.malin.hook"
     const val MIN_SDK_VERSION = 21
-    const val TARGET_SDK_VERSION = 35
+    const val TARGET_SDK_VERSION = 36
     const val VERSION_CODE = 300
     const val VERSION_NAME = "300.0"
     val ABI = arrayOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
@@ -23,7 +23,7 @@ object DependenciesConfig {
 
     const val KTX_CORE = "androidx.core:core-ktx:1.10.1"
 
-    const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
+    const val HIDDEN_API_PASS = "org.lsposed.hiddenapibypass:hiddenapibypass:6.1"
 
     const val MATERIAL = "com.google.android.material:material:1.9.0"
 

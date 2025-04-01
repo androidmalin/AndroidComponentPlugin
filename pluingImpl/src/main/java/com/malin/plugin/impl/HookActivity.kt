@@ -32,7 +32,7 @@ object HookActivity {
      * @param context          context
      * @param subActivityClazz 在AndroidManifest.xml中注册了的Activity
      */
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     fun hookStartActivity(context: Context, subActivityClazz: Class<*>) {
         try {
             val apiLevel = Build.VERSION.SDK_INT
@@ -112,11 +112,7 @@ object HookActivity {
                     handleIActivityManager(context, subActivityClazz, singletonField[null])
                 }
             }
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -125,7 +121,7 @@ object HookActivity {
      * handle 29 <= apiLevel <= 35
      * [android10 ... android15]
      */
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     private fun handleIActivityTaskManager(
         context: Context,
         subActivityClazz: Class<*>,
@@ -173,15 +169,7 @@ object HookActivity {
             // 给mInstance属性,赋新值
             // 给Singleton<IActivityTaskManager> IActivityTaskManagerSingleton实例对象的属性private T mInstance赋新值
             mInstanceField[iActivityTaskManagerSingletonObj] = iActivityTaskManagerProxy
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
-            e.printStackTrace()
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: InvocationTargetException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -191,7 +179,7 @@ object HookActivity {
      *  [android8, android8.1, android9]
      *  [android4.0.3 ... android7]
      */
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     private fun handleIActivityManager(
         context: Context,
         subActivityClazz: Class<*>,
@@ -232,11 +220,7 @@ object HookActivity {
             // 给mInstance属性,赋新值
             // 给Singleton<IActivityManager> IActivityManagerSingleton实例对象的属性private T mInstance赋新值
             mInstanceField[iActivityManagerSingletonObj] = iActivityManagerProxy
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -244,7 +228,7 @@ object HookActivity {
     /**
      * 启动未注册的Activity,将之前替换了的Intent,换回去.我们的目标是要启动未注册的Activity
      */
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     fun hookLauncherActivity() {
         try {
             // 1.获取ActivityThread的Class对象
@@ -289,15 +273,7 @@ object HookActivity {
             } else {
                 mCallbackField[mHObj] = HandlerCallback()
             }
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -307,6 +283,7 @@ object HookActivity {
      * [android4.0.3 ~ android8]
      * 从代理Intent替换到插件Intent
      */
+    @SuppressLint("MemberExtensionConflict")
     private fun handleLaunchActivity(msg: Message) {
         var launchActivity = 100
         try {
@@ -324,7 +301,7 @@ object HookActivity {
             if (launchActivityValue is Int) {
                 launchActivity = launchActivityValue
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
         if (msg.what != launchActivity) return
@@ -406,7 +383,7 @@ object HookActivity {
      * @param context          context
      * @param subActivityClazz 注册了的Activity的class对象
      */
-    @SuppressLint("DiscouragedPrivateApi")
+    @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
     fun hookPackageManager(context: Context, subActivityClazz: Class<*>) {
         try {
             // 1.获取ActivityThread的值
@@ -448,15 +425,7 @@ object HookActivity {
             val mPmField =
                 packageManager.javaClass.getDeclaredField("mPM").also { it.isAccessible = true }
             mPmField[packageManager] = proxy
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -531,7 +500,7 @@ object HookActivity {
             return false
         }
 
-        @SuppressLint("DiscouragedPrivateApi")
+        @SuppressLint("DiscouragedPrivateApi", "MemberExtensionConflict")
         private fun handleActivity(msg: Message) {
             try {
                 // ClientTransaction-->ClientTransaction中的List<ClientTransactionItem> mActivityCallbacks-->集合中的第一个值LaunchActivityItem-->LaunchActivityItem的mIntent

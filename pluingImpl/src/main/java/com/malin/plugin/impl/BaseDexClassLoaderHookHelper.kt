@@ -2,6 +2,7 @@
 
 package com.malin.plugin.impl
 
+import android.annotation.SuppressLint
 import android.os.Build
 import dalvik.system.DexFile
 import dalvik.system.PathClassLoader
@@ -44,6 +45,7 @@ object BaseDexClassLoaderHookHelper {
      * @param apkFile            apkFile
      * @param optDexFile         optDexFile
      */
+    @SuppressLint("MemberExtensionConflict")
     fun patchClassLoader(baseDexClassLoader: ClassLoader, apkFile: File, optDexFile: File) {
 
         // -->PathClassLoader
@@ -56,7 +58,7 @@ object BaseDexClassLoaderHookHelper {
             if (Build.VERSION.SDK_INT >= 34) {//android14
                 try {
                     apkFile.setReadOnly()
-                } catch (ignore: Throwable) {
+                } catch (_: Throwable) {
                 }
             }
 
