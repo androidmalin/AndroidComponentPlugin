@@ -16,3 +16,4 @@ md5_repeat_result.txt
 name_repeat_result.txt
 *.hprof
 .python-version
+.kotlin
