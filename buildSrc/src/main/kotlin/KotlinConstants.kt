@@ -1,5 +1,5 @@
 object KotlinConstants {
-    const val ANDROID_GRADLE_VERSION = "8.10.0"
+    const val ANDROID_GRADLE_VERSION = "8.13.2"
     const val KOTLIN_VERSION = "1.9.25"
 }
 
